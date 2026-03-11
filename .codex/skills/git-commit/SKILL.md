@@ -59,6 +59,7 @@ Before committing:
 - Ensure secrets are not included (`.env`, credentials, API keys, private keys)
 - Prefer splitting mixed changes into separate commits (use `git add -p`)
 - Avoid committing generated artifacts (`dist/`, `build/`, `node_modules/`, `coverage/`) unless intended
+- If there is nothing to commit, say so and stop
 
 ### 2. Analyze Diff
 
@@ -75,7 +76,7 @@ git status --porcelain
 
 ### 3. Stage Files (if needed)
 
-If nothing is staged or you want to group changes differently:
+If nothing is staged or you want to group changes differently. Prefer logical grouping; do not stage unrelated changes:
 
 ```bash
 # Stage specific files
@@ -138,6 +139,7 @@ EOF
 - NEVER run destructive commands (--force, hard reset) without explicit request
 - NEVER skip hooks (--no-verify) unless user asks
 - NEVER force push to main/master
+- NEVER amend commits unless explicitly requested
 - If commit fails due to hooks, fix and create NEW commit (don't amend)
 
 ## If Hooks Fail
