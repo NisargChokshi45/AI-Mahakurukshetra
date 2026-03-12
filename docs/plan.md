@@ -31,7 +31,7 @@ This boilerplate must be deployment-ready on Vercel and structured as a monorepo
 ## Technical Architecture
 
 ### Core Stack
-- **Framework**: Next.js 15+ (App Router)
+- **Framework**: Next.js 16+ (App Router)
 - **Backend**: Supabase (PostgreSQL, Auth, Real-time)
 - **Cache & Rate Limiting**: Redis (Upstash for serverless)
 - **UI**: Tailwind CSS + shadcn/ui
@@ -46,7 +46,7 @@ This boilerplate must be deployment-ready on Vercel and structured as a monorepo
 ```
 AI-Mahakurukshetra/
 ├── apps/
-│   └── web/                    # Next.js 15 SaaS application
+│   └── web/                    # Next.js 16 SaaS application
 │       ├── app/
 │       │   ├── (auth)/        # Public auth pages (login, signup, reset)
 │       │   ├── (dashboard)/   # Protected dashboard routes
@@ -932,7 +932,7 @@ CODECOV_TOKEN=your_codecov_token
 1. **Initialize Turborepo with PNPM**
    ```bash
    npx create-turbo@latest --package-manager pnpm
-   # Configure for Next.js 15 in apps/web
+   # Configure for Next.js 16 in apps/web
    ```
 
 2. **Setup Next.js in `apps/web`**
