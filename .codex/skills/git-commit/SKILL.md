@@ -23,29 +23,28 @@ Create standardized, semantic git commits using the Conventional Commits specifi
 
 ## Commit Types
 
-| Type       | Purpose                        |
-| ---------- | ------------------------------ |
-| `feat`     | New feature                    |
-| `fix`      | Bug fix                        |
-| `docs`     | Documentation only             |
-| `style`    | Formatting/style (no logic)    |
-| `refactor` | Code refactor (no feature/fix) |
-| `perf`     | Performance improvement        |
-| `test`     | Add/update tests               |
-| `build`    | Build system/dependencies      |
-| `ci`       | CI/config changes              |
-| `chore`    | Maintenance/misc               |
-| `revert`   | Revert commit                  |
+- `feat` - New feature
+- `fix` - Bug fix
+- `docs` - Documentation
+- `style` - Formatting
+- `refactor` - Code restructure
+- `perf` - Performance improvement
+- `test` - Tests
+- `build` - Dependencies
+- `ci` - CI config
+- `chore` - Maintenance
+- `revert` - Revert commit
 
 ## Breaking Changes
+
+Add `!` after type or use `BREAKING CHANGE:` footer for breaking changes.
 
 ```
 # Exclamation mark after type/scope
 feat!: remove deprecated endpoint
 
 # BREAKING CHANGE footer
-feat: allow config to extend other configs
-
+feat: allow config extension
 BREAKING CHANGE: `extends` key behavior changed
 ```
 
@@ -90,7 +89,7 @@ git add src/components/*
 git add -p
 ```
 
-**Never commit secrets** (.env, credentials.json, private keys).
+**Never stage secrets or commit secrets** (.env, credentials.json, private keys).
 
 ### 4. Generate Commit Message
 
@@ -122,16 +121,17 @@ EOF
 - One logical change per commit
 - Present tense: "add" not "added"
 - Imperative mood: "fix bug" not "fixes bug"
-- Reference issues: `Closes #123`, `Refs #456`
+- Reference issues when applicable: `Closes #123`, `Refs #456`
 - Keep description under 72 characters
 
-### Scope Examples
+### Commit Examples
 
-- `docs(guide): add participant onboarding steps`
-- `feat(auth): add magic link sign-in`
-- `fix(api): handle empty payloads`
-- `chore(repo): tidy root config`
-- `ci(pipeline): add cache for builds`
+```
+docs(guide): add participant onboarding
+feat(auth): add magic link sign-in
+fix(api): handle empty payload
+ci(pipeline): add build cache
+```
 
 ## Git Safety Protocol
 
@@ -139,11 +139,5 @@ EOF
 - NEVER run destructive commands (--force, hard reset) without explicit request
 - NEVER skip hooks (--no-verify) unless user asks
 - NEVER force push to main/master
-- NEVER amend commits unless explicitly requested
+- NEVER amend commits unless requested
 - If commit fails due to hooks, fix and create NEW commit (don't amend)
-
-## If Hooks Fail
-
-- Read the hook error and fix the reported issue
-- Re-run `git commit` after the fix
-- Do not use `--no-verify` unless explicitly requested
