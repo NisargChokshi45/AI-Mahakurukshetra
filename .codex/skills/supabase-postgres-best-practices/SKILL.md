@@ -46,19 +46,17 @@ Reference these guidelines when:
 
 Read individual rule files for detailed explanations and SQL examples:
 
-```
-references/query-missing-indexes.md
-references/schema-partial-indexes.md
-references/_sections.md
-```
+- `references/query-missing-indexes.md` - Detect and fix missing indexes for query optimization
+- `references/schema-partial-indexes.md` - Use partial indexes effectively for selective performance improvements
+- `references/_sections.md` - Overview of all rule categories and usage patterns
 
 Each rule file contains:
-- Brief explanation of why it matters
-- Incorrect SQL example with explanation
-- Correct SQL example with explanation
-- Optional EXPLAIN output or metrics
+- Why the rule matters
+- Incorrect SQL example and explanation
+- Correct SQL example and explanation
+- Optional EXPLAIN output or performance metrics
 - Additional context and references
-- Supabase-specific notes (when applicable)
+- Supabase-specific notes (if applicable)
 
 ## References
 
