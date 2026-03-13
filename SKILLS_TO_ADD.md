@@ -1,0 +1,14 @@
+https://skills.sh/nextlevelbuilder/ui-ux-pro-max-skill/ui-ux-pro-max
+https://skills.sh/squirrelscan/skills/audit-website
+https://skills.sh/better-auth/skills/better-auth-best-practices
+https://skills.sh/obra/superpowers/using-superpowers
+https://skills.sh/wshobson/agents/tailwind-design-system
+https://skills.sh/google-labs-code/stitch-skills/design-md
+https://skills.sh/wshobson/agents/typescript-advanced-types
+https://skills.sh/anthropics/skills/frontend-design
+https://skills.sh/am-will/codex-skills/frontend-design
+https://skills.sh/shadcn/ui/shadcn
+https://skills.sh/supercent-io/skills-template/web-design-guidelines
+https://skills.sh/vercel/turborepo/turborepo
+https://skills.sh/wshobson/agents/api-design-principles
+https://skills.sh/remotion-dev/skills/remotion-best-practices
