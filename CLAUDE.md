@@ -36,16 +36,20 @@ Production-ready Next.js + Supabase SaaS boilerplate for March 14, 2026 hackatho
 - Public API docs (Swagger)
 - RLS policies on all tables
 
-## Available Skills
+## Available Skills (in `.agents/skills/`)
+All skills are tool-agnostic and work with any AI coding assistant:
+- `/api-spec` - Generate OpenAPI specifications for API endpoints
+- `/deploy-check` - Pre-deployment verification checklist
 - `/git-commit` - Conventional commits with intelligent staging
-- `.agents/skills/next-best-practices/` - Next.js patterns and conventions
-- `.agents/skills/supabase-postgres-best-practices/` - Database optimization
-- `.agents/skills/hackathon-workflow/` - Time management for 10-hour sprint
+- `/migrate` - Database migration creation and management
+- Next.js patterns - `.agents/skills/next-best-practices/`
+- Database optimization - `.agents/skills/supabase-postgres-best-practices/`
 
-## Project Rules
+## Project Rules (in `.agents/rules/`)
 Before any commit:
-- Review `.agents/rules/security-checklist.md`
-- Verify `.agents/rules/code-style.md` compliance
+- Follow `.agents/rules/architecture.md` - System design principles
+- Follow `.agents/rules/coding-standards.md` - TypeScript and React standards
+- Review `.agents/rules/security-checklist.md` - Security best practices
 
 ## Quick References
 - **Roadmap**: `/scratchpad.md` (Phases 0-4)
