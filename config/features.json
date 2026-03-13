@@ -1,0 +1,29 @@
+{
+  "multi_tenancy": {
+    "enabled": false,
+    "plans": [
+      "enterprise"
+    ]
+  },
+  "advanced_analytics": {
+    "enabled": true,
+    "plans": [
+      "pro",
+      "enterprise"
+    ]
+  },
+  "api_access": {
+    "enabled": true,
+    "plans": [
+      "basic",
+      "pro",
+      "enterprise"
+    ],
+    "rate_limits": {
+      "basic": 100,
+      "pro": 1000,
+      "enterprise": 10000
+    }
+  }
+}
+

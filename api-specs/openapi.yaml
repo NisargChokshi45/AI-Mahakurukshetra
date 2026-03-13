@@ -1,0 +1,33 @@
+openapi: 3.1.0
+info:
+  title: AI Mahakurukshetra API
+  version: 0.1.0
+  description: Starter OpenAPI document for the hackathon SaaS boilerplate.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      tags:
+        - Health
+      responses:
+        "200":
+          description: Service health information
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - timestamp
+                  - version
+                properties:
+                  status:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                  version:
+                    type: string
+
