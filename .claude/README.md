@@ -32,16 +32,29 @@ This directory contains the Claude Code configuration for the AI-Mahakurukshetra
 
 ## Available Agents
 
-Each agent is an expert in their domain and can be invoked for complex tasks:
+**database-architect**
+- Use for: Database design, migrations, RLS
+- Expertise: Schema design, SQL migrations, performance optimization
 
-| Agent                     | Use For                          | Expertise                                               |
-| ------------------------- | -------------------------------- | ------------------------------------------------------- |
-| **database-architect**    | Database design, migrations, RLS | Schema design, SQL migrations, performance optimization |
-| **stripe-integration**    | Payment flows, webhooks          | Checkout, subscription management, webhook handlers     |
-| **api-builder**           | API routes, validation           | RESTful APIs, Zod validation, rate limiting             |
-| **ui-builder**            | React components, UI             | Server Components, shadcn/ui, responsive design         |
-| **test-engineer**         | Testing, coverage                | Unit/integration/E2E tests, Vitest, Playwright          |
-| **deployment-specialist** | Vercel deployment, CI/CD         | Production deployment, monitoring, optimization         |
+**stripe-integration**
+- Use for: Payment flows, webhooks
+- Expertise: Checkout, subscription management, webhook handlers
+
+**api-builder**
+- Use for: Building Next.js API routes with validation
+- Expertise: RESTful APIs, Zod validation, rate limiting
+
+**ui-builder**
+- Use for: React components, UI, shadcn/ui integration
+- Expertise: Server Components, shadcn/ui, responsive design
+
+**test-engineer**
+- Use for: Testing, coverage
+- Expertise: Unit/integration/E2E tests, Vitest, Playwright
+
+**deployment-specialist**
+- Use for: Vercel deployment, CI/CD
+- Expertise: Production deployment, monitoring, optimization
 
 ## Available Skills
 
