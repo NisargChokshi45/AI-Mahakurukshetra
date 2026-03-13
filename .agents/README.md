@@ -18,6 +18,8 @@ Resources in `.agents/` are **tool-agnostic** and should work with any AI coding
 - **architecture.md** - System design principles and patterns
 - **coding-standards.md** - TypeScript, React, and code quality standards
 - **security-checklist.md** - Security best practices and checks
+- **performance-targets.md** - Speed and UX targets (Core Web Vitals, API latency, AI timeouts)
+- **error-handling.md** - Error patterns (API failures, AI errors, validation, empty states)
 
 ### Skills (`skills/`)
 - **api-spec/** - Generate OpenAPI specifications for API endpoints

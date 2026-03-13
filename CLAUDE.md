@@ -20,6 +20,8 @@ Production-ready Next.js + Supabase SaaS boilerplate for March 14, 2026 hackatho
 - Use Zod for all input validation
 - Apply Supabase best practices (see `.agents/skills/supabase-postgres-best-practices/`)
 - Conventional commits only (use `/git-commit` skill)
+- Meet performance targets (see `.agents/rules/performance-targets.md`)
+- Handle all errors gracefully (see `.agents/rules/error-handling.md`)
 - Check security before committing (see `.agents/rules/security-checklist.md`)
 
 ## Hackathon Constraints (March 14, 2026)
@@ -46,10 +48,12 @@ All skills are tool-agnostic and work with any AI coding assistant:
 - Database optimization - `.agents/skills/supabase-postgres-best-practices/`
 
 ## Project Rules (in `.agents/rules/`)
-Before any commit:
-- Follow `.agents/rules/architecture.md` - System design principles
-- Follow `.agents/rules/coding-standards.md` - TypeScript and React standards
-- Review `.agents/rules/security-checklist.md` - Security best practices
+All code must follow these production-ready standards:
+- `.agents/rules/architecture.md` - System design and patterns
+- `.agents/rules/coding-standards.md` - TypeScript, React, and code quality
+- `.agents/rules/security-checklist.md` - Security best practices
+- `.agents/rules/performance-targets.md` - Speed and UX targets (Core Web Vitals, API latency)
+- `.agents/rules/error-handling.md` - Error patterns (API failures, AI timeouts, validation)
 
 ## Quick References
 - **Roadmap**: `/scratchpad.md` (Phases 0-4)
