@@ -22,10 +22,9 @@ Resources in `.agents/` are **tool-agnostic** and should work with any AI coding
 - **error-handling.md** - Error patterns (API failures, AI errors, validation, empty states)
 
 ### Skills (`skills/`)
-- **api-spec/** - Generate OpenAPI specifications for API endpoints
+- **api-design/** - Generate API endpoints
 - **deploy-check/** - Pre-deployment verification checklist
 - **git-commit/** - Conventional commit patterns and workflows
-- **migrate/** - Database migration creation and management
 - **next-best-practices/** - Next.js App Router patterns and best practices
 - **supabase-postgres-best-practices/** - PostgreSQL/Supabase optimization patterns
 

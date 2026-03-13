@@ -6,27 +6,21 @@ This directory contains the Claude Code configuration for the AI-Mahakurukshetra
 
 ```
 .claude/
-├── CLAUDE.md              # Main project context and instructions
 ├── agents/                # Specialized agents for different tasks
-│   ├── database-architect.md
-│   ├── stripe-integration.md
+│   ├── AGENTS.md
 │   ├── api-builder.md
-│   ├── ui-builder.md
+│   ├── code-reviewer.md
+│   ├── database-architect.md
+│   ├── deployment-specialist.md
+│   ├── stripe-integration.md
 │   ├── test-engineer.md
-│   └── deployment-specialist.md
-├── skills/                # Custom skills for common tasks
-│   ├── migrate/
-│   ├── api-spec/
-│   └── deploy-check/
-├── rules/                 # Project-specific coding standards
-│   ├── architecture.md
-│   └── coding-standards.md
+│   └── ui-builder.md
 ├── memory/                # Persistent project memory
+│   ├── external-resources.md
 │   ├── MEMORY.md
 │   ├── project-context.md
-│   ├── user-profile.md
 │   ├── technical-decisions.md
-│   └── external-resources.md
+│   └── user-profile.md
 └── README.md             # This file
 ```
 
@@ -56,16 +50,11 @@ This directory contains the Claude Code configuration for the AI-Mahakurukshetra
 - Use for: Vercel deployment, CI/CD
 - Expertise: Production deployment, monitoring, optimization
 
-## Available Skills
+## Available Skills (in `.agents/skills/`)
+All skills are tool-agnostic and work with any AI coding assistant
 
-- **/migrate**: Create database migrations with proper structure and guidance
-- **/api-spec**: Generate/update OpenAPI documentation for API endpoints
-- **/deploy-check**: Run pre-deployment verification checklist
-
-## Project Rules
-
-- **architecture.md**: System design patterns, data flow, caching strategy
-- **coding-standards.md**: TypeScript standards, naming conventions, best practices
+## Project Rules (in `.agents/rules/`)
+All code must follow these production-ready standards
 
 ## Memory System
 
@@ -93,9 +82,6 @@ Use the api-builder agent to create routes with Zod validation and rate limiting
 ### Using a Skill
 
 ```bash
-# To create a migration:
-/migrate add_subscriptions_table
-
 # To check deployment readiness:
 /deploy-check
 ```
@@ -116,9 +102,6 @@ What's our current project phase?
    - Testing, then test-engineer
 
 2. **Use skills for common, repetitive tasks**
-   - Creating migrations, then `/migrate`
-   - Updating API docs, then `/api-spec`
-   - Pre-deployment checks, then `/deploy-check`
 
 3. **Update memory when decisions are made**
    - Add new technical decisions to `technical-decisions.md`

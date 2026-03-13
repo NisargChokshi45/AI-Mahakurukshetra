@@ -40,12 +40,11 @@ Production-ready Next.js + Supabase SaaS boilerplate for March 14, 2026 hackatho
 
 ## Available Skills (in `.agents/skills/`)
 All skills are tool-agnostic and work with any AI coding assistant:
-- `/api-spec` - Generate OpenAPI specifications for API endpoints
-- `/deploy-check` - Pre-deployment verification checklist
-- `/git-commit` - Conventional commits with intelligent staging
-- `/migrate` - Database migration creation and management
-- Next.js patterns - `.agents/skills/next-best-practices/`
-- Database optimization - `.agents/skills/supabase-postgres-best-practices/`
+- `.agents/skills/api-design` - Design API endpoints
+- `.agents/skills/deploy-check` - Pre-deployment verification checklist
+- `.agents/skills/git-commit` - Conventional commits with intelligent staging
+- `.agents/skills/next-best-practices/` - Next.js patterns
+- `.agents/skills/supabase-postgres-best-practices/` - Database optimization
 
 ## Project Rules (in `.agents/rules/`)
 All code must follow these production-ready standards:
