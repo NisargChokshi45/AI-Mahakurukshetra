@@ -1,0 +1,29 @@
+default_model = "gpt-5.4"
+default_reasoning_effort = "medium"
+default_approval = "on-request"
+default_sandbox = "workspace-write"
+
+[roles.coordinator]
+model = "gpt-5.4"
+reasoning_effort = "high"
+prompt_file = ".codex/agents/coordinator.md"
+
+[roles.frontend]
+model = "gpt-5.4"
+reasoning_effort = "medium"
+prompt_file = ".codex/agents/frontend.md"
+
+[roles.backend]
+model = "gpt-5.4"
+reasoning_effort = "high"
+prompt_file = ".codex/agents/backend.md"
+
+[roles.reviewer]
+model = "gpt-5.1-codex-max"
+reasoning_effort = "medium"
+prompt_file = ".codex/agents/reviewer.md"
+
+[roles.docs]
+model = "gpt-5.1-codex-mini"
+reasoning_effort = "low"
+prompt_file = ".codex/agents/docs.md"
