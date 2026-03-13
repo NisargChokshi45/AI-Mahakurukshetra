@@ -1,4 +1,5 @@
 # AGENTS.md
+
 > Living instruction file for Codex and all sub-agents in this repository.
 > Read this file fully before starting any task. Update `/doc` files as you work.
 > Last section: Escalation rules — read before stopping on any blocker.
@@ -20,6 +21,7 @@ Before starting any task, read the following files in `/doc/` to understand curr
 | `/doc/SCHEMA.md`    | Supabase table schemas, RLS policies, migration history                                 |
 
 **After completing any task:**
+
 1. Mark it `[x]` in `TASKS.md` with timestamp
 2. Append a one-line entry to `PROGRESS.md`: `[YYYY-MM-DD HH:MM] <agent> — <what was done>`
 3. Update `CHANGELOG.md` if code or schema changed
@@ -28,6 +30,7 @@ Before starting any task, read the following files in `/doc/` to understand curr
 **If `/doc` does not exist**, create the folder and stub all files above before writing any code.
 
 **New session start prompt** (paste this at the start of every new Codex session):
+
 ```
 Read /doc/TASKS.md, /doc/PROGRESS.md, and /doc/BLOCKERS.md.
 Summarise where we left off, what is in progress, and what is blocked.
@@ -43,6 +46,7 @@ This project uses a **coordinator + specialist subagent** model. The root Codex 
 ### Enabling Multi-Agent in Codex
 
 Add to `~/.codex/config.toml`:
+
 ```toml
 [experimental]
 multi_agent = true
@@ -129,6 +133,7 @@ allow_implicit_invocation: true
 [Full step-by-step instructions — only loaded into context when this skill is triggered]
 
 ## When to load references/
+
 Only load `references/component-patterns.md` when creating a new reusable component.
 Only load `references/tailwind-conventions.md` when the user asks about spacing or tokens.
 ```
@@ -139,7 +144,7 @@ Only load `references/tailwind-conventions.md` when the user asks about spacing 
 name: frontend-design
 description: Specialist for Next.js UI, Tailwind CSS, and shadcn/ui component work.
 invocation:
-  policy: implicit        # auto-triggered when task matches description
+  policy: implicit # auto-triggered when task matches description
 tools:
   - type: file_read
   - type: file_write
@@ -220,6 +225,7 @@ Every subagent must write a **handoff record** to `/doc/PROGRESS.md` before retu
 ### Handoff Verification Script
 
 The coordinator runs this before each handoff gate:
+
 ```bash
 # Verify handoff deliverables exist
 for file in "$@"; do
@@ -352,6 +358,7 @@ echo "All deliverables verified."
 ## ✅ Testing Standards
 
 ### Unit Tests (Vitest) — `$tester`
+
 - Co-locate: `[name].test.ts`
 - Run: `pnpm test`
 - Cover: utilities, Zod schemas, Server Actions, API handlers
@@ -359,12 +366,14 @@ echo "All deliverables verified."
 - Use local Supabase — not manual mocks
 
 ### E2E Tests (Playwright) — `$agent-browser`
+
 - Specs in `tests/e2e/`
 - Run: `pnpm test:e2e`
 - Cover: auth flows, critical journeys, form submissions
 - Requires `supabase start` (Docker) before running
 
 ### Pre-commit Checks (all must pass)
+
 ```bash
 pnpm lint        # ESLint
 pnpm typecheck   # tsc --noEmit
@@ -376,6 +385,7 @@ pnpm test        # Vitest
 ## 🌿 Git Conventions
 
 ### Conventional Commits
+
 ```
 <type>(<scope>): <description>
 
@@ -390,6 +400,7 @@ docs(doc): update TASKS.md — milestone 2 complete
 ```
 
 ### Branch Naming
+
 ```
 feat/<short-description>
 fix/<short-description>
@@ -440,6 +451,7 @@ chore/<short-description>
 ## 🆘 Escalation Rules
 
 Stop and log to `/doc/BLOCKERS.md` when:
+
 - Requirements in `PRD.md` are ambiguous
 - A test failure cannot be resolved within the current task
 - A migration would conflict with existing schema
@@ -447,6 +459,7 @@ Stop and log to `/doc/BLOCKERS.md` when:
 - A subagent deliverable is absent after expected completion
 
 ### Blocker Entry Format
+
 ```
 [YYYY-MM-DD] BLOCKER — <agent that hit it>
 Problem:   <what failed or is unclear>

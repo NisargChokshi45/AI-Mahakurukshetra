@@ -19,6 +19,7 @@ This boilerplate must be deployment-ready on Vercel and structured as a monorepo
 ### Design Principles
 
 **Avoiding Over-Engineering:**
+
 - Keep backend code clean (no JSDoc comments for API specs - use separate YAML files)
 - Features are modular and optional via feature flags
 - Multi-tenancy is disabled by default, only enabled when needed
@@ -31,6 +32,7 @@ This boilerplate must be deployment-ready on Vercel and structured as a monorepo
 ## Technical Architecture
 
 ### Core Stack
+
 - **Framework**: Next.js 16+ (App Router)
 - **Backend**: Supabase (PostgreSQL, Auth, Real-time)
 - **Cache & Rate Limiting**: Redis (Upstash for serverless)
@@ -169,12 +171,14 @@ AI-Mahakurukshetra/
 **Purpose**: Enable subscription-based SaaS monetization with multiple pricing tiers.
 
 **Components**:
+
 - **Checkout Flow**: Create Stripe Checkout sessions from settings/billing
 - **Webhook Handler**: Process events (subscription created, updated, cancelled, payment succeeded/failed)
 - **Customer Portal**: Allow users to manage subscriptions via Stripe's hosted portal
 - **Database Schema**: Store subscriptions, customers, pricing plans, payment history
 
 **Database Tables**:
+
 ```sql
 -- customers: Links Supabase users to Stripe customers
 -- subscriptions: Active/cancelled subscriptions with status
@@ -183,11 +187,13 @@ AI-Mahakurukshetra/
 ```
 
 **API Routes**:
+
 - `POST /api/stripe/checkout` - Create checkout session (protected)
 - `POST /api/stripe/portal` - Create portal session (protected)
 - `POST /api/stripe/webhook` - Handle Stripe events (public, signature-verified)
 
 **Environment Variables**:
+
 ```
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
@@ -202,6 +208,7 @@ STRIPE_PRICE_ID_ENTERPRISE=price_...
 **Purpose**: Provide public, interactive API documentation for judges to explore.
 
 **Implementation**:
+
 - Maintain separate YAML files in `api-specs/` directory (keeps backend code clean)
 - Main `openapi.yaml` references individual spec files for each domain
 - Serve Swagger UI at `/api/docs` (public, no auth required)
@@ -209,6 +216,7 @@ STRIPE_PRICE_ID_ENTERPRISE=price_...
 - Document all API routes: auth, projects CRUD, health checks, Stripe endpoints
 
 **File Structure**:
+
 ```
 api-specs/
 ├── openapi.yaml        # Main spec with references
@@ -218,6 +226,7 @@ api-specs/
 ```
 
 **Example Spec** (`api-specs/projects.yaml`):
+
 ```yaml
 paths:
   /api/projects:
@@ -244,12 +253,14 @@ paths:
 **Purpose**: Showcase code quality and testing rigor to judges via public metrics.
 
 **Setup**:
+
 - Configure Vitest to generate coverage reports (Istanbul/c8)
 - GitHub Action uploads coverage to Codecov after test runs
 - Add Codecov badge to README
 - Make repository public or use Codecov's public report feature
 
 **CI Workflow** (`.github/workflows/coverage.yml`):
+
 ```yaml
 - name: Run tests with coverage
   run: pnpm test:coverage
@@ -268,6 +279,7 @@ paths:
 **Purpose**: Demonstrate system reliability and uptime monitoring to judges.
 
 **Implementation**:
+
 - Use **Upptime** (open-source, GitHub Actions-based, free)
 - Configure health check endpoints in `.upptimerc.yml`
 - Monitors `/api/health` endpoint every 5 minutes
@@ -275,6 +287,7 @@ paths:
 - Shows 90-day uptime history and response times
 
 **Health Check Endpoint** (`/api/health/route.ts`):
+
 ```typescript
 // Returns 200 OK with system status
 {
@@ -292,6 +305,7 @@ paths:
 **Purpose**: Enable/disable features based on subscription tier and tenant configuration.
 
 **Implementation**:
+
 - Configuration file: `config/features.json` defines available features
 - Server-side feature checks using subscription data
 - React Context Provider for client-side feature access
@@ -300,6 +314,7 @@ paths:
 - Multi-tenancy flag to enable workspace/organization features
 
 **Feature Flag Structure**:
+
 ```typescript
 {
   "multi_tenancy": {
@@ -323,6 +338,7 @@ paths:
 ```
 
 **Usage Example**:
+
 ```typescript
 // Server-side
 const hasFeature = await checkFeatureAccess(userId, 'advanced_analytics')
@@ -339,6 +355,7 @@ if (hasFeature) {
 **Purpose**: Improve performance and protect API endpoints from abuse.
 
 **Implementation**:
+
 - Use **Upstash Redis** (serverless, Vercel-compatible, free tier)
 - Caching: User profiles, subscription status, feature flags
 - Rate limiting: Per-user, per-IP, per-endpoint limits based on plan
@@ -346,26 +363,29 @@ if (hasFeature) {
 - Cache keys namespaced by tenant (if multi-tenancy enabled)
 
 **Cache Strategy**:
+
 ```typescript
 // Cache user subscription with 5min TTL
-await redis.set(`subscription:${userId}`, subscription, { ex: 300 })
+await redis.set(`subscription:${userId}`, subscription, { ex: 300 });
 
 // Cache feature flags with 1hr TTL
-await redis.set(`features:${tenantId}`, features, { ex: 3600 })
+await redis.set(`features:${tenantId}`, features, { ex: 3600 });
 ```
 
 **Rate Limiting**:
+
 ```typescript
 // Rate limit middleware
 export async function rateLimit(req: Request, limit: number) {
-  const key = `rate_limit:${userId}:${endpoint}`
-  const requests = await redis.incr(key)
-  if (requests === 1) await redis.expire(key, 60) // 1min window
-  return requests <= limit
+  const key = `rate_limit:${userId}:${endpoint}`;
+  const requests = await redis.incr(key);
+  if (requests === 1) await redis.expire(key, 60); // 1min window
+  return requests <= limit;
 }
 ```
 
 **Environment Variables**:
+
 ```
 UPSTASH_REDIS_REST_URL=https://...upstash.io
 UPSTASH_REDIS_REST_TOKEN=...
@@ -376,6 +396,7 @@ UPSTASH_REDIS_REST_TOKEN=...
 **Purpose**: Enable observability and debugging in production.
 
 **Implementation**:
+
 - Use **pino** (fast, structured JSON logging)
 - Log levels: debug, info, warn, error
 - Automatic request ID tracking
@@ -383,8 +404,9 @@ UPSTASH_REDIS_REST_TOKEN=...
 - Vercel integrations for log aggregation
 
 **Logger Setup**:
+
 ```typescript
-import pino from 'pino'
+import pino from 'pino';
 
 export const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
@@ -392,13 +414,14 @@ export const logger = pino({
   formatters: {
     level: (label) => ({ level: label }),
   },
-})
+});
 ```
 
 **Usage**:
+
 ```typescript
-logger.info({ userId, action: 'subscription_created' }, 'User subscribed')
-logger.error({ error, userId }, 'Payment failed')
+logger.info({ userId, action: 'subscription_created' }, 'User subscribed');
+logger.error({ error, userId }, 'Payment failed');
 ```
 
 ### 8. Multi-Tenancy Support
@@ -406,6 +429,7 @@ logger.error({ error, userId }, 'Payment failed')
 **Purpose**: Allow organizations/workspaces when enabled via feature flag.
 
 **Implementation**:
+
 - **Conditional Feature**: Disabled by default, enabled via `multi_tenancy` flag
 - If enabled: Users can create/join organizations
 - Each organization has its own subscription
@@ -413,6 +437,7 @@ logger.error({ error, userId }, 'Payment failed')
 - Users can switch between personal and organization contexts
 
 **Database Schema** (when enabled):
+
 ```sql
 -- organizations table
 - id (UUID, PK)
@@ -434,6 +459,7 @@ ALTER TABLE projects ADD COLUMN organization_id UUID REFERENCES organizations(id
 ```
 
 **UI Considerations**:
+
 - Organization switcher in header (when multi_tenancy enabled)
 - Invite members flow (gated by enterprise plan)
 - Organization settings page
@@ -446,6 +472,7 @@ ALTER TABLE projects ADD COLUMN organization_id UUID REFERENCES organizations(id
 ### Core Tables
 
 **1. profiles** (extends auth.users)
+
 ```sql
 - id (UUID, FK to auth.users)
 - email (TEXT)
@@ -456,6 +483,7 @@ ALTER TABLE projects ADD COLUMN organization_id UUID REFERENCES organizations(id
 ```
 
 **2. organizations** (multi-tenancy, conditional)
+
 ```sql
 - id (UUID, PK)
 - name (TEXT)
@@ -465,6 +493,7 @@ ALTER TABLE projects ADD COLUMN organization_id UUID REFERENCES organizations(id
 ```
 
 **3. organization_members** (multi-tenancy, conditional)
+
 ```sql
 - id (UUID, PK)
 - organization_id (UUID, FK to organizations)
@@ -474,6 +503,7 @@ ALTER TABLE projects ADD COLUMN organization_id UUID REFERENCES organizations(id
 ```
 
 **4. projects** (sample feature)
+
 ```sql
 - id (UUID, PK)
 - user_id (UUID, FK to profiles)
@@ -485,6 +515,7 @@ ALTER TABLE projects ADD COLUMN organization_id UUID REFERENCES organizations(id
 ```
 
 **5. customers** (Stripe integration)
+
 ```sql
 - id (UUID, PK)
 - user_id (UUID, FK to profiles, unique, nullable)
@@ -495,6 +526,7 @@ ALTER TABLE projects ADD COLUMN organization_id UUID REFERENCES organizations(id
 ```
 
 **6. subscriptions**
+
 ```sql
 - id (UUID, PK)
 - user_id (UUID, FK to profiles, nullable)
@@ -510,6 +542,7 @@ ALTER TABLE projects ADD COLUMN organization_id UUID REFERENCES organizations(id
 ```
 
 **7. prices** (pricing plans)
+
 ```sql
 - id (UUID, PK)
 - stripe_price_id (TEXT, unique)
@@ -530,11 +563,13 @@ ALTER TABLE projects ADD COLUMN organization_id UUID REFERENCES organizations(id
 ## Authentication
 
 ### Providers
+
 - Email/Password (Supabase Auth)
 - Google OAuth
 - GitHub OAuth
 
 ### Flow
+
 1. User signs up → profile created automatically (via DB trigger)
 2. OAuth callback handled at `/api/auth/callback`
 3. Middleware refreshes session on every request
@@ -546,17 +581,20 @@ ALTER TABLE projects ADD COLUMN organization_id UUID REFERENCES organizations(id
 ## Development Tooling
 
 ### Code Quality
+
 - **ESLint**: Next.js config + strict rules
 - **Prettier**: Consistent formatting with Tailwind plugin
 - **TypeScript**: Strict mode enabled
 - **Husky**: Pre-commit (lint-staged) + pre-push (type-check, tests)
 
 ### Testing
+
 - **Vitest**: Unit & integration tests with coverage
 - **Playwright**: E2E tests for critical flows (auth, payment, CRUD)
 - **Coverage Target**: >70% (visible via Codecov)
 
 ### CI/CD
+
 - **GitHub Actions**:
   - `ci.yml` - Lint, type-check, test, build on every push
   - `coverage.yml` - Generate and upload coverage reports
@@ -569,6 +607,7 @@ ALTER TABLE projects ADD COLUMN organization_id UUID REFERENCES organizations(id
 ### Monorepo Configuration
 
 **`pnpm-workspace.yaml`**
+
 ```yaml
 packages:
   - 'apps/*'
@@ -576,6 +615,7 @@ packages:
 ```
 
 **`turbo.json`**
+
 ```json
 {
   "pipeline": {
@@ -595,6 +635,7 @@ packages:
 ```
 
 **Root `package.json`**
+
 ```json
 {
   "name": "AI-Mahakurukshetra",
@@ -619,17 +660,20 @@ packages:
 ### Authentication & Authorization
 
 **`apps/web/middleware.ts`**
+
 - Refreshes Supabase session on every request
 - Protects `/dashboard/*` routes (redirects to `/login`)
 - Redirects authenticated users away from `/login`, `/signup`
 - Uses `@supabase/ssr` for cookie management
 
 **`apps/web/lib/supabase/server.ts`**
+
 - Server-side Supabase client factory
 - Handles cookie reading/writing for SSR
 - Used in Server Components and Server Actions
 
 **`apps/web/lib/hooks/use-user.ts`**
+
 - Primary hook for accessing current user
 - Returns `{ user, loading, error }`
 - Used throughout dashboard components
@@ -637,21 +681,24 @@ packages:
 ### Stripe Integration
 
 **`apps/web/lib/stripe/client.ts`**
+
 ```typescript
-import Stripe from 'stripe'
+import Stripe from 'stripe';
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-11-20.acacia',
-})
+});
 ```
 
 **`apps/web/app/api/stripe/webhook/route.ts`**
+
 - Verifies Stripe signature
 - Handles events: `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_succeeded`, `invoice.payment_failed`
 - Updates `subscriptions` table based on events
 - Returns 200 to acknowledge receipt
 
 **`apps/web/app/(dashboard)/settings/billing/page.tsx`**
+
 - Displays current subscription status
 - Shows pricing cards for available plans
 - "Upgrade" button creates Stripe Checkout session
@@ -660,6 +707,7 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 ### API Documentation
 
 **`apps/web/api-specs/openapi.yaml`**
+
 ```yaml
 openapi: 3.0.0
 info:
@@ -688,6 +736,7 @@ components:
 ```
 
 **`apps/web/app/api/docs/route.ts`**
+
 - Serves Swagger UI HTML
 - Loads and merges OpenAPI specs from `api-specs/` directory
 - Public endpoint (no auth required)
@@ -695,25 +744,27 @@ components:
 ### Redis Cache & Rate Limiting
 
 **`apps/web/lib/redis/client.ts`**
+
 ```typescript
-import { Redis } from '@upstash/redis'
+import { Redis } from '@upstash/redis';
 
 export const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL!,
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-})
+});
 ```
 
 **`apps/web/lib/redis/cache.ts`**
+
 ```typescript
-import { redis } from './client'
+import { redis } from './client';
 
 export async function getCached<T>(key: string): Promise<T | null> {
-  return await redis.get(key)
+  return await redis.get(key);
 }
 
 export async function setCache<T>(key: string, value: T, ttl: number) {
-  await redis.set(key, value, { ex: ttl })
+  await redis.set(key, value, { ex: ttl });
 }
 
 export async function invalidateCache(pattern: string) {
@@ -722,27 +773,29 @@ export async function invalidateCache(pattern: string) {
 ```
 
 **`apps/web/lib/redis/rate-limit.ts`**
+
 ```typescript
-import { redis } from './client'
-import { NextRequest } from 'next/server'
+import { redis } from './client';
+import { NextRequest } from 'next/server';
 
 export async function rateLimit(req: NextRequest, limit: number, window: number = 60) {
-  const userId = req.headers.get('x-user-id') || req.ip
-  const key = `rate_limit:${userId}:${req.nextUrl.pathname}`
+  const userId = req.headers.get('x-user-id') || req.ip;
+  const key = `rate_limit:${userId}:${req.nextUrl.pathname}`;
 
-  const requests = await redis.incr(key)
-  if (requests === 1) await redis.expire(key, window)
+  const requests = await redis.incr(key);
+  if (requests === 1) await redis.expire(key, window);
 
   return {
     success: requests <= limit,
     remaining: Math.max(0, limit - requests),
-  }
+  };
 }
 ```
 
 ### Feature Flags
 
 **`apps/web/config/features.json`**
+
 ```json
 {
   "multi_tenancy": {
@@ -761,26 +814,28 @@ export async function rateLimit(req: NextRequest, limit: number, window: number 
 ```
 
 **`apps/web/lib/feature-flags/hooks.ts`**
+
 ```typescript
-import { useContext } from 'react'
-import { FeatureFlagContext } from './provider'
+import { useContext } from 'react';
+import { FeatureFlagContext } from './provider';
 
 export function useFeatureFlag(flagName: string) {
-  const { flags, subscription } = useContext(FeatureFlagContext)
-  const flag = flags[flagName]
+  const { flags, subscription } = useContext(FeatureFlagContext);
+  const flag = flags[flagName];
 
-  if (!flag || !flag.enabled) return { hasFeature: false }
+  if (!flag || !flag.enabled) return { hasFeature: false };
 
-  const hasFeature = flag.plans.includes(subscription?.plan || 'basic')
-  return { hasFeature }
+  const hasFeature = flag.plans.includes(subscription?.plan || 'basic');
+  return { hasFeature };
 }
 ```
 
 ### Structured Logging
 
 **`apps/web/lib/logger/index.ts`**
+
 ```typescript
-import pino from 'pino'
+import pino from 'pino';
 
 export const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
@@ -797,31 +852,33 @@ export const logger = pino({
       options: { colorize: true },
     },
   }),
-})
+});
 ```
 
 ### Input Validation
 
 **`apps/web/lib/validations/projects.ts`**
+
 ```typescript
-import { z } from 'zod'
+import { z } from 'zod';
 
 export const createProjectSchema = z.object({
   title: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
   status: z.enum(['active', 'archived', 'completed']).default('active'),
   organization_id: z.string().uuid().optional(),
-})
+});
 
-export const updateProjectSchema = createProjectSchema.partial()
+export const updateProjectSchema = createProjectSchema.partial();
 
-export type CreateProjectInput = z.infer<typeof createProjectSchema>
-export type UpdateProjectInput = z.infer<typeof updateProjectSchema>
+export type CreateProjectInput = z.infer<typeof createProjectSchema>;
+export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
 ```
 
 ### Status Monitoring
 
 **`.upptimerc.yml`**
+
 ```yaml
 owner: your-username
 repo: AI-Mahakurukshetra
@@ -838,44 +895,48 @@ status-website:
 ```
 
 **`apps/web/app/api/health/route.ts`**
+
 ```typescript
-import { logger } from '@/lib/logger'
-import { redis } from '@/lib/redis/client'
+import { logger } from '@/lib/logger';
+import { redis } from '@/lib/redis/client';
 
 export async function GET() {
   const checks = {
     database: 'unknown',
     redis: 'unknown',
-  }
+  };
 
   // Check DB connection
   try {
-    const { error } = await supabase.from('profiles').select('count').single()
-    checks.database = error ? 'disconnected' : 'connected'
+    const { error } = await supabase.from('profiles').select('count').single();
+    checks.database = error ? 'disconnected' : 'connected';
   } catch (e) {
-    checks.database = 'error'
-    logger.error({ error: e }, 'Database health check failed')
+    checks.database = 'error';
+    logger.error({ error: e }, 'Database health check failed');
   }
 
   // Check Redis connection
   try {
-    await redis.ping()
-    checks.redis = 'connected'
+    await redis.ping();
+    checks.redis = 'connected';
   } catch (e) {
-    checks.redis = 'disconnected'
-    logger.error({ error: e }, 'Redis health check failed')
+    checks.redis = 'disconnected';
+    logger.error({ error: e }, 'Redis health check failed');
   }
 
-  const isHealthy = checks.database === 'connected' && checks.redis === 'connected'
+  const isHealthy = checks.database === 'connected' && checks.redis === 'connected';
 
-  return Response.json({
-    status: isHealthy ? 'healthy' : 'unhealthy',
-    timestamp: new Date().toISOString(),
-    ...checks,
-    version: '1.0.0',
-  }, {
-    status: isHealthy ? 200 : 503
-  })
+  return Response.json(
+    {
+      status: isHealthy ? 'healthy' : 'unhealthy',
+      timestamp: new Date().toISOString(),
+      ...checks,
+      version: '1.0.0',
+    },
+    {
+      status: isHealthy ? 200 : 503,
+    },
+  );
 }
 ```
 
@@ -930,12 +991,14 @@ CODECOV_TOKEN=your_codecov_token
 ### Phase 1: Monorepo Foundation (Day 1)
 
 1. **Initialize Turborepo with PNPM**
+
    ```bash
    npx create-turbo@latest --package-manager pnpm
    # Configure for Next.js 16 in apps/web
    ```
 
 2. **Setup Next.js in `apps/web`**
+
    ```bash
    cd apps/web
    pnpm create next-app . --typescript --tailwind --app
@@ -947,6 +1010,7 @@ CODECOV_TOKEN=your_codecov_token
    - `packages/stripe` placeholder
 
 4. **Setup development tools**
+
    ```bash
    pnpm add -D -w prettier eslint-config-prettier prettier-plugin-tailwindcss
    pnpm add -D -w husky lint-staged
@@ -971,10 +1035,12 @@ CODECOV_TOKEN=your_codecov_token
    - Add DB triggers (auto-create profile on signup)
 
 7. **Supabase client setup**
+
    ```bash
    cd apps/web
    pnpm add @supabase/supabase-js @supabase/ssr
    ```
+
    - Create `lib/supabase/client.ts`, `server.ts`, `middleware.ts`
    - Generate types: `npx supabase gen types typescript --local > lib/supabase/database.types.ts`
 
@@ -985,6 +1051,7 @@ CODECOV_TOKEN=your_codecov_token
 ### Phase 3: Authentication (Day 3)
 
 9. **Setup shadcn/ui**
+
    ```bash
    cd apps/web
    npx shadcn@latest init
@@ -1014,19 +1081,23 @@ CODECOV_TOKEN=your_codecov_token
 ### Phase 3.5: Redis, Logging & Feature Flags (Day 3.5)
 
 14. **Setup Redis (Upstash)**
+
     ```bash
     cd apps/web
     pnpm add @upstash/redis
     ```
+
     - Create Upstash account and Redis database
     - `lib/redis/client.ts` - Redis client setup
     - `lib/redis/cache.ts` - Cache utilities with TTL
     - `lib/redis/rate-limit.ts` - Rate limiting middleware
 
 15. **Structured Logging**
+
     ```bash
     pnpm add pino pino-pretty
     ```
+
     - `lib/logger/index.ts` - Logger configuration
     - Add request ID middleware
     - Configure log redaction for sensitive data
@@ -1046,6 +1117,7 @@ CODECOV_TOKEN=your_codecov_token
     - Support both user_id and organization_id (for multi-tenancy)
 
 18. **Install Stripe**
+
     ```bash
     cd apps/web
     pnpm add stripe @stripe/stripe-js
@@ -1076,6 +1148,7 @@ CODECOV_TOKEN=your_codecov_token
 ### Phase 5: Dashboard & Sample Feature (Day 5)
 
 23. **Install dashboard UI components**
+
     ```bash
     npx shadcn@latest add dropdown-menu avatar separator skeleton badge table
     ```
@@ -1102,6 +1175,7 @@ CODECOV_TOKEN=your_codecov_token
 ### Phase 6: API Documentation (Day 6)
 
 27. **Install Swagger UI**
+
     ```bash
     cd apps/web
     pnpm add swagger-ui-react
@@ -1147,9 +1221,11 @@ CODECOV_TOKEN=your_codecov_token
 ### Phase 8: Status Page & Monitoring (Day 8)
 
 34. **Setup Upptime**
+
     ```bash
     npx @upptime/uptime-monitor
     ```
+
     - Configure `.upptimerc.yml`
     - Add health check endpoint
     - Push to GitHub to trigger first check
@@ -1221,6 +1297,7 @@ CODECOV_TOKEN=your_codecov_token
 ### For Judges
 
 **Share these public URLs:**
+
 - **App**: `https://your-app.vercel.app`
 - **API Docs**: `https://your-app.vercel.app/api/docs`
 - **Status Page**: `https://your-username.github.io/AI-Mahakurukshetra/`

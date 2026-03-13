@@ -1,6 +1,7 @@
 ## Project Phases (Next.js + Supabase + Vercel)
 
 ### Phase 0 — Hackathon MVP (Demo-Ready)
+
 Focus: ship a stable, demoable core.
 
 - Auth: Email/Password, Session management, Logout, Protected routes
@@ -14,6 +15,7 @@ Focus: ship a stable, demoable core.
 - UX basics: Skeleton loaders, Toast notifications, Mobile responsive UI
 
 ### Phase 1 — Production Core (Post-Hackathon)
+
 Focus: security, stability, and observability.
 
 - Security: RLS hardening, Auth-protected APIs, Input validation, Rate limiting on AI endpoints
@@ -25,6 +27,7 @@ Focus: security, stability, and observability.
 - Analytics: Prompt counts, Feature usage, AI usage stats
 
 ### Phase 2 — Product Maturity
+
 Focus: polish, scale, and user trust.
 
 - OAuth providers: Google + GitHub (defer others)
@@ -41,6 +44,7 @@ Focus: polish, scale, and user trust.
 - Component library / Design system / Storybook - Routes exposed to Developers
 
 ### Phase 3 — Integrations & Growth
+
 Focus: ecosystem and monetization.
 
 - Payments: Stripe or Razorpay (pick one)
@@ -49,6 +53,7 @@ Focus: ecosystem and monetization.
 - Admin dashboard (geo analytics + state-based analysis)
 
 ### Phase 4 — Nice-to-Haves / Experiments
+
 Focus: optional or high-effort features.
 
 - Offline mode support
