@@ -1,0 +1,20 @@
+# Ignore session-specific files
+*.jsonl
+session-*.json
+subagents/
+
+# Ignore tool results
+tool-results/
+
+# Ignore temporary files
+*.tmp
+*.log
+
+# Keep memory, agents, skills, rules
+!memory/
+!agents/
+!skills/
+!rules/
+!prompts/
+!CLAUDE.md
+!README.md
