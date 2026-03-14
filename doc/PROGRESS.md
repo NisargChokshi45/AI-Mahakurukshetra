@@ -12,3 +12,6 @@
 [2026-03-14 14:58] codex — Added the remaining planned UI shells: public auth pages, settings pages, mitigation, billing/integrations placeholders, and a public `/api/docs` page; verified with lint, typecheck, format, and build
 [2026-03-14 15:20] codex — Fixed `pnpm run dev` route collisions by removing duplicate `app/login`, `app/signup`, and `app/auth/callback/page.tsx` so the `(auth)` route group and callback route handler compile cleanly
 [2026-03-14 15:55] codex — Marked Phase 2 hosted-Supabase verification complete after user-confirmed linked reset, migration apply, seed visibility, auth hook setup, and RLS validation
+[2026-03-14 16:11] codex — Closed Phase 3 by shipping a shared risk ingestion pipeline (create/update/webhook), threshold-cross and >3-supplier escalation alerts, and risk-score audit provenance migration/seed updates; verified with `pnpm --filter @repo/web lint`, `typecheck`, and `test`
+[2026-03-14 16:21] codex — Fixed onboarding org creation failures for email-activation users by replacing RLS-blocked org insert-return reads with app-generated UUID inserts and sequential setup writes
+[2026-03-14 16:25] codex — Fixed organization-setup redirect loop by handling Supabase `organization_members -> organizations` embed shapes as either object or array in auth context resolution

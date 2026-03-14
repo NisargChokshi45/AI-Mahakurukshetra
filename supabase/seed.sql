@@ -303,6 +303,7 @@ insert into public.risk_scores (
   organization_id,
   target_type,
   supplier_id,
+  risk_event_id,
   financial_score,
   geopolitical_score,
   natural_disaster_score,
@@ -310,12 +311,14 @@ insert into public.risk_scores (
   compliance_score,
   delivery_score,
   composite_score,
-  score_reason
+  score_reason,
+  triggered_by_source,
+  triggered_by_user_id
 )
 values
-  ('30000000-0000-0000-0000-000000000001', 'supplier', '60000000-0000-0000-0000-000000000001', 60, 74, 90, 82, 44, 66, 81, 'Typhoon risk and constrained fab capacity'),
-  ('30000000-0000-0000-0000-000000000001', 'supplier', '60000000-0000-0000-0000-000000000005', 57, 68, 51, 75, 46, 79, 76, 'Power module shortages and delivery slippage'),
-  ('30000000-0000-0000-0000-000000000002', 'supplier', '60000000-0000-0000-0000-000000000008', 66, 34, 24, 58, 81, 49, 69, 'Compliance delay on upstream metals source')
+  ('30000000-0000-0000-0000-000000000001', 'supplier', '60000000-0000-0000-0000-000000000001', '80000000-0000-0000-0000-000000000001', 60, 74, 90, 82, 44, 66, 81, 'Typhoon risk and constrained fab capacity', 'manual_ingestion', '10000000-0000-0000-0000-000000000001'),
+  ('30000000-0000-0000-0000-000000000001', 'supplier', '60000000-0000-0000-0000-000000000005', '80000000-0000-0000-0000-000000000002', 57, 68, 51, 75, 46, 79, 76, 'Power module shortages and delivery slippage', 'manual_ingestion', '10000000-0000-0000-0000-000000000001'),
+  ('30000000-0000-0000-0000-000000000002', 'supplier', '60000000-0000-0000-0000-000000000008', '80000000-0000-0000-0000-000000000003', 66, 34, 24, 58, 81, 49, 69, 'Compliance delay on upstream metals source', 'manual_ingestion', '10000000-0000-0000-0000-000000000002')
 on conflict do nothing;
 
 insert into public.alerts (

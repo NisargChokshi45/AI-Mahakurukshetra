@@ -1,14 +1,15 @@
 # Schema Status
 
-Phase 2 schema has been authored under `supabase/migrations/` and `supabase/seed.sql`.
+Phase 2 and Phase 3 schema updates are authored under `supabase/migrations/` and `supabase/seed.sql`.
 
 Current state:
 
-- Migrations `001`–`009` exist on disk with timestamped filenames
+- Migrations `001`–`010` exist on disk with timestamped filenames
 - RLS is authored for every table with `force row level security`
 - A custom access-token hook adds `org_id` to JWT claims
 - `supabase/config.toml` enables the custom hook and local seed path
-- Local apply/verification is still pending because the Supabase CLI is not installed in this environment
+- Hosted-dev verification has been completed for `001`–`009`; migration `010` is authored and ready for apply
+- Local apply/verification is still pending in this environment when the Supabase CLI is unavailable
 
 ## Migration History
 
@@ -23,6 +24,7 @@ Current state:
 | 007   | `20260314131600_007_logistics.sql`        | inventories and shipments                                        |
 | 008   | `20260314131700_008_integrations.sql`     | scenarios, metrics, notifications, integrations                  |
 | 009   | `20260314131800_009_subscriptions.sql`    | customers, prices, subscriptions, payment history                |
+| 010   | `20260314131900_010_risk_score_audit.sql` | risk score audit provenance (`risk_event_id`, source, actor)     |
 
 ---
 
@@ -58,13 +60,13 @@ Current state:
 
 ### Risk Engine
 
-| Table                | Description                                                                                                                                              |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `risk_events`        | An event that introduces or escalates risk (geopolitical, natural, financial, operational, compliance). Includes severity, affected regions, and source. |
-| `disruptions`        | A confirmed supply chain disruption linked to a risk event. Has financial impact estimate.                                                               |
-| `risk_scores`        | Point-in-time risk score records for a supplier or region. Captures individual category scores and composite. Enables trend history.                     |
-| `risk_score_configs` | Per-org configurable weights for each risk scoring category.                                                                                             |
-| `alerts`             | Generated alerts tied to a supplier or region when score crosses threshold or event is created. Status: new, acknowledged, dismissed, resolved.          |
+| Table                | Description                                                                                                                                                |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `risk_events`        | An event that introduces or escalates risk (geopolitical, natural, financial, operational, compliance). Includes severity, affected regions, and source.   |
+| `disruptions`        | A confirmed supply chain disruption linked to a risk event. Has financial impact estimate.                                                                 |
+| `risk_scores`        | Point-in-time risk score records for a supplier or region. Captures individual category scores/composite plus provenance (`risk_event_id`, source, actor). |
+| `risk_score_configs` | Per-org configurable weights for each risk scoring category.                                                                                               |
+| `alerts`             | Generated alerts tied to a supplier or region when score crosses threshold or event is created. Status: new, acknowledged, dismissed, resolved.            |
 
 ### Incident Response
 
@@ -174,5 +176,6 @@ CREATE INDEX idx_risk_events_org_severity ON risk_events(organization_id, severi
 CREATE INDEX idx_alerts_org_status ON alerts(organization_id, status);
 CREATE INDEX idx_incidents_org_status ON incidents(organization_id, status);
 CREATE INDEX idx_risk_scores_supplier_created ON risk_scores(supplier_id, created_at DESC);
+CREATE INDEX idx_risk_scores_risk_event_created ON risk_scores(risk_event_id, created_at DESC);
 CREATE INDEX idx_metrics_org_created ON metrics(organization_id, recorded_at DESC);
 ```

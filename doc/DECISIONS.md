@@ -119,3 +119,28 @@ Reason:
 
 Reason:
 Next.js resolves route-group pages to the same public pathname as top-level pages. Duplicating both forms causes `pnpm run dev` to fail at compile time with path conflicts, and `/auth/callback` must remain a route handler so Supabase can exchange the auth code server-side.
+
+### Decision: Use one shared server-side risk pipeline for manual and webhook ingestion
+
+Reason:
+Phase 3 requires consistent scoring, alerting, and audit behavior regardless of ingestion channel. Centralizing this logic avoids drift between server actions and route handlers, and keeps threshold/escalation logic testable and deterministic.
+
+### Decision: Emit threshold alerts only on threshold crossing (not every high score write)
+
+Reason:
+Repeated alerts for already-high suppliers create noisy triage and weak signal quality. Comparing each new score to the latest prior score preserves meaningful alert volume and aligns with "threshold crossed" semantics in the plan.
+
+### Decision: Add explicit provenance columns to `risk_scores` for auditability
+
+Reason:
+Time-series rows alone show "what changed" and "when", but not reliable attribution. Adding `risk_event_id`, `triggered_by_source`, and `triggered_by_user_id` captures source and actor context needed for incident review and compliance traceability.
+
+### Decision: Do not depend on `insert().select()` when bootstrapping a new organization under strict RLS
+
+Reason:
+`organizations_select` requires active membership, which does not exist yet at org creation time. Generating the organization UUID in the server action allows insert + downstream membership creation without reading the row first, and sequential writes prevent race conditions for role-gated config upserts.
+
+### Decision: Normalize Supabase embedded relation shapes at auth-context boundaries
+
+Reason:
+Supabase embeds can resolve as an object or array depending on relationship metadata and query shape. Normalizing this in `getAuthContext()` prevents incorrectly treating valid memberships as missing organizations, which can cause redirect loops on protected routes.

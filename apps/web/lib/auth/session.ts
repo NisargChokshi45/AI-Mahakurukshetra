@@ -30,9 +30,23 @@ type MembershipRow = {
     | {
         name: string;
         slug: string;
+      }
+    | {
+        name: string;
+        slug: string;
       }[]
     | null;
 };
+
+function getOrganizationFromMembership(membership: MembershipRow) {
+  if (!membership.organizations) {
+    return null;
+  }
+
+  return Array.isArray(membership.organizations)
+    ? (membership.organizations[0] ?? null)
+    : membership.organizations;
+}
 
 export async function getAuthContext(): Promise<AuthContext | null> {
   const supabase = await createClient();
@@ -65,6 +79,9 @@ export async function getAuthContext(): Promise<AuthContext | null> {
     ) ??
     membershipRows[0] ??
     null;
+  const organization = currentMembership
+    ? getOrganizationFromMembership(currentMembership)
+    : null;
 
   return {
     user,
@@ -75,14 +92,15 @@ export async function getAuthContext(): Promise<AuthContext | null> {
           email: profile.email,
         }
       : null,
-    organization: currentMembership?.organizations?.[0]
-      ? {
-          organizationId: currentMembership.organization_id,
-          organizationName: currentMembership.organizations[0].name,
-          organizationSlug: currentMembership.organizations[0].slug,
-          role: currentMembership.role,
-        }
-      : null,
+    organization:
+      currentMembership && organization
+        ? {
+            organizationId: currentMembership.organization_id,
+            organizationName: organization.name,
+            organizationSlug: organization.slug,
+            role: currentMembership.role,
+          }
+        : null,
   };
 }
 

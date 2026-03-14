@@ -24,3 +24,12 @@
 - Ignored Supabase CLI local temp artifacts by adding `supabase/.temp/` to `.gitignore` so generated marker files (for example `supabase/.temp/cli-latest`) are not committed.
 - Fixed monorepo dev/runtime env bootstrapping in `apps/web/package.json` by sourcing the workspace root `.env` before `next dev/build/start`, resolving missing `NEXT_PUBLIC_*` runtime variables when running `pnpm run dev` from repo root.
 - Removed duplicate top-level auth pages at `apps/web/app/login`, `apps/web/app/signup`, and `apps/web/app/auth/callback/page.tsx` so Next.js no longer reports conflicting `/login`, `/signup`, and `/auth/callback` routes during `pnpm run dev`.
+- Added `apps/web/lib/risk-pipeline.ts` to centralize Phase 3 ingestion behavior: per-org config loading/upsert, weighted score recomputation, threshold-cross alerting, and >3-supplier critical escalation.
+- Refactored `apps/web/lib/actions/risk.ts` to support both create and update flows for risk events and to run recalculation/audit writes after each mutation.
+- Upgraded `apps/web/app/api/monitoring/route.ts` to enforce HMAC SHA-256 verification with `MONITORING_WEBHOOK_SECRET`, validate `x-org-id` as UUID, and run the same disruption/scoring/alert pipeline as manual ingestion.
+- Extended risk validation schemas in `apps/web/lib/validations/risk.ts` with a shared payload schema and explicit update schema for server-action update flows.
+- Added migration `supabase/migrations/20260314131900_010_risk_score_audit.sql` with risk score provenance columns (`risk_event_id`, `triggered_by_source`, `triggered_by_user_id`) and supporting constraints/index.
+- Updated `supabase/seed.sql` risk score inserts to include provenance metadata and linked risk events for realistic audit history.
+- Added `MONITORING_WEBHOOK_SECRET` to `.env.example` so webhook signature verification is explicitly configured.
+- Fixed `apps/web/app/setup/organization/actions.ts` onboarding reliability: org creation now uses app-generated UUID inserts (no `insert().select()` dependency on org select RLS) and performs membership/config/profile writes sequentially to avoid order races during first-login bootstrap.
+- Fixed `apps/web/lib/auth/session.ts` organization context parsing to support both Supabase embed shapes (`organizations` as object or array), preventing false null-organization redirects back to `/setup/organization`.

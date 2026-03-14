@@ -32,19 +32,21 @@
 - [x] 2026-03-14 13:15 — Implement Supabase auth: email/password + Google OAuth
 - [x] 2026-03-14 13:15 — Session refresh middleware, protected dashboard layout, redirect on unauthenticated
 - [x] 2026-03-14 13:15 — Org creation on first login; invitation flow for org members
+- [x] 2026-03-14 16:21 — Fix first-login org bootstrap failure after email activation by avoiding RLS-blocked `insert().select()` and sequencing membership/config/profile writes
+- [x] 2026-03-14 16:25 — Fix post-create redirect loop by resolving Supabase embedded `organizations` relation as object-or-array in auth context
 - [x] 2026-03-14 13:15 — Write `seed.sql`: 2 demo orgs, 10 suppliers (tiers 1–3), 5 regions, 3 active risk events, 2 open incidents, multiple alerts, contracts, and inventory records
 - [x] 2026-03-14 15:55 — Verified demo data is visible immediately after deploy with no manual setup
 
 ## Phase 3 — Data Ingestion & Risk Engine
 
-- [ ] Build risk scoring model: weighted inputs (financial health, geopolitical, natural disaster, operational stability, compliance, delivery performance)
-- [ ] Store configurable per-org scoring weights in `risk_score_configs`
-- [ ] Create alert generation rules: score threshold crossed → create `alert` record
-- [ ] Escalation rule: new `risk_event` affecting >3 suppliers → critical alert
-- [ ] Build manual risk event ingestion form with Zod validation
-- [ ] Build external feed ingestion endpoint (`POST /api/monitoring`) with HMAC signature verification
-- [ ] Add audit history for risk score changes (stored in `risk_scores` as time-series)
-- [ ] Trigger score recalculation as server action when risk event is created or updated
+- [x] 2026-03-14 16:11 — Built weighted risk scoring model (financial, geopolitical, natural disaster, operational, compliance, delivery) and centralized execution in a shared server-side pipeline
+- [x] 2026-03-14 16:11 — Persisted and auto-hydrated per-org scoring weights from `risk_score_configs` (default row upsert on first pipeline execution)
+- [x] 2026-03-14 16:11 — Implemented threshold-crossing alert generation rules (alert only when latest composite score crosses configured org threshold)
+- [x] 2026-03-14 16:11 — Added escalation rule: new `risk_event` impacting more than 3 suppliers now creates a critical triage alert
+- [x] 2026-03-14 16:11 — Completed manual risk event ingestion form + server action validation with Zod (`createRiskEventSchema` / `updateRiskEventSchema`)
+- [x] 2026-03-14 16:11 — Completed external monitoring webhook ingestion (`POST /api/monitoring`) with HMAC SHA-256 signature verification and UUID org-header validation
+- [x] 2026-03-14 16:11 — Added time-series risk score audit provenance in `risk_scores` (`risk_event_id`, `triggered_by_source`, `triggered_by_user_id`)
+- [x] 2026-03-14 16:11 — Triggered risk score recalculation through server actions for both risk event create and update flows
 
 ## Phase 4 — Core Product UI
 
