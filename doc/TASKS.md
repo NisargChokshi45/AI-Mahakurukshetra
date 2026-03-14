@@ -26,14 +26,14 @@
 ## Phase 2 — Database & Auth
 
 - [x] 2026-03-14 14:58 — Build auth UI surfaces for `/login`, `/signup`, and `/auth/callback` so the planned onboarding flow has visible entry points before Supabase wiring
-- [~] 2026-03-14 13:29 — Authored migrations 001–009 plus `supabase/config.toml`; apply is pending against the hosted development Supabase project
-- [~] 2026-03-14 13:29 — RLS policies authored across all tables with default-deny posture; verification is pending hosted-project migration apply
-- [~] 2026-03-14 13:29 — Implemented custom JWT claim `org_id` via Supabase auth hook SQL + local config; pending hosted-project hook configuration and verification
+- [x] 2026-03-14 15:55 — Applied migrations 001–009 plus `supabase/config.toml` to the hosted development Supabase project via linked reset
+- [x] 2026-03-14 15:55 — Verified RLS policies across all tables with default-deny posture after hosted-project migration apply
+- [x] 2026-03-14 15:55 — Implemented and verified custom JWT claim `org_id` via Supabase auth hook on the hosted development project
 - [x] 2026-03-14 13:15 — Implement Supabase auth: email/password + Google OAuth
 - [x] 2026-03-14 13:15 — Session refresh middleware, protected dashboard layout, redirect on unauthenticated
 - [x] 2026-03-14 13:15 — Org creation on first login; invitation flow for org members
 - [x] 2026-03-14 13:15 — Write `seed.sql`: 2 demo orgs, 10 suppliers (tiers 1–3), 5 regions, 3 active risk events, 2 open incidents, multiple alerts, contracts, and inventory records
-- [!] 2026-03-14 13:29 — Verify demo data is visible immediately after deploy with no manual setup
+- [x] 2026-03-14 15:55 — Verified demo data is visible immediately after deploy with no manual setup
 
 ## Phase 3 — Data Ingestion & Risk Engine
 

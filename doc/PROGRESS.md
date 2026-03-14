@@ -11,3 +11,4 @@
 [2026-03-14 14:23] codex — Built the Phase 4 core UI in `apps/web`: seeded dashboard shell, supplier/risk/incident/map/report/assessment routes, and shared loading/error states; verified with lint, typecheck, format, and production build
 [2026-03-14 14:58] codex — Added the remaining planned UI shells: public auth pages, settings pages, mitigation, billing/integrations placeholders, and a public `/api/docs` page; verified with lint, typecheck, format, and build
 [2026-03-14 15:20] codex — Fixed `pnpm run dev` route collisions by removing duplicate `app/login`, `app/signup`, and `app/auth/callback/page.tsx` so the `(auth)` route group and callback route handler compile cleanly
+[2026-03-14 15:55] codex — Marked Phase 2 hosted-Supabase verification complete after user-confirmed linked reset, migration apply, seed visibility, auth hook setup, and RLS validation
