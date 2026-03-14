@@ -8,6 +8,7 @@ const publicEnvSchema = z.object({
 
 const serverEnvSchema = publicEnvSchema.extend({
   ALLOWED_ORIGINS: z.string().min(1),
+  ALLOWED_REDIRECT_URLS: z.string().optional(),
   MONITORING_WEBHOOK_SECRET: z.string().optional(),
   NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL: z.string().optional(),
   STRIPE_PRICE_ID_ENTERPRISE: z.string().optional(),
@@ -31,6 +32,7 @@ export function getPublicEnv() {
 export function getServerEnv() {
   return serverEnvSchema.parse({
     ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
+    ALLOWED_REDIRECT_URLS: process.env.ALLOWED_REDIRECT_URLS,
     MONITORING_WEBHOOK_SECRET: process.env.MONITORING_WEBHOOK_SECRET,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,

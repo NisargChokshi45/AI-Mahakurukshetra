@@ -25,7 +25,7 @@ values
     crypt('DemoPass123!', gen_salt('bf')),
     timezone('utc', now()),
     '{"provider":"email","providers":["email"]}',
-    '{"display_name":"Apex Owner"}',
+    '{"display_name":"Sarah Chen"}',
     timezone('utc', now()),
     timezone('utc', now()),
     '',
@@ -42,7 +42,151 @@ values
     crypt('DemoPass123!', gen_salt('bf')),
     timezone('utc', now()),
     '{"provider":"email","providers":["email"]}',
-    '{"display_name":"Northstar Owner"}',
+    '{"display_name":"Johann Bauer"}',
+    timezone('utc', now()),
+    timezone('utc', now()),
+    '',
+    '',
+    '',
+    ''
+  ),
+  -- Apex Resilience: admin
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '10000000-0000-0000-0000-000000000003',
+    'authenticated',
+    'authenticated',
+    'admin@apex-resilience.demo',
+    crypt('DemoPass123!', gen_salt('bf')),
+    timezone('utc', now()),
+    '{"provider":"email","providers":["email"]}',
+    '{"display_name":"Marcus Webb"}',
+    timezone('utc', now()),
+    timezone('utc', now()),
+    '',
+    '',
+    '',
+    ''
+  ),
+  -- Apex Resilience: risk_manager
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '10000000-0000-0000-0000-000000000004',
+    'authenticated',
+    'authenticated',
+    'risk@apex-resilience.demo',
+    crypt('DemoPass123!', gen_salt('bf')),
+    timezone('utc', now()),
+    '{"provider":"email","providers":["email"]}',
+    '{"display_name":"Priya Nair"}',
+    timezone('utc', now()),
+    timezone('utc', now()),
+    '',
+    '',
+    '',
+    ''
+  ),
+  -- Apex Resilience: procurement_lead
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '10000000-0000-0000-0000-000000000005',
+    'authenticated',
+    'authenticated',
+    'procurement@apex-resilience.demo',
+    crypt('DemoPass123!', gen_salt('bf')),
+    timezone('utc', now()),
+    '{"provider":"email","providers":["email"]}',
+    '{"display_name":"Daniel Park"}',
+    timezone('utc', now()),
+    timezone('utc', now()),
+    '',
+    '',
+    '',
+    ''
+  ),
+  -- Apex Resilience: viewer (CFO)
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '10000000-0000-0000-0000-000000000006',
+    'authenticated',
+    'authenticated',
+    'cfo@apex-resilience.demo',
+    crypt('DemoPass123!', gen_salt('bf')),
+    timezone('utc', now()),
+    '{"provider":"email","providers":["email"]}',
+    '{"display_name":"Elena Romero"}',
+    timezone('utc', now()),
+    timezone('utc', now()),
+    '',
+    '',
+    '',
+    ''
+  ),
+  -- Northstar Logistics: admin
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '10000000-0000-0000-0000-000000000007',
+    'authenticated',
+    'authenticated',
+    'admin@northstar-logistics.demo',
+    crypt('DemoPass123!', gen_salt('bf')),
+    timezone('utc', now()),
+    '{"provider":"email","providers":["email"]}',
+    '{"display_name":"Ingrid Halvorsen"}',
+    timezone('utc', now()),
+    timezone('utc', now()),
+    '',
+    '',
+    '',
+    ''
+  ),
+  -- Northstar Logistics: risk_manager
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '10000000-0000-0000-0000-000000000008',
+    'authenticated',
+    'authenticated',
+    'risk@northstar-logistics.demo',
+    crypt('DemoPass123!', gen_salt('bf')),
+    timezone('utc', now()),
+    '{"provider":"email","providers":["email"]}',
+    '{"display_name":"Amir Hosseini"}',
+    timezone('utc', now()),
+    timezone('utc', now()),
+    '',
+    '',
+    '',
+    ''
+  ),
+  -- Northstar Logistics: procurement_lead
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '10000000-0000-0000-0000-000000000009',
+    'authenticated',
+    'authenticated',
+    'procurement@northstar-logistics.demo',
+    crypt('DemoPass123!', gen_salt('bf')),
+    timezone('utc', now()),
+    '{"provider":"email","providers":["email"]}',
+    '{"display_name":"Katrin Müller"}',
+    timezone('utc', now()),
+    timezone('utc', now()),
+    '',
+    '',
+    '',
+    ''
+  ),
+  -- Northstar Logistics: viewer (COO)
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '10000000-0000-0000-0000-000000000010',
+    'authenticated',
+    'authenticated',
+    'coo@northstar-logistics.demo',
+    crypt('DemoPass123!', gen_salt('bf')),
+    timezone('utc', now()),
+    '{"provider":"email","providers":["email"]}',
+    '{"display_name":"Pieter van der Berg"}',
     timezone('utc', now()),
     timezone('utc', now()),
     '',
@@ -78,6 +222,86 @@ values
     '10000000-0000-0000-0000-000000000002',
     '10000000-0000-0000-0000-000000000002',
     '{"sub":"10000000-0000-0000-0000-000000000002","email":"owner@northstar-logistics.demo"}',
+    'email',
+    timezone('utc', now()),
+    timezone('utc', now()),
+    timezone('utc', now())
+  ),
+  (
+    '20000000-0000-0000-0000-000000000003',
+    '10000000-0000-0000-0000-000000000003',
+    '10000000-0000-0000-0000-000000000003',
+    '{"sub":"10000000-0000-0000-0000-000000000003","email":"admin@apex-resilience.demo"}',
+    'email',
+    timezone('utc', now()),
+    timezone('utc', now()),
+    timezone('utc', now())
+  ),
+  (
+    '20000000-0000-0000-0000-000000000004',
+    '10000000-0000-0000-0000-000000000004',
+    '10000000-0000-0000-0000-000000000004',
+    '{"sub":"10000000-0000-0000-0000-000000000004","email":"risk@apex-resilience.demo"}',
+    'email',
+    timezone('utc', now()),
+    timezone('utc', now()),
+    timezone('utc', now())
+  ),
+  (
+    '20000000-0000-0000-0000-000000000005',
+    '10000000-0000-0000-0000-000000000005',
+    '10000000-0000-0000-0000-000000000005',
+    '{"sub":"10000000-0000-0000-0000-000000000005","email":"procurement@apex-resilience.demo"}',
+    'email',
+    timezone('utc', now()),
+    timezone('utc', now()),
+    timezone('utc', now())
+  ),
+  (
+    '20000000-0000-0000-0000-000000000006',
+    '10000000-0000-0000-0000-000000000006',
+    '10000000-0000-0000-0000-000000000006',
+    '{"sub":"10000000-0000-0000-0000-000000000006","email":"cfo@apex-resilience.demo"}',
+    'email',
+    timezone('utc', now()),
+    timezone('utc', now()),
+    timezone('utc', now())
+  ),
+  (
+    '20000000-0000-0000-0000-000000000007',
+    '10000000-0000-0000-0000-000000000007',
+    '10000000-0000-0000-0000-000000000007',
+    '{"sub":"10000000-0000-0000-0000-000000000007","email":"admin@northstar-logistics.demo"}',
+    'email',
+    timezone('utc', now()),
+    timezone('utc', now()),
+    timezone('utc', now())
+  ),
+  (
+    '20000000-0000-0000-0000-000000000008',
+    '10000000-0000-0000-0000-000000000008',
+    '10000000-0000-0000-0000-000000000008',
+    '{"sub":"10000000-0000-0000-0000-000000000008","email":"risk@northstar-logistics.demo"}',
+    'email',
+    timezone('utc', now()),
+    timezone('utc', now()),
+    timezone('utc', now())
+  ),
+  (
+    '20000000-0000-0000-0000-000000000009',
+    '10000000-0000-0000-0000-000000000009',
+    '10000000-0000-0000-0000-000000000009',
+    '{"sub":"10000000-0000-0000-0000-000000000009","email":"procurement@northstar-logistics.demo"}',
+    'email',
+    timezone('utc', now()),
+    timezone('utc', now()),
+    timezone('utc', now())
+  ),
+  (
+    '20000000-0000-0000-0000-000000000010',
+    '10000000-0000-0000-0000-000000000010',
+    '10000000-0000-0000-0000-000000000010',
+    '{"sub":"10000000-0000-0000-0000-000000000010","email":"coo@northstar-logistics.demo"}',
     'email',
     timezone('utc', now()),
     timezone('utc', now()),
@@ -129,14 +353,72 @@ values
   (
     '10000000-0000-0000-0000-000000000001',
     'owner@apex-resilience.demo',
-    'Apex Owner',
+    'Sarah Chen',
     '30000000-0000-0000-0000-000000000001',
     timezone('utc', now())
   ),
   (
     '10000000-0000-0000-0000-000000000002',
     'owner@northstar-logistics.demo',
-    'Northstar Owner',
+    'Johann Bauer',
+    '30000000-0000-0000-0000-000000000002',
+    timezone('utc', now())
+  ),
+  -- Apex Resilience team
+  (
+    '10000000-0000-0000-0000-000000000003',
+    'admin@apex-resilience.demo',
+    'Marcus Webb',
+    '30000000-0000-0000-0000-000000000001',
+    timezone('utc', now())
+  ),
+  (
+    '10000000-0000-0000-0000-000000000004',
+    'risk@apex-resilience.demo',
+    'Priya Nair',
+    '30000000-0000-0000-0000-000000000001',
+    timezone('utc', now())
+  ),
+  (
+    '10000000-0000-0000-0000-000000000005',
+    'procurement@apex-resilience.demo',
+    'Daniel Park',
+    '30000000-0000-0000-0000-000000000001',
+    timezone('utc', now())
+  ),
+  (
+    '10000000-0000-0000-0000-000000000006',
+    'cfo@apex-resilience.demo',
+    'Elena Romero',
+    '30000000-0000-0000-0000-000000000001',
+    timezone('utc', now())
+  ),
+  -- Northstar Logistics team
+  (
+    '10000000-0000-0000-0000-000000000007',
+    'admin@northstar-logistics.demo',
+    'Ingrid Halvorsen',
+    '30000000-0000-0000-0000-000000000002',
+    timezone('utc', now())
+  ),
+  (
+    '10000000-0000-0000-0000-000000000008',
+    'risk@northstar-logistics.demo',
+    'Amir Hosseini',
+    '30000000-0000-0000-0000-000000000002',
+    timezone('utc', now())
+  ),
+  (
+    '10000000-0000-0000-0000-000000000009',
+    'procurement@northstar-logistics.demo',
+    'Katrin Müller',
+    '30000000-0000-0000-0000-000000000002',
+    timezone('utc', now())
+  ),
+  (
+    '10000000-0000-0000-0000-000000000010',
+    'coo@northstar-logistics.demo',
+    'Pieter van der Berg',
     '30000000-0000-0000-0000-000000000002',
     timezone('utc', now())
   )
@@ -168,6 +450,86 @@ values
     '30000000-0000-0000-0000-000000000002',
     '10000000-0000-0000-0000-000000000002',
     'owner',
+    'active',
+    '10000000-0000-0000-0000-000000000002',
+    timezone('utc', now())
+  ),
+  -- Apex Resilience: admin
+  (
+    '40000000-0000-0000-0000-000000000003',
+    '30000000-0000-0000-0000-000000000001',
+    '10000000-0000-0000-0000-000000000003',
+    'admin',
+    'active',
+    '10000000-0000-0000-0000-000000000001',
+    timezone('utc', now())
+  ),
+  -- Apex Resilience: risk_manager
+  (
+    '40000000-0000-0000-0000-000000000004',
+    '30000000-0000-0000-0000-000000000001',
+    '10000000-0000-0000-0000-000000000004',
+    'risk_manager',
+    'active',
+    '10000000-0000-0000-0000-000000000001',
+    timezone('utc', now())
+  ),
+  -- Apex Resilience: procurement_lead
+  (
+    '40000000-0000-0000-0000-000000000005',
+    '30000000-0000-0000-0000-000000000001',
+    '10000000-0000-0000-0000-000000000005',
+    'procurement_lead',
+    'active',
+    '10000000-0000-0000-0000-000000000001',
+    timezone('utc', now())
+  ),
+  -- Apex Resilience: viewer (CFO)
+  (
+    '40000000-0000-0000-0000-000000000006',
+    '30000000-0000-0000-0000-000000000001',
+    '10000000-0000-0000-0000-000000000006',
+    'viewer',
+    'active',
+    '10000000-0000-0000-0000-000000000001',
+    timezone('utc', now())
+  ),
+  -- Northstar Logistics: admin
+  (
+    '40000000-0000-0000-0000-000000000007',
+    '30000000-0000-0000-0000-000000000002',
+    '10000000-0000-0000-0000-000000000007',
+    'admin',
+    'active',
+    '10000000-0000-0000-0000-000000000002',
+    timezone('utc', now())
+  ),
+  -- Northstar Logistics: risk_manager
+  (
+    '40000000-0000-0000-0000-000000000008',
+    '30000000-0000-0000-0000-000000000002',
+    '10000000-0000-0000-0000-000000000008',
+    'risk_manager',
+    'active',
+    '10000000-0000-0000-0000-000000000002',
+    timezone('utc', now())
+  ),
+  -- Northstar Logistics: procurement_lead
+  (
+    '40000000-0000-0000-0000-000000000009',
+    '30000000-0000-0000-0000-000000000002',
+    '10000000-0000-0000-0000-000000000009',
+    'procurement_lead',
+    'active',
+    '10000000-0000-0000-0000-000000000002',
+    timezone('utc', now())
+  ),
+  -- Northstar Logistics: viewer (COO)
+  (
+    '40000000-0000-0000-0000-000000000010',
+    '30000000-0000-0000-0000-000000000002',
+    '10000000-0000-0000-0000-000000000010',
+    'viewer',
     'active',
     '10000000-0000-0000-0000-000000000002',
     timezone('utc', now())

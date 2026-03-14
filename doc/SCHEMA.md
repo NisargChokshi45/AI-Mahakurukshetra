@@ -4,27 +4,29 @@ Phase 2 and Phase 3 schema updates are authored under `supabase/migrations/` and
 
 Current state:
 
-- Migrations `001`–`010` exist on disk with timestamped filenames
+- Migrations `001`–`012` exist on disk with timestamped filenames
 - RLS is authored for every table with `force row level security`
 - A custom access-token hook adds `org_id` to JWT claims
 - `supabase/config.toml` enables the custom hook and local seed path
-- Hosted-dev verification has been completed for `001`–`009`; migration `010` is authored and ready for apply
+- Hosted-dev verification has been completed for `001`–`009`; migrations `010`–`012` are authored and ready for apply
 - Local apply/verification is still pending in this environment when the Supabase CLI is unavailable
 
 ## Migration History
 
-| Order | File                                      | Scope                                                            |
-| ----- | ----------------------------------------- | ---------------------------------------------------------------- |
-| 001   | `20260314131000_001_auth_orgs.sql`        | extensions, org/auth tables, profile trigger, JWT hook, base RLS |
-| 002   | `20260314131100_002_suppliers.sql`        | regions, suppliers, facilities, supplier-region links            |
-| 003   | `20260314131200_003_products.sql`         | products, components, supplier-components, contracts             |
-| 004   | `20260314131300_004_risk_engine.sql`      | risk configs, risk events, disruptions, score history            |
-| 005   | `20260314131400_005_alerts_incidents.sql` | alerts, incidents, actions, mitigation plans                     |
-| 006   | `20260314131500_006_assessments.sql`      | assessments and reports                                          |
-| 007   | `20260314131600_007_logistics.sql`        | inventories and shipments                                        |
-| 008   | `20260314131700_008_integrations.sql`     | scenarios, metrics, notifications, integrations                  |
-| 009   | `20260314131800_009_subscriptions.sql`    | customers, prices, subscriptions, payment history                |
-| 010   | `20260314131900_010_risk_score_audit.sql` | risk score audit provenance (`risk_event_id`, source, actor)     |
+| Order | File                                                  | Scope                                                                                                          |
+| ----- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| 001   | `20260314131000_001_auth_orgs.sql`                    | extensions, org/auth tables, profile trigger, JWT hook, base RLS                                               |
+| 002   | `20260314131100_002_suppliers.sql`                    | regions, suppliers, facilities, supplier-region links                                                          |
+| 003   | `20260314131200_003_products.sql`                     | products, components, supplier-components, contracts                                                           |
+| 004   | `20260314131300_004_risk_engine.sql`                  | risk configs, risk events, disruptions, score history                                                          |
+| 005   | `20260314131400_005_alerts_incidents.sql`             | alerts, incidents, actions, mitigation plans                                                                   |
+| 006   | `20260314131500_006_assessments.sql`                  | assessments and reports                                                                                        |
+| 007   | `20260314131600_007_logistics.sql`                    | inventories and shipments                                                                                      |
+| 008   | `20260314131700_008_integrations.sql`                 | scenarios, metrics, notifications, integrations                                                                |
+| 009   | `20260314131800_009_subscriptions.sql`                | customers, prices, subscriptions, payment history                                                              |
+| 010   | `20260314131900_010_risk_score_audit.sql`             | risk score audit provenance (`risk_event_id`, source, actor)                                                   |
+| 011   | `20260314170000_011_risk_link_org_guards.sql`         | trigger guardrails for org-consistent supplier/risk-event references on `disruptions`, `risk_scores`, `alerts` |
+| 012   | `20260314171000_012_transactional_risk_ingestion.sql` | transactional RPC `process_risk_event_ingestion` for atomic risk-event/disruption/score/alert writes           |
 
 ---
 

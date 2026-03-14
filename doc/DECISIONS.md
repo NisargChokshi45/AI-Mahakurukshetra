@@ -144,3 +144,53 @@ Reason:
 
 Reason:
 Supabase embeds can resolve as an object or array depending on relationship metadata and query shape. Normalizing this in `getAuthContext()` prevents incorrectly treating valid memberships as missing organizations, which can cause redirect loops on protected routes.
+
+### Decision: Guard public auth surfaces with both server-side and client-side auth redirects
+
+Reason:
+Server checks on `/`, `/login`, and `/signup` prevent authenticated users from seeing logged-out UI on fresh navigations, while a browser auth-state listener handles already-open tabs so sign-in in one tab redirects sibling tabs without manual refresh.
+
+### Decision: Do not encode logout status in URL query parameters
+
+Reason:
+Logout success is deterministic and does not need a querystring message. Keeping sign-out redirects on a clean `/login` URL avoids leaking transient status into shareable links and keeps auth routes canonical.
+
+### Decision: Authorize risk-event mutations from server-side organization context, not JWT app metadata
+
+Reason:
+`requireOrganizationContext()` resolves active membership and role from the database-backed auth context. Using it for `createRiskEventAction` ensures only `owner|admin|risk_manager` can execute service-role-backed risk writes and avoids trusting mutable client/session metadata as the authorization source.
+
+### Decision: Enforce supplier/risk-event org integrity with database triggers on risk-linked tables
+
+Reason:
+Service-role paths bypass RLS policy checks. Trigger guardrails on `disruptions`, `risk_scores`, and `alerts` make cross-organization supplier/risk-event references impossible even if an application-layer validation is missed in future code paths.
+
+### Decision: Centralize origin allowlist, CORS, and public API rate limiting in `proxy.ts`
+
+Reason:
+Applying Phase 5 security controls at the proxy boundary prevents per-route drift, ensures every `/api/*` response gets consistent allowlist-driven CORS behavior, and enforces public webhook throttling before handlers execute.
+
+### Decision: Resolve Supabase auth callback URLs from request origin, then constrain with `ALLOWED_REDIRECT_URLS`
+
+Reason:
+Using a single hardcoded app URL breaks preview and multi-domain environments. Deriving callback URLs from request headers while validating against explicit redirect allowlists supports local/preview/production flows without opening redirect targets.
+
+### Decision: Use a documented P0/P1/P2 review gate to drive codebase hardening before launch
+
+Reason:
+Passing lint/typecheck alone is not enough for release confidence in a multi-tenant, security-sensitive app. A written remediation plan (`doc/REVIEW_ACTION_PLAN.md`) with severity, ownership scope, and acceptance criteria keeps security and correctness fixes auditable and prioritized.
+
+### Decision: Execute risk-event ingestion through one transactional RPC function
+
+Reason:
+Manual and webhook ingestion previously performed event/disruption/score/alert writes in separate application calls, which could leave partial state on failures. Moving these writes into `public.process_risk_event_ingestion(...)` guarantees atomicity and keeps ingestion behavior consistent across channels.
+
+### Decision: Keep redirect-safety logic in a shared security utility, not inside route modules
+
+Reason:
+Next.js route modules cannot export arbitrary helpers without violating route type constraints. Moving safe-next-path normalization into `lib/security/redirects.ts` makes it reusable and directly unit-testable while keeping route handlers compliant.
+
+### Decision: Keep login page as a server component and isolate password visibility in a client subcomponent
+
+Reason:
+The login form submits through a server action, but password show/hide requires browser state. A small client `PasswordInput` component provides the eye toggle without converting the full page to client rendering or changing the auth mutation flow.

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { signUpAction } from '@/app/(auth)/actions';
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
   title: 'Signup',
@@ -18,6 +20,15 @@ function readMessage(value: string | string[] | undefined) {
 }
 
 export default async function SignupPage({ searchParams }: SignupPageProps) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect('/dashboard');
+  }
+
   const params = (await searchParams) ?? {};
   const error = readMessage(params.error);
 

@@ -1,6 +1,7 @@
 declare namespace NodeJS {
   interface ProcessEnv {
     ALLOWED_ORIGINS?: string;
+    ALLOWED_REDIRECT_URLS?: string;
     NEXT_PUBLIC_APP_URL?: string;
     NEXT_PUBLIC_SUPABASE_ANON_KEY?: string;
     NEXT_PUBLIC_SUPABASE_URL?: string;

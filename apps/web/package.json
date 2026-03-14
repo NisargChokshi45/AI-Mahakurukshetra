@@ -13,6 +13,7 @@
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest --watch --passWithNoTests",
     "test:e2e": "playwright test --config ../../playwright.config.ts --pass-with-no-tests",
+    "validate:domains": "sh -ac 'set -a; [ -f ../../.env ] && . ../../.env; set +a; exec node scripts/validate-domain-config.mjs'",
     "format": "prettier --ignore-path ../../.prettierignore --write .",
     "format:check": "prettier --ignore-path ../../.prettierignore --check ."
   },

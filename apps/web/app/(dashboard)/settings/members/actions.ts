@@ -1,9 +1,10 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { requireOrganizationContext } from '@/lib/auth/session';
-import { getPublicEnv } from '@/lib/env';
+import { resolveAuthCallbackUrl } from '@/lib/security/redirects';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { inviteMemberSchema } from '@/lib/validations/auth';
 
@@ -47,14 +48,15 @@ export async function inviteOrganizationMemberAction(formData: FormData) {
   if (existingProfile) {
     userId = existingProfile.id;
   } else {
-    const env = getPublicEnv();
+    const requestHeaders = await headers();
+    const callbackUrl = resolveAuthCallbackUrl(requestHeaders);
     const { data, error } = await admin.auth.admin.inviteUserByEmail(
       normalizedEmail,
       {
         data: {
           invited_org_name: context.organization.organizationName,
         },
-        redirectTo: `${env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+        redirectTo: callbackUrl,
       },
     );
 

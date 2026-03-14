@@ -2,11 +2,10 @@ import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import {
-  createDisruptionsForSuppliers,
-  runRiskPipelineForEvent,
+  ingestRiskEventTransactional,
+  resolveOrganizationSupplierIds,
 } from '@/lib/risk-pipeline';
 import { getServerEnv } from '@/lib/env';
-import { createAdminClient } from '@/lib/supabase/admin';
 import { monitoringWebhookSchema } from '@/lib/validations/risk';
 
 const orgHeaderSchema = z.string().uuid();
@@ -75,66 +74,51 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   const organizationId = orgIdParsed.data;
-  const admin = createAdminClient();
+  const supplierResolution = await resolveOrganizationSupplierIds(
+    organizationId,
+    parsed.data.supplier_ids ?? [],
+  );
 
-  const { data: newEvent, error: insertError } = await admin
-    .from('risk_events')
-    .insert({
-      organization_id: organizationId,
-      title: parsed.data.title,
-      event_type: parsed.data.event_type,
-      severity: parsed.data.severity,
-      source: parsed.data.source,
-      source_url: parsed.data.source_url || null,
-      summary: parsed.data.summary,
-      detected_at: new Date().toISOString(),
-    })
-    .select('id')
-    .single();
-
-  if (insertError || !newEvent) {
+  if (supplierResolution.invalidSupplierIds.length > 0) {
     return NextResponse.json(
-      { error: 'Failed to persist risk event' },
-      { status: 500 },
+      {
+        error:
+          'One or more supplier_ids are invalid for the provided organization.',
+      },
+      { status: 400 },
     );
   }
 
-  const supplierIds = parsed.data.supplier_ids ?? [];
+  const validatedSupplierIds = supplierResolution.validSupplierIds;
 
   try {
-    await createDisruptionsForSuppliers({
+    const result = await ingestRiskEventTransactional({
       organizationId,
-      riskEventId: newEvent.id,
-      supplierIds,
       title: parsed.data.title,
-      impactSummary: parsed.data.summary,
-    });
-
-    const pipelineResult = await runRiskPipelineForEvent({
-      organizationId,
-      riskEventId: newEvent.id,
       eventType: parsed.data.event_type,
       severity: parsed.data.severity,
-      eventTitle: parsed.data.title,
-      eventSummary: parsed.data.summary,
-      supplierIds,
-      isNewEvent: true,
+      source: parsed.data.source,
+      sourceUrl: parsed.data.source_url || null,
+      summary: parsed.data.summary,
+      supplierIds: validatedSupplierIds,
       ingestionSource: 'monitoring_webhook',
       actorUserId: null,
+      riskEventId: null,
     });
 
     return NextResponse.json(
       {
-        id: newEvent.id,
-        alerts_created: pipelineResult.alertsCreated,
-        scores_inserted: pipelineResult.scoresInserted,
+        id: result.riskEventId,
+        alerts_created: result.alertsCreated,
+        scores_inserted: result.scoresInserted,
       },
       { status: 201 },
     );
-  } catch {
-    return NextResponse.json(
-      { error: 'Risk pipeline failed after event creation' },
-      { status: 500 },
-    );
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Risk pipeline transaction failed';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

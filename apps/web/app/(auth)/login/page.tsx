@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { signInAction, signInWithGoogleAction } from '@/app/(auth)/actions';
+import { PasswordInput } from '@/components/auth/password-input';
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
   title: 'Login',
@@ -18,6 +21,15 @@ function readMessage(value: string | string[] | undefined) {
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect('/dashboard');
+  }
+
   const params = (await searchParams) ?? {};
   const error = readMessage(params.error);
   const message = readMessage(params.message);
@@ -84,13 +96,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
             <label className="block space-y-2">
               <span className="text-sm text-slate-300">Password</span>
-              <input
-                required
-                type="password"
-                name="password"
-                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white ring-0 outline-none placeholder:text-slate-500"
-                placeholder="••••••••"
-              />
+              <PasswordInput required name="password" placeholder="••••••••" />
             </label>
 
             <button

@@ -33,3 +33,26 @@
 - Added `MONITORING_WEBHOOK_SECRET` to `.env.example` so webhook signature verification is explicitly configured.
 - Fixed `apps/web/app/setup/organization/actions.ts` onboarding reliability: org creation now uses app-generated UUID inserts (no `insert().select()` dependency on org select RLS) and performs membership/config/profile writes sequentially to avoid order races during first-login bootstrap.
 - Fixed `apps/web/lib/auth/session.ts` organization context parsing to support both Supabase embed shapes (`organizations` as object or array), preventing false null-organization redirects back to `/setup/organization`.
+- Added `apps/web/components/auth/public-session-redirect.tsx` to listen for Supabase auth state changes in the browser and redirect authenticated users away from public auth screens across tabs.
+- Updated `apps/web/app/(auth)/layout.tsx`, `apps/web/app/(auth)/login/page.tsx`, `apps/web/app/(auth)/signup/page.tsx`, and `apps/web/app/page.tsx` to enforce logged-in redirects to `/dashboard` on both initial server render and cross-tab auth updates.
+- Updated `apps/web/app/(auth)/actions.ts` sign-out flow to redirect to `/login` without appending URL status query params.
+- Hardened `apps/web/lib/actions/risk.ts` by switching to `requireOrganizationContext()`, enforcing allowed mutation roles (`owner|admin|risk_manager`), and validating supplier ownership before create/update writes.
+- Hardened `apps/web/app/auth/callback/route.ts` with strict `next` path sanitization to prevent open redirects to external origins.
+- Hardened `apps/web/app/api/monitoring/route.ts` with org-bound supplier validation before risk event creation.
+- Added `resolveOrganizationSupplierIds()` in `apps/web/lib/risk-pipeline.ts` as a shared org-scoped supplier validation utility.
+- Added migration `supabase/migrations/20260314170000_011_risk_link_org_guards.sql` with DB-level trigger guardrails enforcing supplier/risk-event organization consistency for `disruptions`, `risk_scores`, and `alerts`.
+- Added Phase 5 cross-domain security utilities under `apps/web/lib/security/` (`origins.ts`, `cors.ts`, `public-api.ts`, `redirects.ts`) and wired them in `apps/web/proxy.ts` for origin allowlist enforcement, API CORS headers, OPTIONS preflight handling, and public-route rate-limit responses.
+- Added Upstash-backed public API throttling for `/api/monitoring` (100 req/min) via proxy-level route policy and standardized `X-RateLimit-*` headers.
+- Updated auth callback URL generation in `apps/web/app/(auth)/actions.ts` and `apps/web/app/(dashboard)/settings/members/actions.ts` to resolve request-origin callbacks through allowlisted domains instead of a single static app URL.
+- Expanded environment/config coverage for cross-domain auth and CORS: `ALLOWED_REDIRECT_URLS` in `apps/web/lib/env.ts`, `apps/web/types/env.d.ts`, `.env.example`, and `.env`.
+- Updated `supabase/config.toml` auth redirect allowlist with local + Vercel preview + production callback entries for local CLI parity.
+- Added `apps/web/scripts/validate-domain-config.mjs` and `pnpm --filter @repo/web validate:domains` to validate local/preview/production domain allowlist configuration.
+- Added `doc/REVIEW_ACTION_PLAN.md` with a 10/10 quality rubric, verified gate outcomes (`lint`, `typecheck`, `test`), and prioritized P0/P1/P2 remediation items from a manual code review.
+- Updated `doc/TASKS.md` Phase 6 with completed review tracking and explicit remediation tasks for RBAC hardening, callback redirect sanitization, tenant-safe supplier linkage, and transactional risk ingestion.
+- Added migration `supabase/migrations/20260314171000_012_transactional_risk_ingestion.sql` with `process_risk_event_ingestion(...)` to execute risk-event create/update, disruption refresh, score writes, and alert generation in one transactional database function.
+- Refactored `apps/web/lib/risk-pipeline.ts` to provide `ingestRiskEventTransactional(...)` as a typed wrapper around the transactional `process_risk_event_ingestion` RPC.
+- Refactored `apps/web/lib/actions/risk.ts` and `apps/web/app/api/monitoring/route.ts` to call the shared transactional RPC wrapper after org-scoped supplier validation, replacing non-atomic write sequencing.
+- Added unit tests: `apps/web/lib/risk-engine.test.ts`, `apps/web/lib/validations/auth.test.ts`, `apps/web/lib/validations/risk.test.ts`, and `apps/web/lib/security/redirects.test.ts`.
+- Refactored auth callback redirect sanitization helper into `apps/web/lib/security/redirects.ts` (`resolveSafeNextPath`) and reused it in `apps/web/app/auth/callback/route.ts`.
+- Fixed Vitest execution in app-scoped runs by updating `vitest.config.ts` include/setup paths and aliasing `server-only` for test runtime; added `apps/web/vitest.d.ts` and `tests/setup/server-only.ts`.
+- Added `apps/web/components/auth/password-input.tsx` and integrated it into `apps/web/app/(auth)/login/page.tsx` to support password show/hide with eye/eye-off toggle while preserving the existing server-action sign-in flow.

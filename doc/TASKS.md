@@ -34,6 +34,8 @@
 - [x] 2026-03-14 13:15 — Org creation on first login; invitation flow for org members
 - [x] 2026-03-14 16:21 — Fix first-login org bootstrap failure after email activation by avoiding RLS-blocked `insert().select()` and sequencing membership/config/profile writes
 - [x] 2026-03-14 16:25 — Fix post-create redirect loop by resolving Supabase embedded `organizations` relation as object-or-array in auth context
+- [x] 2026-03-14 16:35 — Fix cross-tab auth sync so open public tabs (`/`, `/login`, `/signup`) auto-redirect to `/dashboard` after sign-in in another tab
+- [x] 2026-03-14 16:38 — Remove logout status querystring redirects so sign-out always routes to `/login` without `?message=...`
 - [x] 2026-03-14 13:15 — Write `seed.sql`: 2 demo orgs, 10 suppliers (tiers 1–3), 5 regions, 3 active risk events, 2 open incidents, multiple alerts, contracts, and inventory records
 - [x] 2026-03-14 15:55 — Verified demo data is visible immediately after deploy with no manual setup
 
@@ -63,16 +65,21 @@
 
 ## Phase 5 — Integrations & Cross-Domain Readiness
 
-- [ ] Implement origin allowlist in middleware using `ALLOWED_ORIGINS` env var (no hardcoded domains)
-- [ ] Configure Supabase Auth redirect URL allowlist for local, preview, and production
-- [ ] Apply CORS headers on all API routes (allowlist-based, never `*`)
-- [ ] Rate limiting via Upstash Redis on all public API routes (see `doc/plan.md` for limits)
+- [x] 2026-03-14 16:45 — Implement origin allowlist in middleware using `ALLOWED_ORIGINS` env var (no hardcoded domains)
+- [x] 2026-03-14 16:45 — Configure Supabase Auth redirect URL allowlist for local, preview, and production
+- [x] 2026-03-14 16:45 — Apply CORS headers on all API routes (allowlist-based, never `*`)
+- [x] 2026-03-14 16:45 — Rate limiting via Upstash Redis on all public API routes (see `doc/plan.md` for limits)
 - [x] 2026-03-14 14:58 — ERP integration placeholder: connector config UI under `/settings/integrations`
-- [ ] Validate Vercel multi-domain deployment with env-based URL config
+- [x] 2026-03-14 16:45 — Validate Vercel multi-domain deployment with env-based URL config
 
 ## Phase 6 — Quality, Security & Demo Readiness
 
-- [ ] Unit tests: risk scoring engine, Zod validation schemas, auth utility functions
+- [x] 2026-03-14 16:44 — Complete reviewer audit of the codebase and publish prioritized remediation checklist in `doc/REVIEW_ACTION_PLAN.md`
+- [x] 2026-03-14 16:50 — P0: Enforce role-based authorization in `createRiskEventAction` / update flow before any service-role writes
+- [x] 2026-03-14 16:50 — P0: Sanitize `/auth/callback` `next` query parameter to prevent open redirects
+- [x] 2026-03-14 16:50 — P0: Add org-bound supplier validation + DB-level guardrails for supplier-linked risk rows (`disruptions`, `risk_scores`, `alerts`)
+- [x] 2026-03-14 16:51 — P1: Make risk ingestion writes transactional (event + disruptions + scores + alerts) to avoid partial persistence
+- [x] 2026-03-14 17:05 — Unit tests: risk scoring engine, Zod validation schemas, auth utility functions
 - [ ] E2E tests: login → dashboard → supplier detail → create incident → resolve incident
 - [ ] Verify RLS: user from org A cannot read or write org B data
 - [ ] Security checklist: no secrets in client bundle, all mutations require auth, webhooks verify signatures, input validated on every API route
@@ -87,6 +94,7 @@
 
 - [x] 2026-03-14 14:58 — Add planned settings UI surfaces for `/settings/profile`, `/settings/organization`, `/settings/members`, and stretch pages `/settings/billing`, `/mitigation`
 - [x] 2026-03-14 14:58 — Add judge-facing placeholder UI at `/api/docs` until the real Swagger/OpenAPI surface is wired
+- [x] 2026-03-14 17:01 — Add login password visibility toggle with eye icon to show/hide password input text
 
 ## Phase 7 — Launch
 

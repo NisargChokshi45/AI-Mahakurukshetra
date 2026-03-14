@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { z } from 'zod';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
   calculateCompositeScore,
@@ -25,7 +26,10 @@ const severityRank: Record<SeverityLevel, number> = {
   critical: 3,
 };
 
-type IngestionSource = 'manual_ingestion' | 'monitoring_webhook' | 'system';
+export type IngestionSource =
+  | 'manual_ingestion'
+  | 'monitoring_webhook'
+  | 'system';
 
 type RiskScoreConfig = WeightConfig & {
   alert_threshold: number;
@@ -44,6 +48,10 @@ type RiskScoreConfigRow = {
 type SupplierNameRow = {
   id: string;
   name: string | null;
+};
+
+type SupplierIdRow = {
+  id: string;
 };
 
 type PreviousScoreRow = {
@@ -77,6 +85,35 @@ type PipelineResult = {
   escalationAlertCreated: boolean;
 };
 
+type IngestRiskEventTransactionalInput = {
+  organizationId: string;
+  title: string;
+  eventType: RiskEventType;
+  severity: SeverityLevel;
+  source: string;
+  sourceUrl: string | null;
+  summary: string;
+  supplierIds: string[];
+  ingestionSource: IngestionSource;
+  actorUserId?: string | null;
+  riskEventId?: string | null;
+};
+
+export type IngestRiskEventTransactionalResult = {
+  alertsCreated: number;
+  escalationAlertCreated: boolean;
+  riskEventId: string;
+  scoresInserted: number;
+};
+
+const ingestRiskEventTransactionalResultSchema = z.object({
+  alerts_created: z.number().int().nonnegative(),
+  escalation_alert_created: z.boolean(),
+  is_update: z.boolean().optional(),
+  risk_event_id: z.string().uuid(),
+  scores_inserted: z.number().int().nonnegative(),
+});
+
 function toFiniteNumber(value: number | string, fallback: number): number {
   const normalized =
     typeof value === 'number' ? value : Number.parseFloat(String(value));
@@ -92,6 +129,84 @@ function normalizeSupplierIds(supplierIds: string[]): string[] {
     }
   }
   return [...deduped];
+}
+
+export async function resolveOrganizationSupplierIds(
+  organizationId: string,
+  supplierIds: string[],
+): Promise<{ invalidSupplierIds: string[]; validSupplierIds: string[] }> {
+  const normalizedSupplierIds = normalizeSupplierIds(supplierIds);
+  if (normalizedSupplierIds.length === 0) {
+    return {
+      invalidSupplierIds: [],
+      validSupplierIds: [],
+    };
+  }
+
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from('suppliers')
+    .select('id')
+    .eq('organization_id', organizationId)
+    .in('id', normalizedSupplierIds);
+
+  if (error) {
+    throw new Error(`Failed to validate supplier IDs: ${error.message}`);
+  }
+
+  const validIds = new Set(
+    (data ?? []).map((row) => (row as SupplierIdRow).id),
+  );
+  const invalidSupplierIds = normalizedSupplierIds.filter(
+    (supplierId) => !validIds.has(supplierId),
+  );
+
+  return {
+    invalidSupplierIds,
+    validSupplierIds: normalizedSupplierIds.filter((supplierId) =>
+      validIds.has(supplierId),
+    ),
+  };
+}
+
+export async function ingestRiskEventTransactional(
+  input: IngestRiskEventTransactionalInput,
+): Promise<IngestRiskEventTransactionalResult> {
+  const admin = createAdminClient();
+  const supplierIds = normalizeSupplierIds(input.supplierIds);
+
+  const { data, error } = await admin.rpc('process_risk_event_ingestion', {
+    p_actor_user_id: input.actorUserId ?? null,
+    p_event_type: input.eventType,
+    p_ingestion_source: input.ingestionSource,
+    p_organization_id: input.organizationId,
+    p_risk_event_id: input.riskEventId ?? null,
+    p_severity: input.severity,
+    p_source: input.source,
+    p_source_url: input.sourceUrl,
+    p_summary: input.summary,
+    p_supplier_ids: supplierIds,
+    p_title: input.title,
+  });
+
+  if (error) {
+    throw new Error(`Transactional risk ingestion failed: ${error.message}`);
+  }
+
+  const parsed = ingestRiskEventTransactionalResultSchema.safeParse(data);
+
+  if (!parsed.success) {
+    throw new Error(
+      'Transactional risk ingestion returned an invalid payload.',
+    );
+  }
+
+  return {
+    alertsCreated: parsed.data.alerts_created,
+    escalationAlertCreated: parsed.data.escalation_alert_created,
+    riskEventId: parsed.data.risk_event_id,
+    scoresInserted: parsed.data.scores_inserted,
+  };
 }
 
 function normalizeRiskConfig(row: RiskScoreConfigRow | null): RiskScoreConfig {

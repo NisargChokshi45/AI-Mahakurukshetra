@@ -1,7 +1,8 @@
 'use server';
 
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { getPublicEnv } from '@/lib/env';
+import { resolveAuthCallbackUrl } from '@/lib/security/redirects';
 import { createClient } from '@/lib/supabase/server';
 import { signInSchema, signUpSchema } from '@/lib/validations/auth';
 
@@ -51,7 +52,8 @@ export async function signUpAction(formData: FormData) {
   }
 
   const supabase = await createClient();
-  const env = getPublicEnv();
+  const requestHeaders = await headers();
+  const callbackUrl = resolveAuthCallbackUrl(requestHeaders);
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
@@ -59,7 +61,7 @@ export async function signUpAction(formData: FormData) {
       data: {
         display_name: parsed.data.displayName,
       },
-      emailRedirectTo: `${env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+      emailRedirectTo: callbackUrl,
     },
   });
 
@@ -81,11 +83,12 @@ export async function signUpAction(formData: FormData) {
 
 export async function signInWithGoogleAction() {
   const supabase = await createClient();
-  const env = getPublicEnv();
+  const requestHeaders = await headers();
+  const callbackUrl = resolveAuthCallbackUrl(requestHeaders);
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+      redirectTo: callbackUrl,
     },
   });
 
@@ -104,5 +107,5 @@ export async function signInWithGoogleAction() {
 export async function signOutAction() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect('/login?message=' + encodeURIComponent('Signed out.'));
+  redirect('/login');
 }
