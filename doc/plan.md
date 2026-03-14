@@ -1341,3 +1341,209 @@ Once this boilerplate is ready, on **March 14th** you can rapidly build features
 10. **Tests optional for MVP**: Coverage infrastructure exists, add tests later if time
 
 The goal of this boilerplate is to eliminate all infrastructure work so you can spend 100% of hackathon time on your unique SaaS idea. Good luck! 🚀
+
+---
+
+## Project-Specific Addendum: Supply Chain Risk Intelligence Platform
+
+This section extends the original boilerplate plan for the actual hackathon problem statement in `problem_statement_blueprint.pdf`. Nothing above is removed; this addendum narrows the execution plan so the repo can be turned into a working Supply Chain Risk Intelligence Platform instead of a generic SaaS starter.
+
+### Problem Framing
+
+Build an organization-scoped platform for:
+
+- supplier risk monitoring
+- disruption visibility
+- region and facility tracking
+- incident response coordination
+- risk scoring and alerts
+- simple supply-chain dependency visualization
+
+### MVP Scope For The Hackathon
+
+The strongest MVP for the available time is:
+
+- Authenticated organization workspace
+- Seeded supplier directory
+- Risk dashboard with active alerts
+- Risk event feed with severity/status
+- Incident response workflow
+- Basic supply chain map or dependency view
+
+Defer these unless the core flow is already complete:
+
+- full ERP integrations
+- advanced ML prediction
+- blockchain traceability
+- immersive war room features
+- complex billing workflows
+
+### Current Repo Reality Check
+
+The current repository is still at starter stage:
+
+- root-level Next.js app, not monorepo
+- starter landing page still present
+- no Supabase integration yet
+- no schema, migrations, or RLS yet
+- no test setup yet
+- no cross-domain configuration yet
+
+This means the fastest path is to build the product in the current root app first, then refactor only if a monorepo becomes necessary. The boilerplate architecture above remains useful as a reference pattern, but it should not slow down the MVP.
+
+### Recommended Product Architecture
+
+- Keep Next.js App Router as the web application shell
+- Use Supabase Auth for login, signup, and session handling
+- Use Supabase Postgres with RLS for tenant isolation
+- Use Server Components for initial dashboard data loading
+- Use Server Actions for internal dashboard mutations
+- Use Route Handlers for webhooks and cross-origin integration endpoints
+- Use Zod for all mutation and API validation
+
+### Proposed Route Map
+
+```text
+/
+/login
+/signup
+/onboarding
+/(dashboard)/overview
+/(dashboard)/suppliers
+/(dashboard)/suppliers/[supplierId]
+/(dashboard)/risks
+/(dashboard)/incidents
+/(dashboard)/map
+/(dashboard)/reports
+/api/health
+/api/webhooks/[source]
+/api/integrations/[provider]
+```
+
+### Proposed Core Entities
+
+- organizations
+- user_profiles
+- organization_members
+- suppliers
+- supplier_facilities
+- regions
+- products
+- components
+- supplier_components
+- risk_events
+- alerts
+- incidents
+- mitigation_plans
+- assessments
+- integration_connections
+
+### Phased Delivery Plan
+
+#### Phase 0 — Foundation And Repo Hardening
+
+- Decide whether to keep the current `next@16` + Tailwind 4 stack or align it with the documented project conventions
+- Install core dependencies: Supabase client, SSR helpers, Zod, React Hook Form, TanStack Query, shadcn/ui, Vitest, Playwright
+- Add `.env.example` and typed env helpers
+- Replace starter metadata and starter landing page
+- Add `typecheck`, `test`, and `test:e2e` scripts
+
+#### Phase 1 — Product Model And UX Definition
+
+- Finalize user roles: admin, analyst, viewer
+- Define status models for risks, alerts, and incidents
+- Finalize screen list and judge demo narrative
+- Create wireframes for overview, suppliers, risks, incidents, and map
+
+#### Phase 2 — Supabase Foundation
+
+- Create initial schema and migrations
+- Add RLS policies to every business table
+- Implement auth and organization membership
+- Add onboarding and seed/demo data
+
+#### Phase 3 — Core Dashboard MVP
+
+- Overview dashboard with KPIs and recent alerts
+- Supplier list and supplier detail page
+- Risk event feed
+- Alert center
+- Incident response workspace
+
+#### Phase 4 — Risk Intelligence Layer
+
+- Implement deterministic risk scoring
+- Add filters for geography, severity, supplier tier, and status
+- Build basic dependency visualization or regional map
+- Add business impact summary views
+
+#### Phase 5 — Integrations And Cross-Domain Readiness
+
+- Build ingestion/webhook endpoints
+- Add signed or token-based machine-to-machine access
+- Add CORS handling only where cross-origin browser access is intentional
+- Configure preview, production, and custom domain redirect handling
+
+#### Phase 6 — Quality, Security, And Demo Readiness
+
+- Add unit tests for validation and scoring
+- Add E2E tests for auth and critical flows
+- Add health checks, logging, and error handling
+- Prepare demo seed data and walkthrough script
+
+#### Phase 7 — Deployment And Launch Prep
+
+- Deploy on Vercel
+- Configure Supabase production project
+- Verify redirects and auth flows on preview and production
+- Record demo video and prepare Product Hunt assets
+
+### Cross-Domain Setup Strategy
+
+The application must not assume a single hostname. Design it to work across:
+
+- localhost
+- Vercel preview URLs
+- primary production domain
+- additional custom domains
+- third-party integration callers
+
+Implementation rules:
+
+1. Never hardcode a single site URL inside application logic.
+2. Centralize `APP_URL`, `ALLOWED_ORIGINS`, and auth redirect URL configuration.
+3. Use SSR cookie auth only for first-party dashboard domains.
+4. Use signed webhooks or API tokens for cross-domain integrations.
+5. Add origin-aware CORS responses only to endpoints intended for browser cross-origin use.
+6. Configure Supabase redirect URLs for local, preview, production, and custom domains.
+
+### Boilerplate Features To Keep vs Defer
+
+Keep now:
+
+- Supabase auth
+- Zod validation
+- shadcn/ui
+- testing setup
+- health endpoint
+- structured logging
+
+Optional if time permits:
+
+- Swagger/OpenAPI docs
+- Redis caching
+- Upptime status page
+- feature flags
+- multi-tenancy enhancements beyond a single organization workspace
+- Stripe billing
+- monorepo refactor
+
+### Execution Order For The Next Working Session
+
+1. Install the missing app dependencies.
+2. Set up Supabase client, server helpers, and middleware.
+3. Create the first migration set and seed data.
+4. Build auth pages and protected dashboard shell.
+5. Implement overview, suppliers, risks, and incidents.
+6. Add basic map/dependency visualization.
+7. Add tests and deploy to Vercel.
