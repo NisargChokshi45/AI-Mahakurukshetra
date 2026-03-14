@@ -8,3 +8,6 @@
 [2026-03-14 13:41] codex — Added hosted-Supabase verification runbook and SQL checks to close the remaining Phase 2 schema/RLS/seed tasks
 [2026-03-14 13:32] codex — Updated `.gitignore` to ignore Supabase local temp artifacts at `supabase/.temp/`
 [2026-03-14 13:37] codex — Fixed root `pnpm run dev` env resolution by sourcing `../../.env` in `apps/web` start/build scripts; verified dev server boots and serves `/`
+[2026-03-14 14:23] codex — Built the Phase 4 core UI in `apps/web`: seeded dashboard shell, supplier/risk/incident/map/report/assessment routes, and shared loading/error states; verified with lint, typecheck, format, and production build
+[2026-03-14 14:58] codex — Added the remaining planned UI shells: public auth pages, settings pages, mitigation, billing/integrations placeholders, and a public `/api/docs` page; verified with lint, typecheck, format, and build
+[2026-03-14 15:20] codex — Fixed `pnpm run dev` route collisions by removing duplicate `app/login`, `app/signup`, and `app/auth/callback/page.tsx` so the `(auth)` route group and callback route handler compile cleanly

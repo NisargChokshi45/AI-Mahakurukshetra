@@ -12,6 +12,7 @@
 - [x] 2026-03-14 12:12 — Align framework versions with project conventions or document divergence
 - [x] 2026-03-14 13:32 — Ignore Supabase local CLI temp artifacts in `.gitignore` (`supabase/.temp/`)
 - [x] 2026-03-14 13:37 — Fix `pnpm run dev` env loading by sourcing workspace-root `.env` from `apps/web` scripts
+- [x] 2026-03-14 15:20 — Fix `pnpm run dev` route conflicts by removing duplicate top-level auth pages and keeping the `(auth)` route-group + `/auth/callback` handler as the single source of truth
 
 ## Phase 1 — Product Definition & Architecture
 
@@ -24,6 +25,7 @@
 
 ## Phase 2 — Database & Auth
 
+- [x] 2026-03-14 14:58 — Build auth UI surfaces for `/login`, `/signup`, and `/auth/callback` so the planned onboarding flow has visible entry points before Supabase wiring
 - [~] 2026-03-14 13:29 — Authored migrations 001–009 plus `supabase/config.toml`; apply is pending against the hosted development Supabase project
 - [~] 2026-03-14 13:29 — RLS policies authored across all tables with default-deny posture; verification is pending hosted-project migration apply
 - [~] 2026-03-14 13:29 — Implemented custom JWT claim `org_id` via Supabase auth hook SQL + local config; pending hosted-project hook configuration and verification
@@ -46,16 +48,16 @@
 
 ## Phase 4 — Core Product UI
 
-- [ ] Dashboard (`/dashboard`): alert counts by severity, top 5 at-risk suppliers, disruption feed, trend sparklines
-- [ ] Supplier directory (`/suppliers`): filterable table with risk score badges, region filter, tier filter
-- [ ] Supplier detail (`/suppliers/[id]`): profile, risk score breakdown by category, active alerts, assessment history, linked incidents
-- [ ] Risk event list (`/risk-events`): filterable by type / region / severity / status, manual ingestion CTA
-- [ ] Supply chain map (`/map`): dependency graph (org → tier-1 → tier-2 suppliers), nodes color-coded by risk score
-- [ ] Incident board (`/incidents`): kanban-style status columns (new → investigating → mitigating → resolved)
-- [ ] Incident workspace (`/incidents/[id]`): timeline, owner assignment, linked risk event, action item checklist, mitigation plans
-- [ ] Reports page (`/reports`): list, generate report by type (executive summary, supplier scorecard), export CSV
-- [ ] Assessments page (`/assessments`): list and create supplier assessments
-- [ ] Add empty, loading, and error states for all critical views
+- [x] 2026-03-14 14:23 — Dashboard (`/dashboard`): alert counts by severity, top 5 at-risk suppliers, disruption feed, trend sparklines
+- [x] 2026-03-14 14:23 — Supplier directory (`/suppliers`): filterable table with risk score badges, region filter, tier filter
+- [x] 2026-03-14 14:23 — Supplier detail (`/suppliers/[id]`): profile, risk score breakdown by category, active alerts, assessment history, linked incidents
+- [x] 2026-03-14 14:23 — Risk event list (`/risk-events`): filterable by type / region / severity / status, manual ingestion CTA
+- [x] 2026-03-14 14:23 — Supply chain map (`/map`): dependency graph (org → tier-1 → tier-2 suppliers), nodes color-coded by risk score
+- [x] 2026-03-14 14:23 — Incident board (`/incidents`): kanban-style status columns (new → investigating → mitigating → resolved)
+- [x] 2026-03-14 14:23 — Incident workspace (`/incidents/[id]`): timeline, owner assignment, linked risk event, action item checklist, mitigation plans
+- [x] 2026-03-14 14:23 — Reports page (`/reports`): list, generate report by type (executive summary, supplier scorecard), export CSV
+- [x] 2026-03-14 14:23 — Assessments page (`/assessments`): list and create supplier assessments
+- [x] 2026-03-14 14:23 — Add empty, loading, and error states for all critical views
 
 ## Phase 5 — Integrations & Cross-Domain Readiness
 
@@ -63,7 +65,7 @@
 - [ ] Configure Supabase Auth redirect URL allowlist for local, preview, and production
 - [ ] Apply CORS headers on all API routes (allowlist-based, never `*`)
 - [ ] Rate limiting via Upstash Redis on all public API routes (see `doc/plan.md` for limits)
-- [ ] ERP integration placeholder: connector config UI under `/settings/integrations`
+- [x] 2026-03-14 14:58 — ERP integration placeholder: connector config UI under `/settings/integrations`
 - [ ] Validate Vercel multi-domain deployment with env-based URL config
 
 ## Phase 6 — Quality, Security & Demo Readiness
@@ -78,6 +80,11 @@
 - [ ] Swagger docs at `/api/docs` cover all endpoint groups
 - [ ] Finalize seed data so the demo org looks realistic and compelling
 - [ ] Write judge walkthrough script: sign in → alerts → supplier risk breakdown → create incident → resolve → view report
+
+## Supplemental UI
+
+- [x] 2026-03-14 14:58 — Add planned settings UI surfaces for `/settings/profile`, `/settings/organization`, `/settings/members`, and stretch pages `/settings/billing`, `/mitigation`
+- [x] 2026-03-14 14:58 — Add judge-facing placeholder UI at `/api/docs` until the real Swagger/OpenAPI surface is wired
 
 ## Phase 7 — Launch
 

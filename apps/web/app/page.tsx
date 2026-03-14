@@ -2,9 +2,9 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.18),_transparent_32%),linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(244,247,245,1))]">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.18),_transparent_24%),radial-gradient(circle_at_top_right,_rgba(14,165,233,0.18),_transparent_24%),linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(244,247,245,1))]">
       <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center gap-12 px-6 py-20 md:px-10">
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-8">
           <span className="border-border bg-background/80 text-muted-foreground inline-flex w-fit rounded-full border px-4 py-2 text-sm font-medium backdrop-blur">
             Phase 2 database and auth implementation
           </span>

@@ -75,6 +75,16 @@ These pages are part of the realistic enterprise product shape and help avoid fu
 Reason:
 The PRD requires a realistic environment immediately after deploy. Automatic idempotent seeding ensures every new demo org lands in a usable state without manual operator steps or duplicated records on retries.
 
+### Decision: Implement Phase 4 as a seeded static UI layer before wiring auth, Supabase, and the risk engine
+
+Reason:
+Phase 2 and Phase 3 are not complete yet, but the hackathon demo needs a full product walkthrough now. Building the core routes on shared mock data creates a stable visual contract for later API integration, keeps the judging flow testable, and avoids reworking layouts once backend data arrives.
+
+### Decision: Build the remaining auth, settings, mitigation, and docs surfaces as UI-first placeholders before backend integration
+
+Reason:
+The route map in `doc/plan.md` is broader than the original Phase 4 task list. Shipping these surfaces now closes visible gaps in the judge flow and page inventory, while still keeping scope under control by deferring real auth, billing, integration, and OpenAPI behavior to later phases.
+
 ### Decision: Accept external dev-session confirmation as the Phase 0 runtime check when sandbox socket binding is restricted
 
 Reason:
@@ -104,3 +114,8 @@ Reason:
 
 Reason:
 `pnpm run dev` runs `next dev` from `apps/web`, and Next loads env files from that app boundary. Sourcing `../../.env` in scripts guarantees consistent env resolution from the root command path and prevents runtime Zod failures for required `NEXT_PUBLIC_*` values.
+
+### Decision: Keep `/login` and `/signup` implemented only in the `(auth)` route group, and reserve `/auth/callback` exclusively for the route handler
+
+Reason:
+Next.js resolves route-group pages to the same public pathname as top-level pages. Duplicating both forms causes `pnpm run dev` to fail at compile time with path conflicts, and `/auth/callback` must remain a route handler so Supabase can exchange the auth code server-side.
