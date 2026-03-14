@@ -74,3 +74,13 @@ These pages are part of the realistic enterprise product shape and help avoid fu
 
 Reason:
 The PRD requires a realistic environment immediately after deploy. Automatic idempotent seeding ensures every new demo org lands in a usable state without manual operator steps or duplicated records on retries.
+
+### Decision: Implement Phase 4 as a seeded static UI layer before wiring auth, Supabase, and the risk engine
+
+Reason:
+Phase 2 and Phase 3 are not complete yet, but the hackathon demo needs a full product walkthrough now. Building the core routes on shared mock data creates a stable visual contract for later API integration, keeps the judging flow testable, and avoids reworking layouts once backend data arrives.
+
+### Decision: Build the remaining auth, settings, mitigation, and docs surfaces as UI-first placeholders before backend integration
+
+Reason:
+The route map in `doc/plan.md` is broader than the original Phase 4 task list. Shipping these surfaces now closes visible gaps in the judge flow and page inventory, while still keeping scope under control by deferring real auth, billing, integration, and OpenAPI behavior to later phases.
