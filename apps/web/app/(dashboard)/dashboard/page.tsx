@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { requireOrganizationContext } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
+import { consumeFlash } from '@/lib/flash';
+import { AIDashboardInsights } from '@/components/dashboard/ai-dashboard-insights';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -45,14 +47,6 @@ type DisruptionImpactRow = {
   id: string;
   financial_impact_usd: number | string | null;
 };
-
-type DashboardPageProps = {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-};
-
-function readMessage(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value;
-}
 
 function formatTierLabel(tier: string | null) {
   if (!tier) {
@@ -114,13 +108,10 @@ function formatTrendDelta(
   return `${direction} ${absoluteDelta.toFixed(1)}${unitLabel} vs previous sample.`;
 }
 
-export default async function DashboardPage({
-  searchParams,
-}: DashboardPageProps) {
+export default async function DashboardPage() {
   const context = await requireOrganizationContext();
   const organizationId = context.organization.organizationId;
-  const params = (await searchParams) ?? {};
-  const message = readMessage(params.message);
+  const { message } = await consumeFlash();
   const supabase = await createClient();
 
   const [
@@ -385,6 +376,9 @@ export default async function DashboardPage({
           </p>
         </Link>
       </section>
+
+      {/* AI Insights Section */}
+      <AIDashboardInsights />
 
       <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">

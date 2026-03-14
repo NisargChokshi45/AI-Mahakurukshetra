@@ -1,7 +1,7 @@
 'use client';
 
 import Script from 'next/script';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 type SwaggerUiBundle = ((config: Record<string, unknown>) => void) & {
   presets?: {
@@ -18,11 +18,10 @@ declare global {
 export function SwaggerUi() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const initializeSwagger = () => {
+  const initializeSwagger = useCallback(() => {
     const bundle = window.SwaggerUIBundle;
 
     if (!bundle) {
-      setLoadError('Swagger UI bundle failed to load.');
       return;
     }
 
@@ -33,7 +32,11 @@ export function SwaggerUi() {
       presets: bundle.presets?.apis ? [bundle.presets.apis] : undefined,
       url: '/api/openapi',
     });
-  };
+  }, []);
+
+  useEffect(() => {
+    initializeSwagger();
+  }, [initializeSwagger]);
 
   return (
     <section className="space-y-4">
@@ -44,7 +47,7 @@ export function SwaggerUi() {
       <Script
         src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"
         strategy="afterInteractive"
-        onLoad={initializeSwagger}
+        onReady={initializeSwagger}
         onError={() =>
           setLoadError('Unable to load Swagger UI assets from CDN.')
         }

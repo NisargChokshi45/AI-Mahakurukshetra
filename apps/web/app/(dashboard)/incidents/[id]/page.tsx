@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { resolveIncidentAction } from '@/app/(dashboard)/incidents/actions';
 import { requireOrganizationContext } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
+import { consumeFlash } from '@/lib/flash';
 import type { AppRole } from '@/lib/validations/auth';
 import type {
   IncidentPriority,
@@ -19,7 +20,6 @@ import {
 
 type IncidentWorkspacePageProps = Readonly<{
   params: Promise<{ id: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }>;
 
 export const dynamic = 'force-dynamic';
@@ -50,10 +50,6 @@ function canManageIncidents(role: AppRole): boolean {
   return INCIDENT_WRITE_ROLES.includes(role);
 }
 
-function readParam(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
-}
-
 function mapPriorityToSeverity(priority: IncidentPriority) {
   return priority;
 }
@@ -70,14 +66,10 @@ export async function generateMetadata({
 
 export default async function IncidentWorkspacePage({
   params,
-  searchParams,
 }: IncidentWorkspacePageProps) {
   const context = await requireOrganizationContext();
   const { id } = await params;
-  const paramsData = (await searchParams) ?? {};
-  const createdMessage = readParam(paramsData.created);
-  const resolvedMessage = readParam(paramsData.resolved);
-  const errorMessage = readParam(paramsData.error);
+  const { error: errorMessage, message } = await consumeFlash();
   const supabase = await createClient();
 
   const { data: incidentData } = await supabase
@@ -143,15 +135,9 @@ export default async function IncidentWorkspacePage({
         }
       />
 
-      {createdMessage ? (
+      {message ? (
         <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          Incident created successfully.
-        </p>
-      ) : null}
-
-      {resolvedMessage ? (
-        <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          Incident resolved successfully.
+          {message}
         </p>
       ) : null}
 

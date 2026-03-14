@@ -19,12 +19,27 @@ export function RouteErrorBoundary({
   routeLabel,
 }: RouteErrorBoundaryProps) {
   useEffect(() => {
-    console.error('dashboard_route_error', {
-      digest: error.digest ?? null,
-      message: error.message,
-      route: routeLabel,
+    // Send structured error to server for logging
+    fetch('/api/logs/error', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'dashboard_route_error',
+        route: routeLabel,
+        message: error.message,
+        digest: error.digest ?? null,
+        stack: error.stack,
+        timestamp: new Date().toISOString(),
+      }),
+    }).catch(() => {
+      // Fallback to console if logging endpoint fails
+      console.error('dashboard_route_error', {
+        digest: error.digest ?? null,
+        message: error.message,
+        route: routeLabel,
+      });
     });
-  }, [error.digest, error.message, routeLabel]);
+  }, [error.digest, error.message, error.stack, routeLabel]);
 
   return (
     <div className="space-y-6">

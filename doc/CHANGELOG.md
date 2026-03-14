@@ -1,3 +1,16 @@
+## 2026-03-15
+
+- Lightened the `/login` surface to match the `/signup` aesthetic: the hero/feature panel now uses the emerald accent background, the form sits on a white card with slate typography, Google/primary buttons use soft borders, and the error/notice chips use matching light alerts so the auth entry point feels production ready.
+- Added a flash-cookie helper and rewired auth/signup, onboarding, incident, member, risk-ingestion, and billing flows so each server action writes inline alerts to a flash cookie instead of `?error`/`?message` query strings, keeping production URLs clean while still surfacing validation or success feedback.
+- Harmonized the password and input treatments on both auth pages: every field now shares the same slate border with hover/focus transitions, the password toggle input uses the shared style, and the eye icon hover state stays visible instead of inverting to white.
+- Removed the Dashboard navigation button from the authenticated header user menu so logged-in workspace links remain the only primary navigation options.
+- Bordered the landing-page Log in action with the same color used for the Start free background so the logged-out header CTAs share a cohesive rounded style.
+- Matched the `/login` Sign in CTA background to the `/signup` Create account button (slate-950 with slate-800 hover) so the auth buttons stay color-coordinated.
+- Reworded `/login` and `/signup` to drop informal abbreviations, surface the MVP coverage, and reinforce that the auth flows are production-ready with enterprise-grade scopes.
+- Replaced the `/login` Google CTA with column-stacked demo role buttons for the Apex Resilience organization so reviewers can jump into role-based demos quickly.
+- Reflowed the `/login` demo access role buttons into a single-row layout with horizontal scrolling so all roles stay visible without a tall stack.
+- Expanded the `/login` demo access card to span the full auth grid width on desktop.
+
 ## 2026-03-14
 
 - Configured `.codex/config.toml` with `frontend`, `backend`, `database`, `tester`, and `reviewer` agents aligned to the supply-chain MVP architecture.
@@ -78,7 +91,7 @@
 - Added dummy Stripe flow routes for local/demo testing: `apps/web/app/api/stripe/dummy/checkout/route.ts`, `apps/web/app/api/stripe/dummy/portal/route.ts`, and `apps/web/app/api/stripe/dummy/invoice/latest/route.ts`.
 - Updated `apps/web/app/(dashboard)/settings/billing/page.tsx` to detect missing Stripe key and automatically route billing actions to dummy endpoints, including inline dummy-mode messaging.
 - Fixed incident resolve reliability in `apps/web/app/(dashboard)/incidents/page.tsx` and `apps/web/app/(dashboard)/incidents/[id]/page.tsx` by scoping incident, risk-event, and incident-action queries to the active organization context; this aligns board/workspace reads with the existing org-scoped resolve update action.
-- Added a full footer section to `apps/web/components/landing/landing-page.tsx` with brand context, in-page navigation links (`#capabilities`, `#workflow`, `#proof`), and primary access links (`/login`, `/signup`, `/dashboard`) to improve landing-page completeness.
+- Added a full footer section to `apps/web/components/landing/landing-page.tsx` with brand context, in-page navigation links (`#capabilities`, `#workflow`, `#outcomes`), and primary access links (`/login`, `/signup`, `/dashboard`) to improve landing-page completeness.
 - Refactored `apps/web/app/(dashboard)/dashboard/page.tsx` top KPI row from simple counts into four real-world operational cards backed by org-scoped live data: supplier risk exposure mix, active disruption financial impact, alert pressure queue, and response performance (MTTR + false-positive trend vs previous sample).
 - Updated `apps/web/app/(auth)/actions.ts` `signOutAction()` redirect target from `/dashboard` to `/` so logout consistently lands on the public home page.
 - Added `apps/web/app/logout/route.ts` so direct `/logout` requests (GET/POST) execute sign-out and redirect to `/`.
@@ -94,3 +107,20 @@
 - Refactored `apps/web/app/(dashboard)/risk-events/page.tsx` into an operations-oriented command-center layout with org-scoped DB reads, disruption-linked supplier impact mapping, KPI summary cards, and improved escalation/context side panels.
 - Rebuilt `apps/web/components/risk/risk-event-list.tsx` with production-style feed UX: search input, data-driven filter options (type/region/severity/status), filter reset, result-count bar, richer card metadata (source/date/region/type), optional source link, and explicit supplier-impact indicators.
 - Redesigned `apps/web/app/(dashboard)/settings/billing/page.tsx` into a clearer billing experience with KPI summary cards, a billing control-center panel, richer plan catalog cards, and governance checkpoints while preserving live Stripe/dummy billing actions and owner-only RBAC behavior.
+- Added shared dropdown styling utility `selectStyles()` in `apps/web/components/dashboard/ui.tsx` (custom chevron, consistent border/focus states, and disabled handling) and applied it to every native `<select>` across dashboard pages/components, including suppliers filters in `apps/web/components/suppliers/supplier-directory.tsx`.
+- Updated `apps/web/components/landing/landing-page.tsx` to make the left-most header brand link auth-aware (`/dashboard` only when `isLoggedIn` is true, otherwise `/`), preventing logged-out users from being sent to the protected dashboard route.
+- Updated `apps/web/app/page.tsx` to pass explicit logged-out state (`<LandingPage isLoggedIn={false} />`) for the public landing render path.
+- Redesigned `apps/web/app/api/docs/page.tsx` into a production-ready, single-flow API docs experience: replaced the previous two-column split with a clearer top-to-bottom structure (header + quick-start steps + full-width Swagger explorer), added direct utility actions (`/api/openapi`, `/api/health`), and removed internal-facing implementation copy that was not meaningful to public users.
+- Improved anchor navigation behavior in `apps/web/components/landing/landing-page.tsx`: switched section links (header + footer) to explicit `/#capabilities|workflow|proof` paths and added `scroll-mt-*` offsets to each target section so sticky header spacing is preserved and browser-back from `/api/docs` returns users to the intended landing section context.
+- Restored a production-style top header in `apps/web/app/api/docs/page.tsx` with SupplySense AI brand link, public section navigation (`/#capabilities`, `/#workflow`, `/#proof`, `/api/docs`), and primary auth actions (`/login`, `/signup`) so API docs navigation is complete and consistent with the landing experience.
+- Fixed `apps/web/components/api/swagger-ui.tsx` initialization lifecycle so Swagger renders on first client-side navigation to `/api/docs` (including from landing): switched script callback to `onReady` and added mount-time bundle init via `useEffect`/`useCallback` to avoid refresh-only rendering.
+- Aligned `apps/web/app/api/docs/page.tsx` header behavior and nav parity with landing by removing sticky positioning (`sticky top-4 z-20`) and dropping the extra `API docs` header link; also corrected the `Outcomes` anchor target to `/#outcomes`.
+- Added `apps/web/app/api/docs/openapi/page.tsx` to present OpenAPI coverage analytically (operation counts, auth split, tag/method distribution, and operation index table) instead of exposing only raw JSON.
+- Added `apps/web/app/api/docs/service-status/page.tsx` to present dependency health diagnostics (global status banner, latency cards, and uptime/version metrics) in a production-ready operations view.
+- Added `apps/web/lib/api/service-status.ts` and refactored `apps/web/app/api/health/route.ts` to share dependency-check logic between machine endpoint (`/api/health`) and the new human-facing Service Status page.
+- Updated `apps/web/app/api/docs/page.tsx` CTA/navigation links to route users to the new analytical docs pages (`/api/docs/openapi`, `/api/docs/service-status`) while keeping direct raw JSON access available.
+- Added landing-header/nav wrapper to `apps/web/app/api/docs/service-status/page.tsx` and removed the redundant “Raw health JSON” action so the page feels consistent with other public docs routes.
+- Added the same SupplySense AI header to `apps/web/app/api/docs/openapi/page.tsx`, removed the primary “Download JSON” CTA, and reworked the Coverage + Endpoint Index sections into stacked, row-based summaries for production clarity.
+- Updated `apps/web/app/api/docs/page.tsx` step cards so each action is now a button (analysis/explorer) and the former “Download raw JSON” link on Step 2 is removed, keeping the guidance focused on the new analytics/sandbox flows.
+- Added `apps/web/app/not-found.tsx` as a production-ready 404 surface with an auth-aware SupplySense AI header, dashboard navigation buttons, and contextual routing guidance for unimplemented routes so users can immediately return to core workspaces.
+- Restored the signup password visibility toggle by reusing `apps/web/components/auth/password-input.tsx` in `apps/web/app/(auth)/signup/page.tsx`, keeping the eye icon available when users enter their password.

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { logRequestResponse, startRequestLog } from '@/lib/logger/http';
 import { resolveSafeNextPath } from '@/lib/security/redirects';
+import { attachFlash, type FlashPayload } from '@/lib/flash';
 import { createClient } from '@/lib/supabase/server';
 
 export async function GET(request: Request) {
@@ -10,22 +11,35 @@ export async function GET(request: Request) {
     pathname: requestUrl.pathname,
     requestId: request.headers.get('x-request-id'),
   });
-  const redirectWithLog = (url: URL, status: number, message: string) => {
-    const response = NextResponse.redirect(url);
+  const redirectWithLog = (
+    url: URL,
+    status: number,
+    message: string,
+    flashPayload?: FlashPayload,
+  ) => {
+    const response = NextResponse.redirect(url, { status });
     response.headers.set('x-request-id', requestLog.requestId);
+    if (flashPayload) {
+      attachFlash(response, flashPayload);
+    }
     logRequestResponse(requestLog, { status, message });
     return response;
   };
 
   const code = requestUrl.searchParams.get('code');
   const error = requestUrl.searchParams.get('error_description');
-  const nextPath = resolveSafeNextPath(requestUrl.searchParams.get('next'));
+  const type = requestUrl.searchParams.get('type');
+  const nextPath =
+    type === 'recovery'
+      ? '/reset-password'
+      : resolveSafeNextPath(requestUrl.searchParams.get('next'));
 
   if (error) {
     return redirectWithLog(
-      new URL(`/login?error=${encodeURIComponent(error)}`, requestUrl.origin),
+      new URL('/login', requestUrl.origin),
       302,
       'Auth callback returned provider error.',
+      { error },
     );
   }
 
@@ -36,12 +50,10 @@ export async function GET(request: Request) {
 
     if (exchangeError) {
       return redirectWithLog(
-        new URL(
-          `/login?error=${encodeURIComponent(exchangeError.message)}`,
-          requestUrl.origin,
-        ),
+        new URL('/login', requestUrl.origin),
         302,
         'Auth callback exchange failed.',
+        { error: exchangeError.message },
       );
     }
   }

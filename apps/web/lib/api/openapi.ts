@@ -183,6 +183,43 @@ export const openApiSpec = {
         responses: { '201': { description: 'Supplier created' } },
       },
     },
+    '/api/suppliers/alternatives': {
+      get: {
+        tags: ['Suppliers'],
+        summary: 'Match alternative suppliers',
+        description:
+          'Returns alternative suppliers based on component capability overlap and non-overlapping regions.',
+        security: protectedAuth,
+        parameters: [
+          {
+            name: 'supplier_id',
+            in: 'query',
+            required: true,
+            schema: { type: 'string', format: 'uuid' },
+          },
+          {
+            name: 'region_ids',
+            in: 'query',
+            required: false,
+            schema: { type: 'string' },
+            description:
+              'Comma-separated list of region UUIDs to constrain candidates.',
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            required: false,
+            schema: { type: 'integer', minimum: 1, maximum: 20 },
+          },
+        ],
+        responses: {
+          '200': { description: 'Alternative supplier matches' },
+          '400': { description: 'Validation failure' },
+          '401': { description: 'Unauthorized' },
+          '500': { description: 'Matching failure' },
+        },
+      },
+    },
     '/api/risks': {
       get: {
         tags: ['Risks'],

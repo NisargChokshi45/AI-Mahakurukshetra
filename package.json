@@ -16,6 +16,7 @@
     "format:check": "turbo run format:check",
     "prepare": "husky",
     "db:push": "./scripts/migrate.sh push",
+    "db:seed": "./scripts/seed-database.sh",
     "db:new": "./scripts/migrate.sh new",
     "db:status": "./scripts/migrate.sh status",
     "db:test": "./scripts/migrate.sh test",

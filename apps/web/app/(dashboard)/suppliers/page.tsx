@@ -38,7 +38,16 @@ export default async function SuppliersPage() {
   const { data: dbRows } = await supabase
     .from('suppliers')
     .select(
-      'id, slug, name, tier, status, country, current_risk_score, primary_contact_email',
+      `id,
+       slug,
+       name,
+       tier,
+       status,
+       country,
+       current_risk_score,
+       primary_contact_email,
+       supplier_region_links(regions(name)),
+       assessments(assessed_at)`,
     )
     .order('current_risk_score', { ascending: false });
 
@@ -54,18 +63,38 @@ export default async function SuppliersPage() {
               riskScore: Math.round(Number(row.current_risk_score)),
             };
 
+          const linkedRegions =
+            row.supplier_region_links
+              ?.map(
+                (link) =>
+                  (link.regions as unknown as { name: string } | null)?.name,
+              )
+              .filter(Boolean) ?? [];
+          const region = linkedRegions[0] ?? '-';
+
+          const lastAssessment =
+            row.assessments && row.assessments.length > 0
+              ? row.assessments
+                  .map((assessment) => assessment.assessed_at)
+                  .filter(Boolean)
+                  .sort()
+                  .at(-1)
+              : undefined;
+
           return {
             id: row.slug ?? row.id,
             name: row.name,
             tier: TIER_LABEL[row.tier] ?? 'Tier 1',
-            region: '—',
+            region,
             country: row.country,
             riskScore: Math.round(Number(row.current_risk_score)),
             status: STATUS_LABEL[row.status] ?? 'stable',
-            primaryContact: row.primary_contact_email ?? '—',
+            primaryContact: row.primary_contact_email ?? '-',
             activeAlerts: 0,
             openIncidents: 0,
-            lastAssessment: '—',
+            lastAssessment: lastAssessment
+              ? new Date(lastAssessment).toISOString().slice(0, 10)
+              : '-',
             leadTimeDays: 0,
             resilienceScore: 0,
             summary: '',

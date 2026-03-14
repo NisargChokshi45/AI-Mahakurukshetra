@@ -3,8 +3,10 @@ import Link from 'next/link';
 import {
   PageHeader,
   SectionCard,
+  SelectField,
   buttonStyles,
 } from '@/components/dashboard/ui';
+import { consumeFlash } from '@/lib/flash';
 import { createRiskEventAction } from '@/lib/actions/risk';
 
 export const metadata: Metadata = {
@@ -24,8 +26,8 @@ function readParam(value: string | string[] | undefined): string | undefined {
 export default async function NewRiskEventPage({
   searchParams,
 }: NewRiskEventPageProps) {
+  const { error: errorMessage, message } = await consumeFlash();
   const params = (await searchParams) ?? {};
-  const errorMessage = readParam(params.error);
   const riskEventId = readParam(params.risk_event_id);
   const isUpdate = Boolean(riskEventId);
 
@@ -46,6 +48,11 @@ export default async function NewRiskEventPage({
         }
       />
 
+      {message ? (
+        <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          {message}
+        </p>
+      ) : null}
       {errorMessage ? (
         <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {errorMessage}
@@ -79,30 +86,24 @@ export default async function NewRiskEventPage({
 
           <label className="grid gap-2 text-sm font-medium">
             Event type
-            <select
-              name="event_type"
-              className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm outline-none"
-            >
+            <SelectField name="event_type">
               <option value="geopolitical">Geopolitical</option>
               <option value="natural_disaster">Natural disaster</option>
               <option value="financial">Financial</option>
               <option value="operational">Operational</option>
               <option value="compliance">Compliance</option>
               <option value="delivery">Delivery</option>
-            </select>
+            </SelectField>
           </label>
 
           <label className="grid gap-2 text-sm font-medium">
             Severity
-            <select
-              name="severity"
-              className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm outline-none"
-            >
+            <SelectField name="severity">
               <option value="critical">Critical</option>
               <option value="high">High</option>
               <option value="medium">Medium</option>
               <option value="low">Low</option>
-            </select>
+            </SelectField>
           </label>
 
           <label className="grid gap-2 text-sm font-medium">
@@ -142,7 +143,7 @@ export default async function NewRiskEventPage({
             <input
               name="supplier_ids"
               className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm outline-none"
-              placeholder="Comma-separated UUIDs (optional) — e.g. uuid1,uuid2"
+              placeholder="Comma-separated UUIDs (optional) - e.g. uuid1,uuid2"
             />
             <span className="text-muted-foreground text-xs">
               Optional. Providing supplier UUIDs will create disruption records

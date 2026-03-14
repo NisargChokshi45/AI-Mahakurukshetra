@@ -18,3 +18,6 @@ export function createLogger(
           },
   });
 }
+
+const logger = createLogger();
+export default logger;

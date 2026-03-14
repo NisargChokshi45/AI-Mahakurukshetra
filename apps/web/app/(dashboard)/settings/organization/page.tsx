@@ -2,15 +2,21 @@ import type { Metadata } from 'next';
 import {
   PageHeader,
   SectionCard,
+  SelectField,
   buttonStyles,
 } from '@/components/dashboard/ui';
+import { requireOrganizationContext } from '@/lib/auth/session';
 
 export const metadata: Metadata = {
   title: 'Organization Settings | Supply Chain Risk Intelligence Platform',
   description: 'Manage organization profile, defaults, and workspace metadata.',
 };
 
-export default function OrganizationSettingsPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function OrganizationSettingsPage() {
+  const context = await requireOrganizationContext();
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -29,17 +35,17 @@ export default function OrganizationSettingsPage() {
             <label className="grid gap-2 text-sm font-medium">
               Organization name
               <input
-                defaultValue="Helix Global Manufacturing"
+                defaultValue={context.organization.organizationName}
                 className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm outline-none"
               />
             </label>
             <label className="grid gap-2 text-sm font-medium">
               Default operating region
-              <select className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm outline-none">
+              <SelectField>
                 <option>APAC Electronics</option>
                 <option>Global</option>
                 <option>North America</option>
-              </select>
+              </SelectField>
             </label>
             <label className="grid gap-2 text-sm font-medium">
               Response target

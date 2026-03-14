@@ -17,6 +17,10 @@ import {
   StatusBadge,
   buttonStyles,
 } from '@/components/dashboard/ui';
+import { AISupplierSummary } from '@/components/suppliers/ai-supplier-summary';
+import { AlternativeSuppliersPanel } from '@/components/suppliers/alternative-suppliers';
+import { RiskTrendChart } from '@/components/suppliers/risk-trend-chart';
+import { getSupplierRiskHistory } from '@/lib/actions/supplier';
 
 type SupplierDetailPageProps = Readonly<{
   params: Promise<{ id: string }>;
@@ -71,6 +75,9 @@ export default async function SupplierDetailPage({
 }: SupplierDetailPageProps) {
   const { id } = await params;
 
+  // Fetch risk history for both demo and real suppliers
+  const riskHistory = await getSupplierRiskHistory(id);
+
   // --- Try demo-data first (for seeded demo entries) ---
   const demoSupplier = getSupplierById(id);
   if (demoSupplier) {
@@ -83,6 +90,7 @@ export default async function SupplierDetailPage({
         alerts={supplierAlerts}
         incidents={supplierIncidents}
         events={supplierEvents}
+        riskHistory={riskHistory}
       />
     );
   }
@@ -103,14 +111,14 @@ export default async function SupplierDetailPage({
     id: row.slug ?? row.id,
     name: row.name,
     tier: TIER_LABEL[row.tier] ?? 'Tier 1',
-    region: '—',
+    region: '-',
     country: row.country,
     riskScore: Math.round(Number(row.current_risk_score)),
     status: STATUS_LABEL[row.status] ?? 'stable',
-    primaryContact: row.primary_contact_email ?? '—',
+    primaryContact: row.primary_contact_email ?? '-',
     activeAlerts: 0,
     openIncidents: 0,
-    lastAssessment: '—',
+    lastAssessment: '-',
     leadTimeDays: 0,
     resilienceScore: 0,
     summary: row.notes ?? '',
@@ -123,6 +131,7 @@ export default async function SupplierDetailPage({
       alerts={[]}
       incidents={[]}
       events={[]}
+      riskHistory={riskHistory}
     />
   );
 }
@@ -141,17 +150,20 @@ type IncidentShape = {
   owner: string;
 };
 type EventShape = { id: string; title: string };
+type RiskHistoryShape = Awaited<ReturnType<typeof getSupplierRiskHistory>>;
 
 function SupplierDetailView({
   supplier,
   alerts,
   incidents,
   events,
+  riskHistory,
 }: {
   supplier: Supplier;
   alerts: AlertShape[];
   incidents: IncidentShape[];
   events: EventShape[];
+  riskHistory: RiskHistoryShape;
 }) {
   return (
     <div className="space-y-6">
@@ -173,6 +185,11 @@ function SupplierDetailView({
         }
       />
 
+      {/* AI Health Summary */}
+      <AISupplierSummary supplierId={supplier.id} />
+
+      <AlternativeSuppliersPanel supplierId={supplier.id} />
+
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <SectionCard
           eyebrow="Profile"
@@ -186,12 +203,12 @@ function SupplierDetailView({
                 <StatusBadge status={supplier.status} />
               </div>
               <div className="text-muted-foreground mt-4 grid gap-2 text-sm">
-                {supplier.region !== '—' && (
+                {supplier.region !== '-' && (
                   <p>
                     {supplier.region} • {supplier.country}
                   </p>
                 )}
-                {supplier.region === '—' && <p>{supplier.country}</p>}
+                {supplier.region === '-' && <p>{supplier.country}</p>}
                 <p>{supplier.tier}</p>
                 <p>Primary contact: {supplier.primaryContact}</p>
                 {supplier.leadTimeDays > 0 && (
@@ -253,7 +270,16 @@ function SupplierDetailView({
         </SectionCard>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-3">
+      {/* Risk Trend Chart - Full Width for Maximum Impact */}
+      <SectionCard
+        eyebrow="Risk Evolution"
+        title="Historical risk score trend"
+        description="Time-series analysis showing how this supplier's risk profile has evolved over assessment cycles."
+      >
+        <RiskTrendChart scores={riskHistory} />
+      </SectionCard>
+
+      <div className="grid gap-6 xl:grid-cols-2">
         <SectionCard
           eyebrow="Alerts"
           title="Active alerts"
@@ -283,30 +309,6 @@ function SupplierDetailView({
                 </article>
               ))
             )}
-          </div>
-        </SectionCard>
-
-        <SectionCard
-          eyebrow="History"
-          title="Assessment history"
-          description="The current design expects a time-series of reviews and score changes."
-        >
-          <div className="space-y-3">
-            <article className="border-border/70 bg-background/80 rounded-[22px] border p-4">
-              <p className="font-semibold">
-                {supplier.lastAssessment !== '—'
-                  ? `Last assessed ${supplier.lastAssessment}`
-                  : 'No assessments recorded yet'}
-              </p>
-              <p className="text-muted-foreground mt-2 text-sm leading-6">
-                Phase 3 can wire this card to historical risk score records and
-                assessment documents.
-              </p>
-            </article>
-            <article className="border-border/70 bg-background/60 text-muted-foreground rounded-[22px] border border-dashed p-4 text-sm">
-              Next assessment window should focus on operational continuity and
-              second-source readiness.
-            </article>
           </div>
         </SectionCard>
 

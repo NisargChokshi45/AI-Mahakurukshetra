@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/auth/session';
+import { setFlash } from '@/lib/flash';
 import { slugify } from '@/lib/slug';
 import { createClient } from '@/lib/supabase/server';
 import { createOrganizationSchema } from '@/lib/validations/organization';
@@ -22,10 +23,8 @@ export async function createOrganizationAction(formData: FormData) {
   });
 
   if (!parsed.success) {
-    redirect(
-      '/setup/organization?error=' +
-        encodeURIComponent('Enter a valid organization name.'),
-    );
+    await setFlash({ error: 'Enter a valid organization name.' });
+    redirect('/setup/organization');
   }
 
   const supabase = await createClient();
@@ -59,13 +58,12 @@ export async function createOrganizationAction(formData: FormData) {
   }
 
   if (!organizationId) {
-    redirect(
-      '/setup/organization?error=' +
-        encodeURIComponent(
-          organizationInsertErrorMessage ??
-            'Unable to create the organization right now.',
-        ),
-    );
+    await setFlash({
+      error:
+        organizationInsertErrorMessage ??
+        'Unable to create the organization right now.',
+    });
+    redirect('/setup/organization');
   }
 
   const { error: membershipError } = await supabase
@@ -79,12 +77,10 @@ export async function createOrganizationAction(formData: FormData) {
     });
 
   if (membershipError) {
-    redirect(
-      '/setup/organization?error=' +
-        encodeURIComponent(
-          membershipError.message ?? 'Unable to finish organization setup.',
-        ),
-    );
+    await setFlash({
+      error: membershipError.message ?? 'Unable to finish organization setup.',
+    });
+    redirect('/setup/organization');
   }
 
   const { error: configError } = await supabase
@@ -94,12 +90,10 @@ export async function createOrganizationAction(formData: FormData) {
     });
 
   if (configError) {
-    redirect(
-      '/setup/organization?error=' +
-        encodeURIComponent(
-          configError.message ?? 'Unable to finish organization setup.',
-        ),
-    );
+    await setFlash({
+      error: configError.message ?? 'Unable to finish organization setup.',
+    });
+    redirect('/setup/organization');
   }
 
   const { error: profileError } = await supabase
@@ -111,14 +105,13 @@ export async function createOrganizationAction(formData: FormData) {
     .eq('id', context.user.id);
 
   if (profileError) {
-    redirect(
-      '/setup/organization?error=' +
-        encodeURIComponent(
-          profileError.message ?? 'Unable to finish organization setup.',
-        ),
-    );
+    await setFlash({
+      error: profileError.message ?? 'Unable to finish organization setup.',
+    });
+    redirect('/setup/organization');
   }
 
   revalidatePath('/dashboard');
-  redirect('/dashboard?message=' + encodeURIComponent('Organization created.'));
+  await setFlash({ message: 'Organization created.' });
+  redirect('/dashboard');
 }

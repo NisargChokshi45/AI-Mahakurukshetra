@@ -11,7 +11,13 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-export function LandingPage() {
+type LandingPageProps = {
+  isLoggedIn?: boolean;
+};
+
+export function LandingPage({ isLoggedIn = false }: LandingPageProps) {
+  const brandHref = isLoggedIn ? '/dashboard' : '/';
+
   return (
     <main className="relative overflow-hidden bg-[linear-gradient(180deg,_rgba(245,251,249,0.92)_0%,_rgba(238,247,253,0.86)_50%,_rgba(255,255,255,1)_100%)]">
       <div
@@ -22,33 +28,36 @@ export function LandingPage() {
       <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-20 px-5 pt-6 pb-20 md:px-10 md:pb-24">
         <header className="border-border/70 bg-background/80 sticky top-4 z-20 flex items-center justify-between rounded-full border px-4 py-3 shadow-[0_20px_40px_-28px_rgba(15,23,42,0.4)] backdrop-blur md:px-6">
           <Link
-            href="/dashboard"
+            href={brandHref}
             className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900"
           >
             <span
               aria-hidden="true"
               className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_0_6px_rgba(16,185,129,0.18)]"
             />
-            SignalChain
+            SupplySense AI
           </Link>
           <nav
             aria-label="Primary"
             className="text-muted-foreground hidden items-center gap-6 text-sm font-medium md:flex"
           >
-            <a href="#capabilities" className="transition hover:text-slate-900">
+            <Link
+              href="/#capabilities"
+              className="transition hover:text-slate-900"
+            >
               Capabilities
-            </a>
-            <a href="#workflow" className="transition hover:text-slate-900">
+            </Link>
+            <Link href="/#workflow" className="transition hover:text-slate-900">
               Workflow
-            </a>
-            <a href="#proof" className="transition hover:text-slate-900">
+            </Link>
+            <Link href="/#outcomes" className="transition hover:text-slate-900">
               Outcomes
-            </a>
+            </Link>
           </nav>
           <div className="flex items-center gap-2">
             <Link
               href="/login"
-              className="inline-flex min-h-11 items-center rounded-full px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+              className="inline-flex min-h-11 items-center rounded-full border border-slate-950 px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
             >
               Log in
             </Link>
@@ -72,7 +81,7 @@ export function LandingPage() {
                 delivery windows.
               </h1>
               <p className="text-muted-foreground max-w-2xl text-base leading-7 md:text-lg">
-                SignalChain unifies supplier exposure, regional threats, and
+                SupplySense AI unifies supplier exposure, regional threats, and
                 incident response into one operations cockpit so teams can act
                 in hours, not days.
               </p>
@@ -142,7 +151,10 @@ export function LandingPage() {
           </aside>
         </section>
 
-        <section id="capabilities" className="space-y-6">
+        <section
+          id="capabilities"
+          className="scroll-mt-28 space-y-6 md:scroll-mt-32"
+        >
           <div className="max-w-2xl space-y-3">
             <p className="text-muted-foreground text-xs font-semibold tracking-[0.22em] uppercase">
               Capabilities
@@ -173,7 +185,7 @@ export function LandingPage() {
 
         <section
           id="workflow"
-          className="grid gap-6 lg:grid-cols-[0.86fr_1.14fr]"
+          className="grid scroll-mt-28 gap-6 md:scroll-mt-32 lg:grid-cols-[0.86fr_1.14fr]"
         >
           <div className="space-y-3">
             <p className="text-muted-foreground text-xs font-semibold tracking-[0.22em] uppercase">
@@ -206,8 +218,8 @@ export function LandingPage() {
         </section>
 
         <section
-          id="proof"
-          className="border-border/80 rounded-[2rem] border bg-[linear-gradient(120deg,_rgba(255,255,255,0.92),rgba(232,246,242,0.88))] p-6 shadow-[0_28px_85px_-52px_rgba(15,23,42,0.5)] md:p-8"
+          id="outcomes"
+          className="border-border/80 scroll-mt-28 rounded-[2rem] border bg-[linear-gradient(120deg,_rgba(255,255,255,0.92),rgba(232,246,242,0.88))] p-6 shadow-[0_28px_85px_-52px_rgba(15,23,42,0.5)] md:scroll-mt-32 md:p-8"
         >
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
             <div className="space-y-4">
@@ -253,14 +265,14 @@ export function LandingPage() {
                 aria-hidden="true"
                 className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_0_6px_rgba(16,185,129,0.18)]"
               />
-              SignalChain
+              SupplySense AI
             </p>
             <p className="text-muted-foreground max-w-md text-sm leading-7">
               Supply chain risk intelligence for teams that need clear signals,
               coordinated response, and audit-ready decisions.
             </p>
             <p className="text-xs text-slate-500">
-              © {new Date().getFullYear()} SignalChain. All rights reserved.
+              © {new Date().getFullYear()} SupplySense AI. All rights reserved.
             </p>
           </div>
 
@@ -269,21 +281,24 @@ export function LandingPage() {
               Product
             </p>
             <div className="flex flex-col gap-2 text-sm">
-              <a
-                href="#capabilities"
+              <Link
+                href="/#capabilities"
                 className="text-slate-700 hover:text-slate-950"
               >
                 Capabilities
-              </a>
-              <a
-                href="#workflow"
+              </Link>
+              <Link
+                href="/#workflow"
                 className="text-slate-700 hover:text-slate-950"
               >
                 Workflow
-              </a>
-              <a href="#proof" className="text-slate-700 hover:text-slate-950">
+              </Link>
+              <Link
+                href="/#outcomes"
+                className="text-slate-700 hover:text-slate-950"
+              >
                 Outcomes
-              </a>
+              </Link>
               <Link
                 href="/api/docs"
                 className="text-slate-700 hover:text-slate-950"

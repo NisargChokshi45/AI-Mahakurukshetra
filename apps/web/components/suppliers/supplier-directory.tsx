@@ -9,6 +9,7 @@ import {
   RiskScoreBadge,
   SectionCard,
   StatusBadge,
+  SelectField,
 } from '@/components/dashboard/ui';
 
 type SupplierDirectoryProps = Readonly<{
@@ -59,28 +60,26 @@ export function SupplierDirectory({ suppliers }: SupplierDirectoryProps) {
               className="placeholder:text-muted-foreground w-full bg-transparent text-sm outline-none"
             />
           </label>
-          <select
+          <SelectField
             value={region}
             onChange={(event) => setRegion(event.target.value)}
-            className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm outline-none"
           >
             {allRegions.map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>
             ))}
-          </select>
-          <select
+          </SelectField>
+          <SelectField
             value={tier}
             onChange={(event) => setTier(event.target.value)}
-            className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm outline-none"
           >
             {allTiers.map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>
             ))}
-          </select>
+          </SelectField>
         </div>
 
         {filteredSuppliers.length === 0 ? (

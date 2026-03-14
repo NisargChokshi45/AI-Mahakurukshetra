@@ -1,3 +1,10 @@
+## 2026-03-15
+
+### Decision: Remove the redundant Dashboard link from the authenticated header navigation
+
+Reason:
+The brand link already routes logged-in users to `/dashboard`, so removing the extra Dashboard button keeps the header user menu focused on other workspace destinations and avoids duplicate navigation affordances.
+
 ## 2026-03-14
 
 ### Decision: Build MVP around organization-scoped risk operations
@@ -314,3 +321,48 @@ Export CTAs should trigger a real browser download without client-side file-gene
 
 Reason:
 The billing page needed clearer scanability and action clarity. Leading with KPI cards, then grouping operational actions in a dedicated control-center panel, and separating plan selection into a catalog view improves decision speed while keeping existing Stripe/dummy flows unchanged.
+
+### Decision: Standardize all native select/dropdown controls through a shared UI helper
+
+Reason:
+Dropdown quality was inconsistent between suppliers and other dashboard forms due to repeated ad-hoc class strings. Centralizing select presentation in `selectStyles()` keeps spacing, focus affordances, chevron treatment, and disabled states visually consistent across the platform while reducing future drift.
+
+### Decision: Make landing-page brand navigation conditional on auth state
+
+Reason:
+The public landing page must avoid deep-linking logged-out users into protected routes. Keeping the logo on `/` for unauthenticated users, while preserving `/dashboard` for authenticated contexts, aligns navigation with access expectations and removes avoidable redirect churn.
+
+### Decision: Prioritize a single-flow API docs page over split overview/explorer columns
+
+Reason:
+Public API docs users primarily want to discover and test endpoints quickly. A linear layout (context first, then full interactive explorer) is easier to scan on desktop and mobile, while removing internal implementation text keeps the page focused on user outcomes rather than engineering internals.
+
+### Decision: Use hash-path section links plus explicit scroll offsets for landing-page in-page navigation
+
+Reason:
+The landing page has a sticky header, so default hash jumps can place section headings too close to the viewport top. Converting section links to explicit `/#...` targets and applying section `scroll-mt` offsets keeps navigation intuitive, and also preserves clearer section context when users visit `/api/docs` and return via browser back.
+
+### Decision: Keep `/api/docs` on the same public-header pattern as landing
+
+Reason:
+Developer docs is a public-entry route and should not feel visually disconnected from the rest of the marketing/navigation flow. Adding the same style of top header (brand, key section links, auth actions) improves orientation and reduces navigation friction.
+
+### Decision: Initialize Swagger UI for both first script load and route-transition remounts
+
+Reason:
+In App Router navigation, relying only on `Script.onLoad` can leave third-party widgets uninitialized on client transitions. Using `onReady` plus a mount-time `window.SwaggerUIBundle` check ensures `/api/docs` renders reliably without requiring a hard refresh.
+
+### Decision: Keep `/api/docs` top navigation behavior visually and interactively equivalent to the landing header
+
+Reason:
+The public docs route should feel like the same marketing surface as landing. Removing route-specific header items and sticky behavior avoids navigation drift and preserves expected page scroll behavior.
+
+### Decision: Keep `/api/openapi` and `/api/health` as machine endpoints, and add separate analytical pages for humans
+
+Reason:
+Integrations and uptime probes need stable JSON endpoints, while users need readable diagnostics and API understanding. Adding `/api/docs/openapi` and `/api/docs/service-status` preserves endpoint compatibility and delivers a production-ready UX that summarizes data instead of dumping raw payloads.
+
+### Decision: Reuse the shared password visibility toggle on signup
+
+Reason:
+The login screen already exposes the `PasswordInput` component with the eye/eye-off affordance, and reusing it on signup keeps the interaction consistent while preventing the signup form from losing the show/hide control when the component is updated elsewhere.

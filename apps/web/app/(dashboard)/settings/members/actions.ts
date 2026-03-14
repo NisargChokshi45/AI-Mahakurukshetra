@@ -5,6 +5,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { requireOrganizationContext } from '@/lib/auth/session';
 import { resolveAuthCallbackUrl } from '@/lib/security/redirects';
+import { setFlash } from '@/lib/flash';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { AppRole } from '@/lib/validations/auth';
 import {
@@ -18,13 +19,6 @@ type OrganizationMember = {
   status: 'active' | 'inactive' | 'invited';
   user_id: string;
 };
-
-function buildSettingsMembersRedirect(
-  key: 'error' | 'message',
-  message: string,
-) {
-  return '/settings/members?' + key + '=' + encodeURIComponent(message);
-}
 
 function canManageMembers(role: AppRole) {
   return role === 'owner' || role === 'admin';
@@ -58,12 +52,10 @@ export async function inviteOrganizationMemberAction(formData: FormData) {
   const context = await requireOrganizationContext();
 
   if (!canManageMembers(context.organization.role)) {
-    redirect(
-      buildSettingsMembersRedirect(
-        'error',
-        'Only owners and admins can manage organization members.',
-      ),
-    );
+    await setFlash({
+      error: 'Only owners and admins can manage organization members.',
+    });
+    redirect('/settings/members');
   }
 
   const parsed = inviteMemberSchema.safeParse({
@@ -72,9 +64,8 @@ export async function inviteOrganizationMemberAction(formData: FormData) {
   });
 
   if (!parsed.success) {
-    redirect(
-      buildSettingsMembersRedirect('error', 'Enter a valid email and role.'),
-    );
+    await setFlash({ error: 'Enter a valid email and role.' });
+    redirect('/settings/members');
   }
 
   const admin = createAdminClient();
@@ -103,19 +94,16 @@ export async function inviteOrganizationMemberAction(formData: FormData) {
     );
 
     if (error) {
-      redirect(buildSettingsMembersRedirect('error', error.message));
+      await setFlash({ error: error.message });
+      redirect('/settings/members');
     }
 
     userId = data.user?.id ?? null;
   }
 
   if (!userId) {
-    redirect(
-      buildSettingsMembersRedirect(
-        'error',
-        'Unable to resolve the invited user.',
-      ),
-    );
+    await setFlash({ error: 'Unable to resolve the invited user.' });
+    redirect('/settings/members');
   }
 
   const { error: membershipError } = await admin
@@ -135,7 +123,8 @@ export async function inviteOrganizationMemberAction(formData: FormData) {
     );
 
   if (membershipError) {
-    redirect(buildSettingsMembersRedirect('error', membershipError.message));
+    await setFlash({ error: membershipError.message });
+    redirect('/settings/members');
   }
 
   await admin
@@ -147,21 +136,18 @@ export async function inviteOrganizationMemberAction(formData: FormData) {
     .is('current_organization_id', null);
 
   revalidatePath('/settings/members');
-  redirect(
-    buildSettingsMembersRedirect('message', 'Member invited successfully.'),
-  );
+  await setFlash({ message: 'Member invited successfully.' });
+  redirect('/settings/members');
 }
 
 export async function updateOrganizationMemberRoleAction(formData: FormData) {
   const context = await requireOrganizationContext();
 
   if (!canManageMembers(context.organization.role)) {
-    redirect(
-      buildSettingsMembersRedirect(
-        'error',
-        'Only owners and admins can manage organization members.',
-      ),
-    );
+    await setFlash({
+      error: 'Only owners and admins can manage organization members.',
+    });
+    redirect('/settings/members');
   }
 
   const parsed = updateMemberRoleSchema.safeParse({
@@ -170,18 +156,15 @@ export async function updateOrganizationMemberRoleAction(formData: FormData) {
   });
 
   if (!parsed.success) {
-    redirect(
-      buildSettingsMembersRedirect('error', 'Enter a valid member and role.'),
-    );
+    await setFlash({ error: 'Enter a valid member and role.' });
+    redirect('/settings/members');
   }
 
   if (parsed.data.userId === context.user.id) {
-    redirect(
-      buildSettingsMembersRedirect(
-        'error',
-        'You cannot change your own role from this page.',
-      ),
-    );
+    await setFlash({
+      error: 'You cannot change your own role from this page.',
+    });
+    redirect('/settings/members');
   }
 
   const member = await findOrganizationMember(
@@ -190,27 +173,22 @@ export async function updateOrganizationMemberRoleAction(formData: FormData) {
   );
 
   if (!member) {
-    redirect(
-      buildSettingsMembersRedirect(
-        'error',
-        'The selected member could not be found in this organization.',
-      ),
-    );
+    await setFlash({
+      error: 'The selected member could not be found in this organization.',
+    });
+    redirect('/settings/members');
   }
 
   if (member.role === 'owner') {
-    redirect(
-      buildSettingsMembersRedirect(
-        'error',
-        'Owner memberships cannot be edited from this page.',
-      ),
-    );
+    await setFlash({
+      error: 'Owner memberships cannot be edited from this page.',
+    });
+    redirect('/settings/members');
   }
 
   if (member.role === parsed.data.role) {
-    redirect(
-      buildSettingsMembersRedirect('message', 'No role changes were needed.'),
-    );
+    await setFlash({ message: 'No role changes were needed.' });
+    redirect('/settings/members');
   }
 
   const admin = createAdminClient();
@@ -223,28 +201,23 @@ export async function updateOrganizationMemberRoleAction(formData: FormData) {
     .eq('user_id', parsed.data.userId);
 
   if (error) {
-    redirect(buildSettingsMembersRedirect('error', error.message));
+    await setFlash({ error: error.message });
+    redirect('/settings/members');
   }
 
   revalidatePath('/settings/members');
-  redirect(
-    buildSettingsMembersRedirect(
-      'message',
-      'Member role updated successfully.',
-    ),
-  );
+  await setFlash({ message: 'Member role updated successfully.' });
+  redirect('/settings/members');
 }
 
 export async function deleteOrganizationMemberAction(formData: FormData) {
   const context = await requireOrganizationContext();
 
   if (!canManageMembers(context.organization.role)) {
-    redirect(
-      buildSettingsMembersRedirect(
-        'error',
-        'Only owners and admins can manage organization members.',
-      ),
-    );
+    await setFlash({
+      error: 'Only owners and admins can manage organization members.',
+    });
+    redirect('/settings/members');
   }
 
   const parsed = deleteMemberSchema.safeParse({
@@ -252,16 +225,15 @@ export async function deleteOrganizationMemberAction(formData: FormData) {
   });
 
   if (!parsed.success) {
-    redirect(buildSettingsMembersRedirect('error', 'Select a valid member.'));
+    await setFlash({ error: 'Select a valid member.' });
+    redirect('/settings/members');
   }
 
   if (parsed.data.userId === context.user.id) {
-    redirect(
-      buildSettingsMembersRedirect(
-        'error',
-        'You cannot remove your own membership from this page.',
-      ),
-    );
+    await setFlash({
+      error: 'You cannot remove your own membership from this page.',
+    });
+    redirect('/settings/members');
   }
 
   const member = await findOrganizationMember(
@@ -270,21 +242,17 @@ export async function deleteOrganizationMemberAction(formData: FormData) {
   );
 
   if (!member) {
-    redirect(
-      buildSettingsMembersRedirect(
-        'error',
-        'The selected member could not be found in this organization.',
-      ),
-    );
+    await setFlash({
+      error: 'The selected member could not be found in this organization.',
+    });
+    redirect('/settings/members');
   }
 
   if (member.role === 'owner') {
-    redirect(
-      buildSettingsMembersRedirect(
-        'error',
-        'Owner memberships cannot be removed from this page.',
-      ),
-    );
+    await setFlash({
+      error: 'Owner memberships cannot be removed from this page.',
+    });
+    redirect('/settings/members');
   }
 
   const admin = createAdminClient();
@@ -295,7 +263,8 @@ export async function deleteOrganizationMemberAction(formData: FormData) {
     .eq('user_id', parsed.data.userId);
 
   if (error) {
-    redirect(buildSettingsMembersRedirect('error', error.message));
+    await setFlash({ error: error.message });
+    redirect('/settings/members');
   }
 
   await admin
@@ -307,7 +276,6 @@ export async function deleteOrganizationMemberAction(formData: FormData) {
     .eq('current_organization_id', context.organization.organizationId);
 
   revalidatePath('/settings/members');
-  redirect(
-    buildSettingsMembersRedirect('message', 'Member removed successfully.'),
-  );
+  await setFlash({ message: 'Member removed successfully.' });
+  redirect('/settings/members');
 }

@@ -21,5 +21,17 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
+    {
+      name: 'demo-recording',
+      testMatch: '**/demo-recording.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1440, height: 900 },
+        // Records a video of the full test run
+        video: { mode: 'on', size: { width: 1440, height: 900 } },
+        // Slow down actions so the demo is readable on screen
+        launchOptions: { slowMo: 300 },
+      },
+    },
   ],
 });

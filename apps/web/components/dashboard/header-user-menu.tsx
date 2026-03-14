@@ -85,16 +85,18 @@ export function HeaderUserMenu({
         onClick={() => setIsOpen((current) => !current)}
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 transition hover:bg-slate-50"
+        className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white p-1.5 transition hover:bg-slate-50 sm:gap-3 sm:px-3 sm:py-2"
       >
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600 text-xs font-semibold text-white">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-semibold text-white sm:h-9 sm:w-9">
           {userInitials || 'U'}
         </span>
-        <span className="text-left">
-          <span className="block text-sm font-semibold text-slate-900">
+        <span className="hidden max-w-[140px] text-left sm:block">
+          <span className="block truncate text-sm font-semibold text-slate-900">
             {displayName}
           </span>
-          <span className="block text-xs text-slate-500">{roleLabel}</span>
+          <span className="block truncate text-xs text-slate-500">
+            {roleLabel}
+          </span>
         </span>
       </button>
 

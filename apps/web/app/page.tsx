@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
-  title: 'SignalChain | Supply Chain Risk Intelligence',
+  title: 'SupplySense AI | Supply Chain Risk Intelligence',
   description:
     'Detect disruption risk early, assess supplier impact, and coordinate mitigation actions from one unified command center.',
 };
@@ -24,7 +24,7 @@ export default async function Home() {
   return (
     <>
       <PublicSessionRedirect />
-      <LandingPage />
+      <LandingPage isLoggedIn={false} />
     </>
   );
 }

@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { requireOrganizationContext } from '@/lib/auth/session';
+import { setFlash } from '@/lib/flash';
 import { createClient } from '@/lib/supabase/server';
 import type { AppRole } from '@/lib/validations/auth';
 import {
@@ -20,19 +21,11 @@ function getString(formData: FormData, key: string): string {
   return typeof value === 'string' ? value.trim() : '';
 }
 
-function getErrorRedirect(pathname: string, message: string): string {
-  return `${pathname}?error=${encodeURIComponent(message)}`;
-}
-
 export async function createIncidentAction(formData: FormData): Promise<void> {
   const context = await requireOrganizationContext();
   if (!canManageIncidents(context.organization.role)) {
-    redirect(
-      getErrorRedirect(
-        '/incidents',
-        'You are not authorized to create incidents.',
-      ),
-    );
+    await setFlash({ error: 'You are not authorized to create incidents.' });
+    redirect('/incidents');
   }
 
   const parsed = createIncidentSchema.safeParse({
@@ -42,12 +35,10 @@ export async function createIncidentAction(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    redirect(
-      getErrorRedirect(
-        '/incidents',
-        parsed.error.issues[0]?.message ?? 'Incident validation failed.',
-      ),
-    );
+    await setFlash({
+      error: parsed.error.issues[0]?.message ?? 'Incident validation failed.',
+    });
+    redirect('/incidents');
   }
 
   const supabase = await createClient();
@@ -66,26 +57,21 @@ export async function createIncidentAction(formData: FormData): Promise<void> {
     .single();
 
   if (error || !data?.id) {
-    redirect(
-      getErrorRedirect(
-        '/incidents',
-        error?.message ?? 'Unable to create incident. Please retry.',
-      ),
-    );
+    await setFlash({
+      error: error?.message ?? 'Unable to create incident. Please retry.',
+    });
+    redirect('/incidents');
   }
 
-  redirect(`/incidents/${data.id}?created=1`);
+  await setFlash({ message: 'Incident created successfully.' });
+  redirect(`/incidents/${data.id}`);
 }
 
 export async function resolveIncidentAction(formData: FormData): Promise<void> {
   const context = await requireOrganizationContext();
   if (!canManageIncidents(context.organization.role)) {
-    redirect(
-      getErrorRedirect(
-        '/incidents',
-        'You are not authorized to resolve incidents.',
-      ),
-    );
+    await setFlash({ error: 'You are not authorized to resolve incidents.' });
+    redirect('/incidents');
   }
 
   const parsed = resolveIncidentSchema.safeParse({
@@ -93,7 +79,8 @@ export async function resolveIncidentAction(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    redirect(getErrorRedirect('/incidents', 'Invalid incident identifier.'));
+    await setFlash({ error: 'Invalid incident identifier.' });
+    redirect('/incidents');
   }
 
   const supabase = await createClient();
@@ -108,13 +95,12 @@ export async function resolveIncidentAction(formData: FormData): Promise<void> {
     .maybeSingle();
 
   if (error || !data?.id) {
-    redirect(
-      getErrorRedirect(
-        `/incidents/${parsed.data.incidentId}`,
-        error?.message ?? 'Unable to resolve incident.',
-      ),
-    );
+    await setFlash({
+      error: error?.message ?? 'Unable to resolve incident.',
+    });
+    redirect(`/incidents/${parsed.data.incidentId}`);
   }
 
-  redirect(`/incidents/${parsed.data.incidentId}?resolved=1`);
+  await setFlash({ message: 'Incident resolved successfully.' });
+  redirect(`/incidents/${parsed.data.incidentId}`);
 }

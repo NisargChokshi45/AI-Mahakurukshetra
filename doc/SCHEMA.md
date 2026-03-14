@@ -151,7 +151,7 @@ payment_history
 - Custom JWT claim `org_id` set on session to avoid per-row subquery overhead
 - Admin-only mutation paths: `risk_score_configs`, `integration_connections`, `organization_members`
 - Public (no auth): `GET /api/health`, `POST /api/auth/callback`, `POST /api/monitoring` (signature-verified), `POST /api/stripe/webhook` (signature-verified)
-- Service role used only in seed scripts and webhook handlers — never exposed to client
+- Service role used only in seed scripts and webhook handlers - never exposed to client
 
 ## Seed Coverage
 

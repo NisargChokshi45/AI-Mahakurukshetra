@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Severity } from '@/lib/demo-data';
 
@@ -41,6 +42,34 @@ export function buttonStyles(variant: ButtonVariant = 'primary') {
       'border border-border bg-background/80 text-foreground hover:bg-accent hover:text-accent-foreground',
     variant === 'ghost' &&
       'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+  );
+}
+
+export function selectStyles(className?: string) {
+  return cn(
+    'border-border/70 bg-background/85 text-foreground min-h-11 w-full cursor-pointer appearance-none rounded-2xl border px-4 pr-10 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] transition outline-none',
+    'focus-visible:border-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-70',
+    className,
+  );
+}
+
+type SelectFieldProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
+  wrapperClassName?: string;
+};
+
+export function SelectField({
+  className,
+  wrapperClassName,
+  children,
+  ...props
+}: SelectFieldProps) {
+  return (
+    <div className={cn('relative w-full', wrapperClassName)}>
+      <select {...props} className={selectStyles(className)}>
+        {children}
+      </select>
+      <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2" />
+    </div>
   );
 }
 

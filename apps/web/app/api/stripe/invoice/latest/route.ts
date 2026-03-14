@@ -3,6 +3,7 @@ import { getAuthContext } from '@/lib/auth/session';
 import { logRequestResponse, startRequestLog } from '@/lib/logger/http';
 import { createClient } from '@/lib/supabase/server';
 import { getStripeServerClient } from '@/lib/stripe/server';
+import { attachFlash } from '@/lib/flash';
 
 function redirectToBilling(
   request: NextRequest,
@@ -10,8 +11,9 @@ function redirectToBilling(
   message: string,
 ) {
   const redirectUrl = new URL('/settings/billing', request.url);
-  redirectUrl.searchParams.set(key, message);
-  return NextResponse.redirect(redirectUrl, { status: 303 });
+  const response = NextResponse.redirect(redirectUrl, { status: 303 });
+  attachFlash(response, { [key]: message });
+  return response;
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {

@@ -6,6 +6,7 @@ import {
   resolveOrganizationSupplierIds,
 } from '@/lib/risk-pipeline';
 import { requireOrganizationContext } from '@/lib/auth/session';
+import { setFlash } from '@/lib/flash';
 import type { AppRole } from '@/lib/validations/auth';
 import {
   createRiskEventSchema,
@@ -16,10 +17,6 @@ import {
 function getString(formData: FormData, key: string): string {
   const value = formData.get(key);
   return typeof value === 'string' ? value.trim() : '';
-}
-
-function getErrorRedirect(pathname: string, message: string): string {
-  return `${pathname}?error=${encodeURIComponent(message)}`;
 }
 
 function parseSupplierIds(raw: string): string[] {
@@ -92,12 +89,10 @@ export async function createRiskEventAction(formData: FormData): Promise<void> {
   const organizationId = context.organization.organizationId;
 
   if (!canManageRiskEvents(context.organization.role)) {
-    redirect(
-      getErrorRedirect(
-        '/risk-events/new',
-        'You are not authorized to create or update risk events.',
-      ),
-    );
+    await setFlash({
+      error: 'You are not authorized to create or update risk events.',
+    });
+    redirect('/risk-events/new');
   }
 
   const payload = readRiskEventPayload(formData);
@@ -113,7 +108,8 @@ export async function createRiskEventAction(formData: FormData): Promise<void> {
     const message =
       payloadParsed.error.issues[0]?.message ??
       'Validation failed. Check all fields.';
-    redirect(getErrorRedirect('/risk-events/new', message));
+    await setFlash({ error: message });
+    redirect('/risk-events/new');
   }
 
   const supplierResolution = await resolveOrganizationSupplierIds(
@@ -122,12 +118,11 @@ export async function createRiskEventAction(formData: FormData): Promise<void> {
   );
 
   if (supplierResolution.invalidSupplierIds.length > 0) {
-    redirect(
-      getErrorRedirect(
-        '/risk-events/new',
+    await setFlash({
+      error:
         'One or more selected suppliers are invalid for your organization.',
-      ),
-    );
+    });
+    redirect('/risk-events/new');
   }
 
   const validatedSupplierIds = supplierResolution.validSupplierIds;
@@ -141,7 +136,10 @@ export async function createRiskEventAction(formData: FormData): Promise<void> {
         validatedSupplierIds,
         riskEventId,
       );
-      redirect('/risk-events?updated=1');
+      await setFlash({
+        message: 'Risk event updated and scoring pipeline re-run successfully.',
+      });
+      redirect('/risk-events');
     }
 
     await runIngestionFlow(
@@ -150,12 +148,17 @@ export async function createRiskEventAction(formData: FormData): Promise<void> {
       payload,
       validatedSupplierIds,
     );
-    redirect('/risk-events?success=1');
+    await setFlash({
+      message:
+        'Risk event created and scoring pipeline triggered successfully.',
+    });
+    redirect('/risk-events');
   } catch (error) {
     const message =
       error instanceof Error
         ? error.message
         : 'Risk event ingestion failed. Please retry.';
-    redirect(getErrorRedirect('/risk-events/new', message));
+    await setFlash({ error: message });
+    redirect('/risk-events/new');
   }
 }

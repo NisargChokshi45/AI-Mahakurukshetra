@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { createIncidentAction } from '@/app/(dashboard)/incidents/actions';
 import { requireOrganizationContext } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
+import { consumeFlash } from '@/lib/flash';
 import type { AppRole } from '@/lib/validations/auth';
 import type {
   IncidentPriority,
@@ -12,6 +13,7 @@ import {
   EmptyState,
   PageHeader,
   SectionCard,
+  SelectField,
   SeverityBadge,
   StatusBadge,
   buttonStyles,
@@ -37,28 +39,17 @@ type IncidentRow = {
   owner_user_id: string | null;
 };
 
-type IncidentsPageProps = {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-};
-
 function canManageIncidents(role: AppRole): boolean {
   return INCIDENT_WRITE_ROLES.includes(role);
-}
-
-function readParam(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
 }
 
 function mapPriorityToSeverity(priority: IncidentPriority) {
   return priority;
 }
 
-export default async function IncidentsPage({
-  searchParams,
-}: IncidentsPageProps) {
+export default async function IncidentsPage() {
   const context = await requireOrganizationContext();
-  const params = (await searchParams) ?? {};
-  const errorMessage = readParam(params.error);
+  const { error: errorMessage, message } = await consumeFlash();
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('incidents')
@@ -83,6 +74,11 @@ export default async function IncidentsPage({
         }
       />
 
+      {message ? (
+        <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          {message}
+        </p>
+      ) : null}
       {errorMessage ? (
         <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {errorMessage}
@@ -123,17 +119,16 @@ export default async function IncidentsPage({
 
             <label className="grid gap-2 text-sm font-medium">
               Priority
-              <select
+              <SelectField
                 name="priority"
                 data-testid="incident-priority-select"
-                className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm outline-none"
                 defaultValue="medium"
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
                 <option value="critical">Critical</option>
-              </select>
+              </SelectField>
             </label>
 
             <label className="grid gap-2 text-sm font-medium lg:col-span-2">

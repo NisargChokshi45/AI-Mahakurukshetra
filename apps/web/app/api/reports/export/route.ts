@@ -23,6 +23,243 @@ function toSlug(value: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function renderReportPdfPreview(params: {
+  report: (typeof reports)[number];
+  generatedAt: string;
+  organizationId: string;
+  organizationName: string;
+}) {
+  const { report, generatedAt, organizationId, organizationName } = params;
+
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${escapeHtml(report.title)} - PDF Preview</title>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+        background: #f8fafc;
+        color: #0f172a;
+      }
+      main {
+        max-width: 920px;
+        margin: 32px auto 48px;
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 24px 60px -48px rgba(15, 23, 42, 0.6);
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 20px;
+      }
+      h1 {
+        margin: 0 0 6px;
+        font-size: 28px;
+        letter-spacing: -0.02em;
+      }
+      .meta {
+        font-size: 12px;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        font-weight: 600;
+      }
+      .pill {
+        background: #e0f2fe;
+        color: #0c4a6e;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+      }
+      .summary {
+        margin-top: 24px;
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+      .summary-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 16px;
+        background: #f8fafc;
+      }
+      .summary-card h3 {
+        margin: 0 0 10px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: #64748b;
+      }
+      .summary-card p {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+      }
+      .section {
+        margin-top: 28px;
+      }
+      .section h2 {
+        margin: 0 0 12px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: #475569;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 14px;
+      }
+      .row:last-child {
+        border-bottom: none;
+      }
+      .footer {
+        margin-top: 28px;
+        font-size: 12px;
+        color: #64748b;
+        line-height: 1.6;
+      }
+      .actions {
+        margin-top: 28px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .button {
+        border: none;
+        border-radius: 999px;
+        padding: 10px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        background: #0f172a;
+        color: #ffffff;
+      }
+      .button.secondary {
+        background: #e2e8f0;
+        color: #0f172a;
+      }
+      @media print {
+        body {
+          background: #ffffff;
+        }
+        main {
+          margin: 0;
+          box-shadow: none;
+          border-radius: 0;
+        }
+        .actions {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <div class="meta">Report Preview</div>
+          <h1>${escapeHtml(report.title)}</h1>
+          <div style="font-size: 14px; color: #475569;">
+            ${escapeHtml(report.type)} · #${escapeHtml(report.id)}
+          </div>
+        </div>
+        <div class="pill">${escapeHtml(report.status)}</div>
+      </header>
+
+      <section class="summary">
+        <div class="summary-card">
+          <h3>Owner</h3>
+          <p>${escapeHtml(report.owner)}</p>
+        </div>
+        <div class="summary-card">
+          <h3>Scope</h3>
+          <p>${escapeHtml(report.scope)}</p>
+        </div>
+        <div class="summary-card">
+          <h3>Generated</h3>
+          <p>${escapeHtml(report.generatedAt)}</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Executive Summary</h2>
+        <div class="row">
+          <div>At-risk suppliers</div>
+          <strong>18</strong>
+        </div>
+        <div class="row">
+          <div>Open incidents</div>
+          <strong>7</strong>
+        </div>
+        <div class="row">
+          <div>Regional exposure zones</div>
+          <strong>3</strong>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Export Context</h2>
+        <div class="row">
+          <div>Organization</div>
+          <strong>${escapeHtml(organizationName)}</strong>
+        </div>
+        <div class="row">
+          <div>Organization ID</div>
+          <strong>${escapeHtml(organizationId)}</strong>
+        </div>
+        <div class="row">
+          <div>Export generated at</div>
+          <strong>${escapeHtml(generatedAt)}</strong>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button class="button" onclick="window.print()">Print / Save as PDF</button>
+        <button class="button secondary" onclick="window.close()">Close preview</button>
+      </div>
+
+      <p class="footer">
+        This preview uses demo report data to validate PDF workflows before live rendering is wired.
+      </p>
+    </main>
+    <script>
+      if (window && typeof window.print === 'function') {
+        window.setTimeout(() => window.print(), 300);
+      }
+    </script>
+  </body>
+</html>`;
+}
+
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const requestLog = startRequestLog({
     method: request.method,
@@ -56,6 +293,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 
   const reportId = request.nextUrl.searchParams.get('reportId');
+  const format = request.nextUrl.searchParams.get('format') ?? 'csv';
   const selectedReport = reportId
     ? reports.find((report) => report.id === reportId)
     : undefined;
@@ -71,7 +309,44 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return respondJson(404, { error: 'Report not found.' }, 'warn');
   }
 
+  if (format !== 'csv' && format !== 'pdf') {
+    return respondJson(
+      400,
+      { error: 'Unsupported report export format.' },
+      'warn',
+    );
+  }
+
   const nowIso = new Date().toISOString();
+
+  if (format === 'pdf') {
+    const html = renderReportPdfPreview({
+      report,
+      generatedAt: nowIso,
+      organizationId: context.organization.organizationId,
+      organizationName: context.organization.organizationName,
+    });
+
+    const response = new NextResponse(html, {
+      status: 200,
+      headers: {
+        'cache-control': 'no-store, max-age=0',
+        'content-type': 'text/html; charset=utf-8',
+        'x-request-id': requestLog.requestId,
+      },
+    });
+
+    logRequestResponse(requestLog, {
+      status: 200,
+      message: 'Report PDF preview generated.',
+      metadata: {
+        organization_id: context.organization.organizationId,
+        report_id: report.id,
+      },
+    });
+
+    return response;
+  }
   const rows: string[][] = [
     ['report_id', report.id],
     ['report_title', report.title],

@@ -1,4 +1,4 @@
-# 🚀 AI Mahakurukshetra — Participant Guide
+# 🚀 AI Mahakurukshetra - Participant Guide
 
 ### Vibe Coding Hackathon | March 14, 2026 | 10 Hours | Build. Deploy. Launch.
 
@@ -10,12 +10,12 @@
 | -------------- | --------------------------------------------------------------- |
 | **Date**       | March 14, 2026                                                  |
 | **Duration**   | 10 Hours                                                        |
-| **Format**     | Solo — every participant is a single-person team                |
+| **Format**     | Solo - every participant is a single-person team                |
 | **Stack**      | Next.js + Supabase (mandatory)                                  |
 | **Deployment** | Vercel (mandatory)                                              |
-| **AI Tools**   | Claude CLI or Codex CLI (mandatory — one of these must be used) |
+| **AI Tools**   | Claude CLI or Codex CLI (mandatory - one of these must be used) |
 
-You will design, build, and deploy a working SaaS application using AI-assisted development within the 10-hour window. All work — code, deployment, video, and submission — must be completed before the deadline.
+You will design, build, and deploy a working SaaS application using AI-assisted development within the 10-hour window. All work - code, deployment, video, and submission - must be completed before the deadline.
 
 ---
 
@@ -55,9 +55,9 @@ You will be assigned a specific Product Hunt launch date by the organizers. Laun
 
 Go to the event platform and browse available definitions. Each definition includes:
 
-- **Product definition** — what it does and who it's for
-- **Alternatives** — existing tools or competitors
-- **Category** — the problem space
+- **Product definition** - what it does and who it's for
+- **Alternatives** - existing tools or competitors
+- **Category** - the problem space
 
 Up to two participants can pick the same definition. If you submitted a definition that was approved, it is automatically assigned to you.
 
@@ -82,11 +82,11 @@ Inside the Bacancy GitHub organization:
 
 You must use one of these two tools for all development. Manual coding is allowed only where AI assistance is not practical (e.g. env variable setup).
 
-### Option A — Claude CLI (your own account)
+### Option A - Claude CLI (your own account)
 
 If you already have Claude CLI set up from client work, use that. This is the recommended option for most participants.
 
-### Option B — Codex CLI (Bacancy provides access)
+### Option B - Codex CLI (Bacancy provides access)
 
 If you don't have Claude CLI, Bacancy will provide Codex CLI access. Credentials will be shared on hackathon day.
 
@@ -107,10 +107,10 @@ Ask for any missing details before building.
 
 ### Tips
 
-- Be specific in prompts — vague prompts produce vague code
-- Iterate quickly — build → test → fix in tight loops
-- Use AI to fix errors too — paste the error message directly into the CLI
-- Don't spend more than 30 minutes stuck on one problem — use the troubleshooter chat
+- Be specific in prompts - vague prompts produce vague code
+- Iterate quickly - build → test → fix in tight loops
+- Use AI to fix errors too - paste the error message directly into the CLI
+- Don't spend more than 30 minutes stuck on one problem - use the troubleshooter chat
 
 ---
 
@@ -171,18 +171,18 @@ Ask your AI CLI tool to create a seed script that inserts demo users, sample rec
 | Section          | Time        | What to Cover                                                 |
 | ---------------- | ----------- | ------------------------------------------------------------- |
 | **Hook**         | 0:00 – 0:30 | What problem does this solve? Who is it for?                  |
-| **Product Demo** | 0:30 – 2:30 | Show the live app — key user flows, main features, data       |
+| **Product Demo** | 0:30 – 2:30 | Show the live app - key user flows, main features, data       |
 | **Tech Stack**   | 2:30 – 3:30 | Next.js + Supabase + Vercel. Mention the AI CLI tool you used |
 | **Why Better**   | 3:30 – 4:30 | How is it different from existing alternatives?               |
 | **CTA**          | 4:30 – 5:00 | End with one of the Bacancy CTAs below                        |
 
-### Bacancy CTA — Use One at the End
+### Bacancy CTA - Use One at the End
 
 Choose whichever fits your tone:
 
 > _"Build fast. Scale smart. Stay secure. Connect with Bacancy and launch your application the right way."_
-> _"Speed matters. Quality matters. Scale matters. If you want your application built quickly with enterprise-grade security and performance — Bacancy is your technology partner. Connect with us today."_
-> _"Have an idea? Let's turn it into a powerful, scalable, and secure product — fast. Bacancy combines AI, cloud, and modern engineering to help you launch and scale without limits."_
+> _"Speed matters. Quality matters. Scale matters. If you want your application built quickly with enterprise-grade security and performance - Bacancy is your technology partner. Connect with us today."_
+> _"Have an idea? Let's turn it into a powerful, scalable, and secure product - fast. Bacancy combines AI, cloud, and modern engineering to help you launch and scale without limits."_
 
 ---
 
@@ -192,21 +192,21 @@ You will receive an assigned launch date from the organizers. All launches are s
 
 ### Preparing Your PH Listing
 
-- **Product name and tagline** — keep it clear and punchy
-- **Short description** — what problem it solves and who it's for
-- **Screenshots** — minimum 3, show the key screens
-- **Demo video link** — link to your 5-minute video
-- **Live URL** — your Vercel deployment
+- **Product name and tagline** - keep it clear and punchy
+- **Short description** - what problem it solves and who it's for
+- **Screenshots** - minimum 3, show the key screens
+- **Demo video link** - link to your 5-minute video
+- **Live URL** - your Vercel deployment
 - **GitHub repo link**
 
 ### On Launch Day
 
 - Post at **12:01 AM PST** on your assigned date for maximum exposure
-- Share the link in the Bacancy Slack channel — your teammates will upvote
-- Respond to every comment on PH — engagement boosts ranking
+- Share the link in the Bacancy Slack channel - your teammates will upvote
+- Respond to every comment on PH - engagement boosts ranking
 - Share on your personal LinkedIn and Twitter/X
 
-PH ranking is one of the judging criteria — treat your launch seriously.
+PH ranking is one of the judging criteria - treat your launch seriously.
 
 ---
 
@@ -238,14 +238,14 @@ You may update your submission until the deadline. No changes accepted after.
 
 ## 🆘 Getting Help
 
-If you're stuck, don't waste more than 15–20 minutes on one problem — use the **troubleshooter chat** inside the event platform. Troubleshooters are most available in the first hour and the final hour of the hackathon.
+If you're stuck, don't waste more than 15–20 minutes on one problem - use the **troubleshooter chat** inside the event platform. Troubleshooters are most available in the first hour and the final hour of the hackathon.
 
-- Check the **FAQ in the event platform** first — common issues are already answered
+- Check the **FAQ in the event platform** first - common issues are already answered
 - Use the **troubleshooter chat** for anything not covered
-- For AI CLI issues — paste the full error message into your CLI before giving up
+- For AI CLI issues - paste the full error message into your CLI before giving up
 
 ---
 
 > **Build fast. Ship clean. Deploy working.**
 >
-> Good luck. — Bacancy AI Mahakurukshetra 2026
+> Good luck. - Bacancy AI Mahakurukshetra 2026

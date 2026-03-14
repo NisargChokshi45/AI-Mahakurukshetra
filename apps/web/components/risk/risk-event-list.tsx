@@ -11,12 +11,12 @@ import {
   UsersRound,
 } from 'lucide-react';
 import type { Severity } from '@/lib/demo-data';
-import { getSupplierName } from '@/lib/demo-data';
 import {
   EmptyState,
   SectionCard,
   SeverityBadge,
   StatusBadge,
+  SelectField,
   buttonStyles,
 } from '@/components/dashboard/ui';
 
@@ -167,47 +167,44 @@ export function RiskEventList({ events }: RiskEventListProps) {
             className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm outline-none md:col-span-2"
             placeholder="Search by title, summary, or source"
           />
-          <select
+          <SelectField
             value={type}
             onChange={(event) => setType(event.target.value)}
-            className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm outline-none"
           >
             {typeOptions.map((option) => (
               <option key={option} value={option}>
                 {formatFilterLabel(option, 'All event types')}
               </option>
             ))}
-          </select>
-          <select
+          </SelectField>
+          <SelectField
             value={region}
             onChange={(event) => setRegion(event.target.value)}
-            className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm outline-none"
           >
             {regionOptions.map((option) => (
               <option key={option} value={option}>
                 {formatFilterLabel(option, 'All regions')}
               </option>
             ))}
-          </select>
+          </SelectField>
         </div>
 
         <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
-          <select
+          <SelectField
             value={severity}
             onChange={(event) =>
               setSeverity(
                 event.target.value as Severity | typeof ALL_FILTER_VALUE,
               )
             }
-            className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm outline-none"
           >
             {severityOptions.map((option) => (
               <option key={option} value={option}>
                 {formatFilterLabel(option, 'All severities')}
               </option>
             ))}
-          </select>
-          <select
+          </SelectField>
+          <SelectField
             value={status}
             onChange={(event) =>
               setStatus(
@@ -216,14 +213,13 @@ export function RiskEventList({ events }: RiskEventListProps) {
                   | typeof ALL_FILTER_VALUE,
               )
             }
-            className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm outline-none"
           >
             {statusOptions.map((option) => (
               <option key={option} value={option}>
                 {formatFilterLabel(option, 'All statuses')}
               </option>
             ))}
-          </select>
+          </SelectField>
           <button
             type="button"
             onClick={clearFilters}
@@ -254,94 +250,73 @@ export function RiskEventList({ events }: RiskEventListProps) {
             actionLabel="Create a manual event"
           />
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-3">
             {filteredEvents.map((event) => (
               <article
                 key={event.id}
-                className="border-border/70 bg-background/80 rounded-[24px] border p-5 shadow-sm"
+                className="border-border/70 bg-background/80 rounded-2xl border p-4 shadow-sm"
               >
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                  <div className="space-y-3">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <SeverityBadge severity={event.severity} />
-                      <StatusBadge status={event.status} />
-                      <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-                        <ShieldAlert className="h-3.5 w-3.5" />
-                        {formatFilterLabel(event.type, event.type)}
-                      </span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-                        <Globe2 className="h-3.5 w-3.5" />
-                        {event.region}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-semibold tracking-tight">
-                      {event.title}
-                    </h3>
-                    <p className="text-muted-foreground max-w-3xl text-sm leading-6">
-                      {event.summary || 'No summary provided for this signal.'}
-                    </p>
+                {/* Top row: badges + date */}
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <SeverityBadge severity={event.severity} />
+                    <StatusBadge status={event.status} />
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                      <ShieldAlert className="h-3 w-3" />
+                      {formatFilterLabel(event.type, event.type)}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                      <Globe2 className="h-3 w-3" />
+                      {event.region}
+                    </span>
                   </div>
-                  <div className="grid gap-2 text-sm text-slate-600 lg:min-w-72">
-                    <p className="inline-flex items-center gap-2">
-                      <CalendarClock className="h-4 w-4 text-slate-500" />
-                      Detected {formatDateLabel(event.date)}
-                    </p>
-                    <p className="inline-flex items-center gap-2">
-                      <RadioTower className="h-4 w-4 text-slate-500" />
-                      Source: {event.source}
-                    </p>
+                  <span className="inline-flex items-center gap-1.5 text-xs text-slate-400">
+                    <CalendarClock className="h-3.5 w-3.5" />
+                    {formatDateLabel(event.date)}
+                  </span>
+                </div>
+
+                {/* Title */}
+                <h3 className="mt-2.5 text-base font-semibold tracking-tight text-slate-900">
+                  {event.title}
+                </h3>
+
+                {/* Summary — capped at 2 lines */}
+                {event.summary ? (
+                  <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-500">
+                    {event.summary}
+                  </p>
+                ) : null}
+
+                {/* Footer: source + supplier count + actions */}
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                    <span className="inline-flex items-center gap-1">
+                      <RadioTower className="h-3.5 w-3.5" />
+                      {event.source}
+                    </span>
                     {event.affectedSupplierIds.length > 0 ? (
-                      <p className="inline-flex flex-wrap items-center gap-1">
-                        Suppliers:{' '}
-                        {event.affectedSupplierIds.map((supplierId, index) => (
-                          <span key={supplierId}>
-                            {/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-                              supplierId,
-                            ) ? (
-                              <span className="text-slate-700">
-                                {supplierId.slice(0, 8)}...
-                              </span>
-                            ) : (
-                              <Link
-                                href={`/suppliers/${supplierId}`}
-                                className="hover:text-foreground underline underline-offset-2"
-                              >
-                                {getSupplierName(supplierId)}
-                              </Link>
-                            )}
-                            {index < event.affectedSupplierIds.length - 1
-                              ? ', '
-                              : null}
-                          </span>
-                        ))}
-                      </p>
+                      <span className="inline-flex items-center gap-1">
+                        <UsersRound className="h-3.5 w-3.5" />
+                        {event.affectedSupplierIds.length}{' '}
+                        {event.affectedSupplierIds.length === 1
+                          ? 'supplier'
+                          : 'suppliers'}{' '}
+                        affected
+                      </span>
                     ) : null}
                   </div>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-3">
-                  {event.sourceUrl ? (
+                  <div className="flex items-center gap-2">
                     <Link
-                      href={event.sourceUrl}
-                      target="_blank"
-                      rel="noreferrer"
+                      href={`/risk-events/${event.id}`}
                       className={buttonStyles('secondary')}
                     >
-                      Open source
+                      View details
                     </Link>
-                  ) : null}
-                  <Link
-                    href={`/risk-events/new?risk_event_id=${event.id}`}
-                    className={buttonStyles('secondary')}
-                  >
-                    Edit event
-                  </Link>
-                  <span className="inline-flex min-h-11 items-center rounded-full bg-slate-100 px-4 text-xs font-semibold tracking-[0.14em] text-slate-600 uppercase">
-                    <UsersRound className="mr-2 h-4 w-4" />
-                    Supplier impact {event.affectedSupplierIds.length}
-                  </span>
-                  <Link href="/incidents" className={buttonStyles('primary')}>
-                    Open incident
-                  </Link>
+                    <Link href="/incidents" className={buttonStyles('primary')}>
+                      Open incident
+                    </Link>
+                  </div>
                 </div>
               </article>
             ))}

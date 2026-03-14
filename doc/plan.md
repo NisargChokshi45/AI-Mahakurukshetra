@@ -1,14 +1,14 @@
-# Supply Chain Risk Intelligence Platform — Architecture Plan
+# Supply Chain Risk Intelligence Platform - Architecture Plan
 
 ## Context
 
-Building a production-grade Supply Chain Risk Intelligence Platform for the AI Mahakurukshetra hackathon (March 14, 2026, 10-hour window). The product targets enterprise risk managers, procurement leads, and operations teams who need real-time visibility into supplier disruptions, risk scoring, and incident response — an alternative to Resilinc.
+Building a production-grade Supply Chain Risk Intelligence Platform for the AI Mahakurukshetra hackathon (March 14, 2026, 10-hour window). The product targets enterprise risk managers, procurement leads, and operations teams who need real-time visibility into supplier disruptions, risk scoring, and incident response - an alternative to Resilinc.
 
 **Goal**: Ship a polished, seeded, fully demo-able MVP on Vercel that covers the core supply chain risk loop: monitor → score → alert → respond → report.
 
 ### Design Principles
 
-- Keep backend clean — no JSDoc API comments, use separate YAML spec files
+- Keep backend clean - no JSDoc API comments, use separate YAML spec files
 - Org-scoped data model from day one; multi-tenancy enforced via RLS
 - Risk scoring is configurable, not hardcoded
 - Seed data must make the app look real immediately on first deploy
@@ -342,13 +342,13 @@ Constraints:
 | `ai_supplier_discovery` | `false` | Hidden       | Alternative supplier suggestions deferred                |
 | `scenario_simulation`   | `false` | Hidden       | Scenario planning remains schema-only in MVP             |
 
-All advanced/differentiating features are gated — core monitoring, scoring, alerting, and incident response are always on.
+All advanced/differentiating features are gated - core monitoring, scoring, alerting, and incident response are always on.
 
 ---
 
 ## Phase Details
 
-### Phase 0 — Foundation (1 hr)
+### Phase 0 - Foundation (1 hr)
 
 **Goal**: Working monorepo with all dependencies, typed env, and CI configured.
 
@@ -377,9 +377,9 @@ NEXT_PUBLIC_APP_URL=
 
 ---
 
-### Phase 1 — Product Definition & Architecture (0.5 hr)
+### Phase 1 - Product Definition & Architecture (0.5 hr)
 
-**Goal**: Lock routes, roles, API surface, and cross-domain strategy. No code — documents only.
+**Goal**: Lock routes, roles, API surface, and cross-domain strategy. No code - documents only.
 
 - Finalize route map and page inventory
 - Define role matrix (owner, admin, risk_manager, procurement_lead, viewer)
@@ -390,7 +390,7 @@ NEXT_PUBLIC_APP_URL=
 
 ---
 
-### Phase 2 — Database & Auth (1.5 hr)
+### Phase 2 - Database & Auth (1.5 hr)
 
 **Goal**: All tables migrated, RLS on every table, auth working end-to-end, seed data visible.
 
@@ -404,7 +404,7 @@ NEXT_PUBLIC_APP_URL=
 
 ---
 
-### Phase 3 — Data Ingestion & Risk Engine (1.5 hr)
+### Phase 3 - Data Ingestion & Risk Engine (1.5 hr)
 
 **Goal**: Risk scores calculated, alerts generated, audit trail recorded.
 
@@ -418,7 +418,7 @@ NEXT_PUBLIC_APP_URL=
 
 ---
 
-### Phase 4 — Core Product UI (2 hr)
+### Phase 4 - Core Product UI (2 hr)
 
 **Goal**: Full dashboard, supplier registry, risk events, incidents, and map screens working with real data.
 
@@ -465,7 +465,7 @@ NEXT_PUBLIC_APP_URL=
 
 ---
 
-### Phase 5 — Integrations & Cross-Domain Readiness (1 hr)
+### Phase 5 - Integrations & Cross-Domain Readiness (1 hr)
 
 **Goal**: External callers can POST risk events, CORS is locked, preview deployments work.
 
@@ -479,7 +479,7 @@ NEXT_PUBLIC_APP_URL=
 
 ---
 
-### Phase 6 — Quality, Security & Demo Readiness (1.5 hr)
+### Phase 6 - Quality, Security & Demo Readiness (1.5 hr)
 
 **Goal**: Tests passing, no secrets exposed, app is demo-ready for judges.
 
@@ -511,7 +511,7 @@ NEXT_PUBLIC_APP_URL=
 
 ---
 
-### Phase 7 — Launch (1 hr)
+### Phase 7 - Launch (1 hr)
 
 **Goal**: Production deploy working, submission complete.
 
@@ -572,9 +572,9 @@ Tiered by number of suppliers monitored:
 | Professional | up to 100 | $299/mo |
 | Enterprise   | Unlimited | Custom  |
 
-- `POST /api/stripe/checkout` — create Checkout session (protected)
-- `POST /api/stripe/portal` — create portal session (protected)
-- `POST /api/stripe/webhook` — process events: `subscription.created`, `subscription.updated`, `subscription.deleted`, `payment_intent.succeeded`, `payment_intent.payment_failed`
+- `POST /api/stripe/checkout` - create Checkout session (protected)
+- `POST /api/stripe/portal` - create portal session (protected)
+- `POST /api/stripe/webhook` - process events: `subscription.created`, `subscription.updated`, `subscription.deleted`, `payment_intent.succeeded`, `payment_intent.payment_failed`
 
 ### Swagger / OpenAPI Docs
 

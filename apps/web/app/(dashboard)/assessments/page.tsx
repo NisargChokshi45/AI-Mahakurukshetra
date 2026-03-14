@@ -6,7 +6,9 @@ import {
   RiskScoreBadge,
   SectionCard,
   StatusBadge,
+  SelectField,
   buttonStyles,
+  selectStyles,
 } from '@/components/dashboard/ui';
 
 export const metadata: Metadata = {
@@ -45,7 +47,7 @@ export default function AssessmentsPage() {
           <form className="grid gap-4">
             <label className="grid gap-2 text-sm font-medium">
               Supplier
-              <select className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm outline-none">
+              <select className={selectStyles()}>
                 {assessments.map((assessment) => {
                   const supplierName = getSupplierName(assessment.supplierId);
 

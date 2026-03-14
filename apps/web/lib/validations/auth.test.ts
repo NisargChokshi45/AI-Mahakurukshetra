@@ -27,12 +27,12 @@ describe('auth validations', () => {
 
   it('trims display name for sign-up', () => {
     const result = signUpSchema.parse({
-      displayName: '  Maya Chen  ',
-      email: 'maya@example.com',
+      displayName: '  John Doe  ',
+      email: 'john@example.com',
       password: 'a-secure-password',
     });
 
-    expect(result.displayName).toBe('Maya Chen');
+    expect(result.displayName).toBe('John Doe');
   });
 
   it('disallows owner role in member invite payload', () => {

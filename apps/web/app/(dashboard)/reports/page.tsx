@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Sparkles } from 'lucide-react';
 import {
   PageHeader,
   SectionCard,
   StatusBadge,
+  SelectField,
   buttonStyles,
 } from '@/components/dashboard/ui';
 import { reports } from '@/lib/demo-data';
@@ -31,6 +33,9 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   const defaultPreviewReport =
     reports.find((report) => report.status === 'completed') ?? reports[0];
   const featuredReport = selectedPreviewReport ?? defaultPreviewReport;
+  const stripeConfigured = Boolean(process.env.STRIPE_SECRET_KEY?.trim());
+  const pdfPreviewTarget = stripeConfigured ? undefined : '_blank';
+  const pdfPreviewLabel = 'Preview PDF';
 
   return (
     <div className="space-y-6">
@@ -53,6 +58,16 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
         }
       />
 
+      {!stripeConfigured ? (
+        <div className="flex items-start gap-3 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+          <Sparkles className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <p>
+            Stripe secret key is not configured. Report PDF previews are running
+            in preview mode for local testing.
+          </p>
+        </div>
+      ) : null}
+
       <div className="grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
         <SectionCard
           eyebrow="Generate"
@@ -70,10 +85,9 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
               className="grid gap-2 text-sm font-medium"
             >
               Report type
-              <select
+              <SelectField
                 id="report-type"
                 name="preview"
-                className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm transition outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40"
                 defaultValue={featuredReport.id}
               >
                 {reports.map((report) => (
@@ -81,7 +95,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                     {report.type}
                   </option>
                 ))}
-              </select>
+              </SelectField>
             </label>
 
             <label
@@ -179,12 +193,17 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  <Link
-                    href={`/reports?preview=${encodeURIComponent(report.id)}#report-preview`}
-                    className={buttonStyles('secondary')}
+                  <form
+                    action="/api/reports/export"
+                    method="get"
+                    target={pdfPreviewTarget}
                   >
-                    Open preview
-                  </Link>
+                    <input type="hidden" name="reportId" value={report.id} />
+                    <input type="hidden" name="format" value="pdf" />
+                    <button type="submit" className={buttonStyles('secondary')}>
+                      {pdfPreviewLabel}
+                    </button>
+                  </form>
                   <a
                     href={`/api/reports/export?reportId=${encodeURIComponent(report.id)}`}
                     className={buttonStyles('primary')}

@@ -9,6 +9,7 @@ import {
   SectionCard,
   buttonStyles,
 } from '@/components/dashboard/ui';
+import { consumeFlash } from '@/lib/flash';
 import { riskEvents as demoRiskEvents } from '@/lib/demo-data';
 import type { RiskEvent } from '@/lib/demo-data';
 import { requireOrganizationContext } from '@/lib/auth/session';
@@ -40,10 +41,6 @@ type DbDisruptionRow = {
   risk_event_id: string;
   supplier_id: string | null;
 };
-
-function readParam(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
-}
 
 function resolveRegionName(
   regions: DbRiskEventRow['regions'],
@@ -109,17 +106,9 @@ function mapDemoRiskEvent(event: RiskEvent): RiskEventFeedItem {
   };
 }
 
-export default async function RiskEventsPage({
-  searchParams,
-}: {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-}) {
+export default async function RiskEventsPage() {
   const context = await requireOrganizationContext();
-  const params = (await searchParams) ?? {};
-  const successParam = readParam(params.success);
-  const updatedParam = readParam(params.updated);
-  const showSuccess = successParam === '1';
-  const showUpdated = updatedParam === '1';
+  const { error, message } = await consumeFlash();
 
   let events: RiskEventFeedItem[] = demoRiskEvents.map(mapDemoRiskEvent);
 
@@ -187,14 +176,14 @@ export default async function RiskEventsPage({
 
   return (
     <div className="space-y-6">
-      {showSuccess ? (
+      {message ? (
         <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          Risk event created and scoring pipeline triggered successfully.
+          {message}
         </p>
       ) : null}
-      {showUpdated ? (
-        <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          Risk event updated and scoring pipeline re-run successfully.
+      {error ? (
+        <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
         </p>
       ) : null}
 

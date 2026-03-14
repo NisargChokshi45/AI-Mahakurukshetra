@@ -4,13 +4,26 @@ import {
   SectionCard,
   buttonStyles,
 } from '@/components/dashboard/ui';
+import { requireOrganizationContext } from '@/lib/auth/session';
 
 export const metadata: Metadata = {
   title: 'Profile Settings | Supply Chain Risk Intelligence Platform',
   description: 'Manage user profile and personal workspace preferences.',
 };
 
-export default function ProfileSettingsPage() {
+export const dynamic = 'force-dynamic';
+
+function roleLabel(role: string) {
+  return role.replaceAll('_', ' ');
+}
+
+export default async function ProfileSettingsPage() {
+  const context = await requireOrganizationContext();
+  const displayName =
+    context.profile?.displayName ?? context.user.email ?? 'User';
+  const email = context.profile?.email ?? context.user.email ?? '';
+  const role = roleLabel(context.organization.role);
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -29,21 +42,28 @@ export default function ProfileSettingsPage() {
             <label className="grid gap-2 text-sm font-medium">
               Full name
               <input
-                defaultValue="Arjun Rao"
+                defaultValue={displayName}
                 className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm outline-none"
               />
             </label>
             <label className="grid gap-2 text-sm font-medium">
               Role
-              <input
-                defaultValue="Risk Manager"
+              <select
+                defaultValue={role}
                 className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm outline-none"
-              />
+              >
+                <option value="owner">Owner</option>
+                <option value="admin">Admin</option>
+                <option value="risk manager">Risk manager</option>
+                <option value="procurement lead">Procurement lead</option>
+                <option value="viewer">Viewer</option>
+              </select>
             </label>
             <label className="grid gap-2 text-sm font-medium">
               Email
               <input
-                defaultValue="arjun.rao@helix.example"
+                defaultValue={email}
+                disabled
                 className="border-border/70 bg-background/85 min-h-11 rounded-2xl border px-4 text-sm outline-none"
               />
             </label>

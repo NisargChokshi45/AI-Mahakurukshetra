@@ -71,6 +71,7 @@ Use the following pattern:
 | `test/`     | Tests only                               |
 
 Examples:
+
 - `feat/user-onboarding`
 - `fix/stripe-webhook-signature`
 - `chore/upgrade-nextjs`
@@ -106,7 +107,7 @@ Use the `/git-commit` skill for guided commit creation.
 ## Pull Request Process
 
 1. Branch off `main` using the naming convention above
-2. Make focused, atomic changes — one concern per PR
+2. Make focused, atomic changes - one concern per PR
 3. Fill out the [PR template](.github/PULL_REQUEST_TEMPLATE.md) completely
 4. Ensure all checklist items pass before requesting review
 5. Assign at least one reviewer
@@ -142,7 +143,7 @@ See `.agents/rules/coding-standards.md` for the full reference.
 | Integration | Vitest + Supabase local | API routes and server actions   |
 | E2E         | Playwright              | Critical user flows             |
 
-- Do not mock the database in integration tests — use a real local Supabase instance
+- Do not mock the database in integration tests - use a real local Supabase instance
 - New features require corresponding tests before merge
 - Existing tests must remain green
 
@@ -167,7 +168,7 @@ See `.agents/rules/security-checklist.md` for the full checklist.
 
 - All schema changes must be in a versioned migration file under `supabase/migrations/`
 - RLS policies are required on every new table
-- Never use the Supabase dashboard to make schema changes directly — always use migrations
+- Never use the Supabase dashboard to make schema changes directly - always use migrations
 - Include a rollback SQL comment in each migration
 
 ---

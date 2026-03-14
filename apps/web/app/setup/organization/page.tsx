@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { Country } from 'country-state-city';
 import { createOrganizationAction } from '@/app/setup/organization/actions';
 import { requireUser } from '@/lib/auth/session';
+import { consumeFlash } from '@/lib/flash';
+import { SelectField } from '@/components/dashboard/ui';
 
 export const metadata: Metadata = {
   title: 'Organization Setup',
@@ -10,25 +13,15 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-type SetupPageProps = {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-};
-
-function readMessage(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value;
-}
-
-export default async function OrganizationSetupPage({
-  searchParams,
-}: SetupPageProps) {
+export default async function OrganizationSetupPage() {
+  const countries = Country.getAllCountries();
   const context = await requireUser();
 
   if (context.organization) {
     redirect('/dashboard');
   }
 
-  const params = (await searchParams) ?? {};
-  const error = readMessage(params.error);
+  const { error } = await consumeFlash();
 
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,_rgba(236,253,245,1),_rgba(248,250,252,1))] px-6 py-20 md:px-10">
@@ -82,11 +75,16 @@ export default async function OrganizationSetupPage({
               <span className="text-sm font-medium text-slate-700">
                 Headquarters country
               </span>
-              <input
-                name="headquartersCountry"
-                className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-950 outline-none"
-                placeholder="United States"
-              />
+              <SelectField name="headquartersCountry" defaultValue="">
+                <option value="" disabled>
+                  Select a country
+                </option>
+                {countries.map((country) => (
+                  <option key={country.isoCode} value={country.name}>
+                    {country.name}
+                  </option>
+                ))}
+              </SelectField>
             </label>
 
             <button

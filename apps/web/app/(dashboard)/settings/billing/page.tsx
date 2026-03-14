@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import {
   ArrowUpRight,
   CalendarClock,
@@ -16,6 +17,7 @@ import {
   SectionCard,
   buttonStyles,
 } from '@/components/dashboard/ui';
+import { consumeFlash, setFlash } from '@/lib/flash';
 import { createClient } from '@/lib/supabase/server';
 import { cn } from '@/lib/utils';
 
@@ -42,13 +44,13 @@ type BillingPlan = {
 };
 
 type PriceRow = {
-  currency: string;
+  currency: string | null;
   id: string;
-  interval: 'month' | 'year';
+  interval: 'month' | 'year' | null;
   is_active: boolean;
-  nickname: string;
+  nickname: string | null;
   supplier_limit: number | null;
-  unit_amount: number;
+  unit_amount: number | null;
 };
 
 type SubscriptionRow = {
@@ -72,7 +74,15 @@ function readMessage(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function formatPrice(currency: string, unitAmount: number, interval: string) {
+function formatPrice(
+  currency: string | null,
+  unitAmount: number | null,
+  interval: string | null,
+) {
+  if (!currency || unitAmount === null) {
+    return '--';
+  }
+
   const normalizedInterval = interval === 'year' ? 'yr' : 'mo';
 
   return (
@@ -83,7 +93,11 @@ function formatPrice(currency: string, unitAmount: number, interval: string) {
   );
 }
 
-function formatCurrency(currency: string, amountCents: number) {
+function formatCurrency(currency: string | null, amountCents: number | null) {
+  if (!currency || amountCents === null) {
+    return '--';
+  }
+
   return new Intl.NumberFormat('en-US', {
     currency: currency.toUpperCase(),
     style: 'currency',
@@ -179,7 +193,7 @@ function buildBillingPlans(
   );
 
   return prices
-    .sort((a, b) => a.unit_amount - b.unit_amount)
+    .sort((a, b) => (a.unit_amount ?? 0) - (b.unit_amount ?? 0))
     .map((price) => {
       const isCurrentPlan = subscription?.price_id === price.id;
       const status: PlanStatus = isCurrentPlan
@@ -198,7 +212,7 @@ function buildBillingPlans(
           price.unit_amount,
           price.interval,
         ),
-        priceValueCents: price.unit_amount,
+        priceValueCents: price.unit_amount ?? 0,
         supplierLimit: price.supplier_limit,
         status,
         statusLabel:
@@ -208,7 +222,7 @@ function buildBillingPlans(
               ? 'Inactive'
               : 'Available',
         suppliers: getSupplierLimitLabel(price.supplier_limit),
-        title: price.nickname,
+        title: price.nickname ?? 'Coverage plan',
       };
     });
 }
@@ -278,8 +292,19 @@ export default async function BillingSettingsPage({
 }: BillingSettingsPageProps) {
   const context = await requireOrganizationContext();
   const params = (await searchParams) ?? {};
-  const error = readMessage(params.error);
-  const message = readMessage(params.message);
+  const queryError = readMessage(params.error);
+  const queryMessage = readMessage(params.message);
+
+  if (queryError || queryMessage) {
+    if (queryError) {
+      await setFlash({ error: queryError });
+    }
+    if (queryMessage) {
+      await setFlash({ message: queryMessage });
+    }
+    redirect('/settings/billing');
+  }
+  const { error, message } = await consumeFlash();
   const supabase = await createClient();
   const isOwner = context.organization.role === 'owner';
   const stripeConfigured = Boolean(process.env.STRIPE_SECRET_KEY?.trim());
@@ -292,6 +317,7 @@ export default async function BillingSettingsPage({
   const invoiceAction = stripeConfigured
     ? '/api/stripe/invoice/latest'
     : '/api/stripe/dummy/invoice/latest';
+  const invoiceTarget = stripeConfigured ? undefined : '_blank';
 
   const { count: supplierCount } = await supabase
     .from('suppliers')
@@ -446,206 +472,204 @@ export default async function BillingSettingsPage({
         />
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[0.82fr_1.18fr]">
-        <SectionCard
-          eyebrow="Control Center"
-          title="Subscription health and billing actions"
-          description="Review current subscription posture and launch operational billing actions without leaving settings."
-        >
-          <div className="grid gap-4">
-            <div className="rounded-[24px] border border-emerald-200 bg-[linear-gradient(145deg,rgba(236,253,245,0.85),rgba(240,249,255,0.8))] p-5">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="text-muted-foreground text-sm font-semibold tracking-[0.24em] uppercase">
-                    Active subscription
-                  </p>
-                  <p className="mt-2 text-3xl font-semibold tracking-tight">
-                    {currentPlan?.title ?? 'Not configured'}
-                  </p>
-                  <p className="mt-1 text-sm text-slate-600">
-                    {subscriptionState.summaryText}
-                  </p>
-                </div>
-                <PlanStatusPill
-                  status={subscriptionState.isActive ? 'active' : 'inactive'}
-                />
-              </div>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/70 bg-white/80 p-3">
-                  <p className="text-xs font-semibold tracking-[0.2em] text-slate-500 uppercase">
-                    Renewal date
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-slate-900">
-                    {renewalDate}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-white/70 bg-white/80 p-3">
-                  <p className="text-xs font-semibold tracking-[0.2em] text-slate-500 uppercase">
-                    Invoice status
-                  </p>
-                  <p
-                    className={cn(
-                      'mt-1 text-sm font-semibold',
-                      latestPayment?.status === 'failed'
-                        ? 'text-red-700'
-                        : 'text-emerald-700',
-                    )}
-                  >
-                    {invoiceStatusText}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="border-border/70 bg-background/90 space-y-4 rounded-[24px] border p-5">
-              <div className="space-y-2">
-                <div className="text-muted-foreground flex items-center justify-between text-sm">
-                  <span>Supplier capacity utilization</span>
-                  <span className="font-semibold text-slate-800">
-                    {usagePercent !== null ? `${usagePercent}%` : 'Unlimited'}
-                  </span>
-                </div>
-                <progress
-                  className={cn(
-                    'h-2 w-full overflow-hidden rounded-full [&::-webkit-progress-bar]:bg-slate-200',
-                    usageToneClasses,
-                  )}
-                  max={usageMax}
-                  value={usageValue}
-                />
-                <p className="text-muted-foreground text-sm">
-                  {supplierLimit
-                    ? `${usedSuppliers} of ${supplierLimit} monitored suppliers are currently active this cycle.`
-                    : `${usedSuppliers} monitored suppliers are currently active this cycle.`}
+      <SectionCard
+        eyebrow="Control Center"
+        title="Subscription health and billing actions"
+        description="Review current subscription posture and launch operational billing actions without leaving settings."
+      >
+        <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+          <div className="rounded-[24px] border border-emerald-200 bg-[linear-gradient(145deg,rgba(236,253,245,0.85),rgba(240,249,255,0.8))] p-5">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="text-muted-foreground text-sm font-semibold tracking-[0.24em] uppercase">
+                  Active subscription
+                </p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight">
+                  {currentPlan?.title ?? 'Not configured'}
+                </p>
+                <p className="mt-1 text-sm text-slate-600">
+                  {subscriptionState.summaryText}
                 </p>
               </div>
+              <PlanStatusPill
+                status={subscriptionState.isActive ? 'active' : 'inactive'}
+              />
+            </div>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/70 bg-white/80 p-3">
+                <p className="text-xs font-semibold tracking-[0.2em] text-slate-500 uppercase">
+                  Renewal date
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">
+                  {renewalDate}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/70 bg-white/80 p-3">
+                <p className="text-xs font-semibold tracking-[0.2em] text-slate-500 uppercase">
+                  Invoice status
+                </p>
+                <p
+                  className={cn(
+                    'mt-1 text-sm font-semibold',
+                    latestPayment?.status === 'failed'
+                      ? 'text-red-700'
+                      : 'text-emerald-700',
+                  )}
+                >
+                  {invoiceStatusText}
+                </p>
+              </div>
+            </div>
+          </div>
 
-              <div className="grid gap-2">
-                <form action={portalAction} method="post">
-                  <button
-                    type="submit"
-                    className={cn(
-                      buttonStyles('primary'),
-                      'w-full justify-start',
-                    )}
-                    disabled={!isOwner}
+          <div className="border-border/70 bg-background/90 flex flex-col justify-between space-y-4 rounded-[24px] border p-5">
+            <div className="space-y-2">
+              <div className="text-muted-foreground flex items-center justify-between text-sm">
+                <span>Supplier capacity utilization</span>
+                <span className="font-semibold text-slate-800">
+                  {usagePercent !== null ? `${usagePercent}%` : 'Unlimited'}
+                </span>
+              </div>
+              <progress
+                className={cn(
+                  'h-2 w-full overflow-hidden rounded-full [&::-webkit-progress-bar]:bg-slate-200',
+                  usageToneClasses,
+                )}
+                max={usageMax}
+                value={usageValue}
+              />
+              <p className="text-muted-foreground text-sm">
+                {supplierLimit
+                  ? `${usedSuppliers} of ${supplierLimit} monitored suppliers are currently active this cycle.`
+                  : `${usedSuppliers} monitored suppliers are currently active this cycle.`}
+              </p>
+            </div>
+
+            <div className="grid gap-2">
+              <form action={portalAction} method="post">
+                <button
+                  type="submit"
+                  className={cn(
+                    buttonStyles('primary'),
+                    'w-full justify-start',
+                  )}
+                  disabled={!isOwner}
+                >
+                  <CreditCard className="mr-2 h-4 w-4" aria-hidden="true" />
+                  {stripeConfigured
+                    ? 'Open billing portal'
+                    : 'Open dummy billing portal'}
+                  <ArrowUpRight
+                    className="ml-auto h-4 w-4"
+                    aria-hidden="true"
+                  />
+                </button>
+              </form>
+              <form action={invoiceAction} method="post" target={invoiceTarget}>
+                <button
+                  type="submit"
+                  className={cn(
+                    buttonStyles('secondary'),
+                    'w-full justify-start',
+                  )}
+                  disabled={!isOwner || !latestPayment}
+                >
+                  <ReceiptText className="mr-2 h-4 w-4" aria-hidden="true" />
+                  {stripeConfigured
+                    ? 'Download latest invoice'
+                    : 'Open dummy invoice'}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </SectionCard>
+
+      <SectionCard
+        eyebrow="Plan Catalog"
+        title="Select the right coverage tier"
+        description="Plan cards reflect live subscription state and workspace supplier capacity data."
+      >
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {renderedPlans.map((plan) => (
+            <article
+              key={plan.id}
+              className={cn(
+                'flex flex-col rounded-[24px] border p-5 transition',
+                plan.status === 'active'
+                  ? 'border-emerald-300 bg-emerald-50/70 shadow-[0_22px_45px_-32px_rgba(22,163,74,0.45)]'
+                  : plan.status === 'inactive'
+                    ? 'border-amber-300 bg-amber-50/60'
+                    : 'border-border/70 bg-background/85',
+              )}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-semibold tracking-tight text-slate-950">
+                    {plan.title}
+                  </h3>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    {plan.suppliers}
+                  </p>
+                </div>
+                <PlanStatusPill status={plan.status} label={plan.statusLabel} />
+              </div>
+
+              <p className="mt-4 text-3xl font-semibold tracking-tight text-slate-900">
+                {plan.priceLabel}
+              </p>
+              <p className="text-muted-foreground mt-2 text-sm leading-6">
+                {plan.description}
+              </p>
+
+              <div className="mt-4 grow space-y-2 rounded-2xl border border-slate-200/80 bg-white/60 p-3">
+                {getPlanHighlights(plan.supplierLimit).map((highlight) => (
+                  <p
+                    key={`${plan.id}-${highlight}`}
+                    className="flex items-start gap-2 text-xs leading-5 text-slate-600"
                   >
-                    <CreditCard className="mr-2 h-4 w-4" aria-hidden="true" />
-                    {stripeConfigured
-                      ? 'Open billing portal'
-                      : 'Open dummy billing portal'}
-                    <ArrowUpRight
-                      className="ml-auto h-4 w-4"
+                    <CheckCircle2
+                      className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500"
                       aria-hidden="true"
                     />
-                  </button>
-                </form>
-                <form action={invoiceAction} method="post">
-                  <button
-                    type="submit"
-                    className={cn(
-                      buttonStyles('secondary'),
-                      'w-full justify-start',
-                    )}
-                    disabled={!isOwner || !latestPayment}
-                  >
-                    <ReceiptText className="mr-2 h-4 w-4" aria-hidden="true" />
-                    {stripeConfigured
-                      ? 'Download latest invoice'
-                      : 'Open dummy invoice'}
-                  </button>
-                </form>
+                    {highlight}
+                  </p>
+                ))}
               </div>
-            </div>
-          </div>
-        </SectionCard>
 
-        <SectionCard
-          eyebrow="Plan Catalog"
-          title="Select the right coverage tier"
-          description="Plan cards reflect live subscription state and workspace supplier capacity data."
-        >
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {renderedPlans.map((plan) => (
-              <article
-                key={plan.id}
-                className={cn(
-                  'rounded-[24px] border p-5 transition',
-                  plan.status === 'active'
-                    ? 'border-emerald-300 bg-emerald-50/70 shadow-[0_22px_45px_-32px_rgba(22,163,74,0.45)]'
-                    : plan.status === 'inactive'
-                      ? 'border-amber-300 bg-amber-50/60'
-                      : 'border-border/70 bg-background/85',
-                )}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="text-lg font-semibold tracking-tight text-slate-950">
-                      {plan.title}
-                    </h3>
-                    <p className="text-muted-foreground mt-1 text-sm">
-                      {plan.suppliers}
-                    </p>
-                  </div>
-                  <PlanStatusPill
-                    status={plan.status}
-                    label={plan.statusLabel}
-                  />
-                </div>
-
-                <p className="mt-4 text-2xl font-semibold tracking-tight text-slate-900">
-                  {plan.priceLabel}
-                </p>
-                <p className="text-muted-foreground mt-2 text-sm leading-6">
-                  {plan.description}
-                </p>
-
-                <div className="mt-4 space-y-2 rounded-2xl border border-slate-200/80 bg-white/70 p-3">
-                  {getPlanHighlights(plan.supplierLimit).map((highlight) => (
-                    <p
-                      key={`${plan.id}-${highlight}`}
-                      className="flex items-start gap-2 text-xs leading-5 text-slate-600"
-                    >
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400" />
-                      {highlight}
-                    </p>
-                  ))}
-                </div>
-
-                <form action={checkoutAction} method="post">
-                  <input type="hidden" name="priceId" value={plan.id} />
-                  <button
-                    type="submit"
-                    disabled={
-                      !isOwner ||
+              <form action={checkoutAction} method="post">
+                <input type="hidden" name="priceId" value={plan.id} />
+                <button
+                  type="submit"
+                  disabled={
+                    !isOwner ||
+                    !plan.isCheckoutEnabled ||
+                    plan.priceValueCents <= 0
+                  }
+                  className={cn(
+                    buttonStyles(
+                      plan.status === 'active' ? 'secondary' : 'primary',
+                    ),
+                    'mt-5 w-full',
+                    (!isOwner ||
                       !plan.isCheckoutEnabled ||
-                      plan.priceValueCents <= 0
-                    }
-                    className={cn(
-                      buttonStyles(
-                        plan.status === 'active' ? 'ghost' : 'secondary',
-                      ),
-                      'mt-5 w-full',
-                      (!isOwner ||
-                        !plan.isCheckoutEnabled ||
-                        plan.priceValueCents <= 0) &&
-                        'cursor-default',
-                    )}
-                  >
-                    {isOwner
-                      ? plan.isCheckoutEnabled
-                        ? stripeConfigured
-                          ? plan.ctaLabel
-                          : `Dummy ${plan.ctaLabel.toLowerCase()}`
-                        : 'Current plan'
-                      : 'Owner access required'}
-                  </button>
-                </form>
-              </article>
-            ))}
-          </div>
-        </SectionCard>
-      </div>
+                      plan.priceValueCents <= 0) &&
+                      'cursor-default opacity-60',
+                  )}
+                >
+                  {isOwner
+                    ? plan.isCheckoutEnabled
+                      ? stripeConfigured
+                        ? plan.ctaLabel
+                        : `Dummy ${plan.ctaLabel.toLowerCase()}`
+                      : 'Current plan'
+                    : 'Owner access required'}
+                </button>
+              </form>
+            </article>
+          ))}
+        </div>
+      </SectionCard>
 
       <SectionCard
         eyebrow="Compliance"
