@@ -5,11 +5,13 @@
 - [x] 2026-03-14 10:19 — Review repo baseline, extract problem statement, and create phased implementation plan
 - [x] 2026-03-14 11:50 — Configure `.codex` multi-agent roster from `PRD.md` and `plan.md`
 - [x] 2026-03-14 11:57 — Tighten `.codex/agents/*.toml` to minimal, production-ready role profiles
-- [~] 2026-03-14 12:12 — Workspace foundation aligned; `pnpm build` passes, but `pnpm dev` could not be socket-verified inside the sandbox
+- [x] 2026-03-14 13:03 — Workspace foundation aligned; `pnpm build` passes and dev workflow was confirmed from the already-running user session outside sandbox socket limits
 - [x] 2026-03-14 12:12 — Install and configure: Supabase client + SSR auth helpers, Zod, React Hook Form, TanStack Query, shadcn/ui, pino, Vitest, Playwright, Upstash Redis
 - [x] 2026-03-14 12:12 — Set up `.env.example` with all required vars (Supabase, Stripe, Redis, app URLs, allowed origins)
 - [x] 2026-03-14 12:12 — Configure ESLint, Prettier, Husky pre-commit (lint-staged + type-check)
 - [x] 2026-03-14 12:12 — Align framework versions with project conventions or document divergence
+- [x] 2026-03-14 13:32 — Ignore Supabase local CLI temp artifacts in `.gitignore` (`supabase/.temp/`)
+- [x] 2026-03-14 13:37 — Fix `pnpm run dev` env loading by sourcing workspace-root `.env` from `apps/web` scripts
 
 ## Phase 1 — Product Definition & Architecture
 
@@ -22,14 +24,14 @@
 
 ## Phase 2 — Database & Auth
 
-- [ ] Write and apply migrations 001–009 (see SCHEMA.md for full table list)
-- [ ] Enable RLS on every table; verify default-deny policy
-- [ ] Implement custom JWT claim `org_id` via Supabase auth hook
-- [ ] Implement Supabase auth: email/password + Google OAuth
-- [ ] Session refresh middleware, protected dashboard layout, redirect on unauthenticated
-- [ ] Org creation on first login; invitation flow for org members
-- [ ] Write `seed.sql`: 2 demo orgs, 10 suppliers (tiers 1–3), 5 regions, 3 active risk events, 2 open incidents, multiple alerts, contracts, and inventory records
-- [ ] Verify demo data is visible immediately after deploy with no manual setup
+- [~] 2026-03-14 13:29 — Authored migrations 001–009 plus `supabase/config.toml`; apply is pending against the hosted development Supabase project
+- [~] 2026-03-14 13:29 — RLS policies authored across all tables with default-deny posture; verification is pending hosted-project migration apply
+- [~] 2026-03-14 13:29 — Implemented custom JWT claim `org_id` via Supabase auth hook SQL + local config; pending hosted-project hook configuration and verification
+- [x] 2026-03-14 13:15 — Implement Supabase auth: email/password + Google OAuth
+- [x] 2026-03-14 13:15 — Session refresh middleware, protected dashboard layout, redirect on unauthenticated
+- [x] 2026-03-14 13:15 — Org creation on first login; invitation flow for org members
+- [x] 2026-03-14 13:15 — Write `seed.sql`: 2 demo orgs, 10 suppliers (tiers 1–3), 5 regions, 3 active risk events, 2 open incidents, multiple alerts, contracts, and inventory records
+- [!] 2026-03-14 13:29 — Verify demo data is visible immediately after deploy with no manual setup
 
 ## Phase 3 — Data Ingestion & Risk Engine
 
