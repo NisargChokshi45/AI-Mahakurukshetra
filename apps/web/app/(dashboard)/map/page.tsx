@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { dependencyMap } from '@/lib/demo-data';
 import {
   PageHeader,
   RiskScoreBadge,
   SectionCard,
+  buttonStyles,
 } from '@/components/dashboard/ui';
 
 export const metadata: Metadata = {
@@ -26,6 +28,11 @@ export default function MapPage() {
         eyebrow="Dependency view"
         title="A supply chain map that shows who depends on whom, and where risk is stacking."
         description="The seeded map uses tiered columns instead of a heavy graph library, which keeps the MVP fast and reliable while still making the dependency story legible."
+        actions={
+          <Link href="/suppliers" className={buttonStyles('secondary')}>
+            View supplier directory
+          </Link>
+        }
       />
 
       <SectionCard
@@ -33,7 +40,7 @@ export default function MapPage() {
         title="Org → tiered supplier dependency graph"
         description="Nodes are color-coded with the same risk score language used throughout the dashboard."
       >
-        <div className="grid gap-5 xl:grid-cols-4">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {tiers.map((tier) => (
             <div key={tier} className="space-y-4">
               <div className="border-border/70 bg-background/75 rounded-full border px-4 py-3 text-sm font-semibold">
@@ -41,38 +48,54 @@ export default function MapPage() {
               </div>
               {dependencyMap
                 .filter((node) => node.tier === tier)
-                .map((node) => (
-                  <article
-                    key={node.id}
-                    className="border-border/70 bg-background/80 rounded-[24px] border p-4"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="font-semibold">{node.label}</p>
-                        <p className="text-muted-foreground mt-1 text-sm">
-                          {node.region}
-                        </p>
+                .map((node) => {
+                  const inner = (
+                    <>
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="font-semibold">{node.label}</p>
+                          <p className="text-muted-foreground mt-1 text-sm">
+                            {node.region}
+                          </p>
+                        </div>
+                        <RiskScoreBadge score={node.riskScore} />
                       </div>
-                      <RiskScoreBadge score={node.riskScore} />
-                    </div>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {node.dependencyLabels.length === 0 ? (
-                        <span className="text-muted-foreground text-sm">
-                          No downstream nodes
-                        </span>
-                      ) : (
-                        node.dependencyLabels.map((dependency) => (
-                          <span
-                            key={dependency}
-                            className="border-border/70 text-muted-foreground rounded-full border px-3 py-2 text-sm"
-                          >
-                            {dependency}
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {node.dependencyLabels.length === 0 ? (
+                          <span className="text-muted-foreground text-sm">
+                            No downstream nodes
                           </span>
-                        ))
-                      )}
-                    </div>
-                  </article>
-                ))}
+                        ) : (
+                          node.dependencyLabels.map((dependency) => (
+                            <span
+                              key={dependency}
+                              className="border-border/70 text-muted-foreground rounded-full border px-3 py-2 text-sm"
+                            >
+                              {dependency}
+                            </span>
+                          ))
+                        )}
+                      </div>
+                    </>
+                  );
+
+                  return node.supplierId ? (
+                    <Link
+                      key={node.id}
+                      href={`/suppliers/${node.supplierId}`}
+                      className="border-border/70 bg-background/80 block rounded-[24px] border p-4 transition hover:border-slate-300 hover:shadow-sm"
+                    >
+                      {inner}
+                    </Link>
+                  ) : (
+                    <article
+                      key={node.id}
+                      className="border-border/70 bg-background/80 rounded-[24px] border p-4"
+                    >
+                      {inner}
+                    </article>
+                  );
+                })}
             </div>
           ))}
         </div>

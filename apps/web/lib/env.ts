@@ -1,5 +1,14 @@
 import { z } from 'zod';
 
+const optionalNonEmptyString = z.preprocess((value) => {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}, z.string().optional());
+
 const publicEnvSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
@@ -17,8 +26,8 @@ const serverEnvSchema = publicEnvSchema.extend({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
-  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
-  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: optionalNonEmptyString,
+  UPSTASH_REDIS_REST_URL: optionalNonEmptyString,
 });
 
 export function getPublicEnv() {

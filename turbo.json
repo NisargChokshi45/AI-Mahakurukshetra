@@ -27,7 +27,8 @@
       "dependsOn": ["^test"]
     },
     "test:e2e": {
-      "cache": false
+      "cache": false,
+      "env": ["E2E_TEST_EMAIL", "E2E_TEST_PASSWORD", "NEXT_PUBLIC_APP_URL"]
     },
     "format": {
       "cache": false

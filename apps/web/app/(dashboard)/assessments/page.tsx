@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { assessments, getSupplierName } from '@/lib/demo-data';
 import {
   PageHeader,
@@ -23,6 +24,16 @@ export default function AssessmentsPage() {
         eyebrow="Assessments"
         title="Plan, track, and complete supplier assessments from one operational queue."
         description="Assessments close the loop between monitoring and remediation. This page keeps upcoming work and completed reviews visible for procurement and risk owners."
+        actions={
+          <>
+            <Link href="/suppliers" className={buttonStyles('secondary')}>
+              View suppliers
+            </Link>
+            <Link href="/incidents" className={buttonStyles('primary')}>
+              View incidents
+            </Link>
+          </>
+        }
       />
 
       <div className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
@@ -73,9 +84,10 @@ export default function AssessmentsPage() {
         >
           <div className="grid gap-4">
             {assessments.map((assessment) => (
-              <article
+              <Link
                 key={assessment.id}
-                className="border-border/70 bg-background/80 rounded-[24px] border p-4"
+                href={`/suppliers/${assessment.supplierId}`}
+                className="border-border/70 bg-background/80 block rounded-[24px] border p-4 transition hover:border-slate-300 hover:shadow-sm"
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
@@ -98,7 +110,7 @@ export default function AssessmentsPage() {
                   </div>
                   <RiskScoreBadge score={assessment.score} />
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         </SectionCard>

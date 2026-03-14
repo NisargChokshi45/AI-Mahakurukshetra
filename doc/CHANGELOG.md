@@ -56,3 +56,41 @@
 - Refactored auth callback redirect sanitization helper into `apps/web/lib/security/redirects.ts` (`resolveSafeNextPath`) and reused it in `apps/web/app/auth/callback/route.ts`.
 - Fixed Vitest execution in app-scoped runs by updating `vitest.config.ts` include/setup paths and aliasing `server-only` for test runtime; added `apps/web/vitest.d.ts` and `tests/setup/server-only.ts`.
 - Added `apps/web/components/auth/password-input.tsx` and integrated it into `apps/web/app/(auth)/login/page.tsx` to support password show/hide with eye/eye-off toggle while preserving the existing server-action sign-in flow.
+- Replaced static billing placeholders in `apps/web/app/(dashboard)/settings/billing/page.tsx` with live Supabase-backed data (`prices`, `subscriptions`, `payment_history`, `suppliers` count), including RBAC-aware owner visibility messaging and dynamic active/inactive/available plan badges.
+- Added Stripe server integration: `apps/web/lib/stripe/server.ts`, `apps/web/app/api/stripe/checkout/route.ts`, and `apps/web/app/api/stripe/portal/route.ts`, plus billing-page form wiring to submit directly to these routes for real checkout/portal redirects.
+- Added `stripe` package dependency to `apps/web/package.json` and refreshed workspace lockfile via `pnpm install`.
+- Added `apps/web/app/api/stripe/invoice/latest/route.ts` for owner-only latest invoice download redirects via Stripe hosted invoice URL.
+- Added `apps/web/app/api/stripe/webhook/route.ts` to verify Stripe signatures and sync `customer.subscription.*`, `checkout.session.completed`, and `invoice.payment_*` events into `subscriptions` and `payment_history`.
+- Added reusable Stripe sync helpers/tests in `apps/web/lib/stripe/sync.ts` and `apps/web/lib/stripe/sync.test.ts`.
+- Updated billing UI actions in `apps/web/app/(dashboard)/settings/billing/page.tsx` so “Download latest invoice” now posts to the live invoice route.
+- Added `doc/QA_ERRORS.md` as a session QA ledger and recorded root-cause/fix verification for browser/runtime issues discovered during role-based QA.
+- Hardened origin allowlist matching in `apps/web/lib/security/origins.ts` to treat loopback hosts (`localhost`, `127.0.0.1`, `::1`) as equivalent for exact-origin rules when protocol/port match, preventing server-action failures on loopback aliases.
+- Added `apps/web/lib/security/origins.test.ts` to cover exact origin checks and loopback-equivalence behavior.
+- Stabilized authenticated E2E flow in `tests/e2e/critical-incident-flow.spec.ts` by increasing dashboard redirect/content assertion timeouts.
+- Fixed stale incident status rendering after resolve by forcing dynamic rendering in `apps/web/app/(dashboard)/incidents/[id]/page.tsx`.
+- Expanded `.env.example` local allowlists to include `http://127.0.0.1:3000` for both `ALLOWED_ORIGINS` and `ALLOWED_REDIRECT_URLS`.
+- Fixed auth session-refresh reliability in `apps/web/lib/supabase/middleware.ts` by awaiting `supabase.auth.getUser()` before returning the proxy response, ensuring refreshed cookies are persisted after access-token expiry.
+- Updated `apps/web/proxy.ts` to `await updateSession(request)` on all paths so session refresh completes deterministically for API and page requests.
+- Updated header brand navigation in `apps/web/components/landing/landing-page.tsx` and `apps/web/app/(dashboard)/layout.tsx` so logo/brand clicks route users to `/dashboard`.
+- Updated `apps/web/app/(auth)/actions.ts` sign-out flow to redirect to `/dashboard` instead of `/login`.
+- Updated `apps/web/app/(dashboard)/layout.tsx` to render a persistent authenticated-dashboard footer (organization + platform context) and made the shell a flex column with `main` using `flex-1` so the footer stays anchored at the bottom across routes.
+- Redesigned `apps/web/app/(dashboard)/settings/members/page.tsx` into a production-style member-management workspace with: organization-level member metrics, role guide, refined invite form, searchable member directory, clearer identity cards, and guarded inline role/remove actions.
+- Added dummy Stripe flow routes for local/demo testing: `apps/web/app/api/stripe/dummy/checkout/route.ts`, `apps/web/app/api/stripe/dummy/portal/route.ts`, and `apps/web/app/api/stripe/dummy/invoice/latest/route.ts`.
+- Updated `apps/web/app/(dashboard)/settings/billing/page.tsx` to detect missing Stripe key and automatically route billing actions to dummy endpoints, including inline dummy-mode messaging.
+- Fixed incident resolve reliability in `apps/web/app/(dashboard)/incidents/page.tsx` and `apps/web/app/(dashboard)/incidents/[id]/page.tsx` by scoping incident, risk-event, and incident-action queries to the active organization context; this aligns board/workspace reads with the existing org-scoped resolve update action.
+- Added a full footer section to `apps/web/components/landing/landing-page.tsx` with brand context, in-page navigation links (`#capabilities`, `#workflow`, `#proof`), and primary access links (`/login`, `/signup`, `/dashboard`) to improve landing-page completeness.
+- Refactored `apps/web/app/(dashboard)/dashboard/page.tsx` top KPI row from simple counts into four real-world operational cards backed by org-scoped live data: supplier risk exposure mix, active disruption financial impact, alert pressure queue, and response performance (MTTR + false-positive trend vs previous sample).
+- Updated `apps/web/app/(auth)/actions.ts` `signOutAction()` redirect target from `/dashboard` to `/` so logout consistently lands on the public home page.
+- Added `apps/web/app/logout/route.ts` so direct `/logout` requests (GET/POST) execute sign-out and redirect to `/`.
+- Aligned `apps/web/app/(auth)/actions.ts` `signOutAction()` redirect target to `/` for consistency with `/logout` route behavior.
+- Hardened `apps/web/app/(dashboard)/dashboard/page.tsx` supplier watchlist cards to tolerate nullable `slug`, `tier`, and `current_risk_score` values via safe fallbacks, improving `/map` → `/dashboard` navigation robustness.
+- Updated `apps/web/app/(dashboard)/layout.tsx` authenticated header to include broader primary navigation, direct settings/risk shortcuts, and a logged-in profile menu with profile/organization/billing links plus sign-out action.
+- Redesigned `apps/web/app/(dashboard)/reports/page.tsx` to improve form clarity, CTA hierarchy, and queue card scanability while adding richer report metadata.
+- Added `apps/web/app/(dashboard)/reports/_components/report-preview-card.tsx` with a realistic dummy executive report preview (highlights, risk drivers, and mitigation timeline) for judge/demo walkthrough quality.
+- Added `apps/web/components/dashboard/header-user-menu.tsx` and refactored `apps/web/app/(dashboard)/layout.tsx` to use a fixed popup-style user menu overlay (outside-click + escape close) so opening account actions no longer triggers dashboard scroll shifts.
+- Fixed `apps/web/app/(dashboard)/reports/page.tsx` preview CTA wiring: `Generate preview` now submits a `preview` query, queue `Open preview` links now target `?preview=<reportId>#report-preview`, and the page resolves/loads the selected preview report server-side.
+- Added `apps/web/app/api/reports/export/route.ts` to generate authenticated dummy CSV downloads for report exports, including attachment headers and structured request logging.
+- Updated `apps/web/app/(dashboard)/reports/page.tsx` queue `Export CSV` CTAs to call `/api/reports/export?reportId=<id>`, so clicking export now downloads a dummy CSV file for the selected report.
+- Refactored `apps/web/app/(dashboard)/risk-events/page.tsx` into an operations-oriented command-center layout with org-scoped DB reads, disruption-linked supplier impact mapping, KPI summary cards, and improved escalation/context side panels.
+- Rebuilt `apps/web/components/risk/risk-event-list.tsx` with production-style feed UX: search input, data-driven filter options (type/region/severity/status), filter reset, result-count bar, richer card metadata (source/date/region/type), optional source link, and explicit supplier-impact indicators.
+- Redesigned `apps/web/app/(dashboard)/settings/billing/page.tsx` into a clearer billing experience with KPI summary cards, a billing control-center panel, richer plan catalog cards, and governance checkpoints while preserving live Stripe/dummy billing actions and owner-only RBAC behavior.

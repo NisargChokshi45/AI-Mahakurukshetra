@@ -109,6 +109,8 @@ export type DependencyNode = {
   region: string;
   riskScore: number;
   dependencyLabels: string[];
+  /** Slug used to link to the supplier detail page (undefined for Org node) */
+  supplierId?: string;
 };
 
 export const organization = {
@@ -624,6 +626,7 @@ export const dependencyMap: DependencyNode[] = [
     region: 'East Asia',
     riskScore: 84,
     dependencyLabels: ['Blue Ridge Minerals'],
+    supplierId: 'aurora-electronics',
   },
   {
     id: 'dep-northwind',
@@ -632,6 +635,7 @@ export const dependencyMap: DependencyNode[] = [
     region: 'Europe',
     riskScore: 71,
     dependencyLabels: ['Delta Forge'],
+    supplierId: 'northwind-polymers',
   },
   {
     id: 'dep-solstice',
@@ -640,6 +644,7 @@ export const dependencyMap: DependencyNode[] = [
     region: 'North America',
     riskScore: 44,
     dependencyLabels: ['Summit Logistics'],
+    supplierId: 'solstice-packaging',
   },
   {
     id: 'dep-delta',
@@ -648,6 +653,7 @@ export const dependencyMap: DependencyNode[] = [
     region: 'North America',
     riskScore: 78,
     dependencyLabels: ['Blue Ridge Minerals'],
+    supplierId: 'delta-forge',
   },
   {
     id: 'dep-summit',
@@ -656,6 +662,7 @@ export const dependencyMap: DependencyNode[] = [
     region: 'South Asia',
     riskScore: 67,
     dependencyLabels: [],
+    supplierId: 'summit-logistics',
   },
   {
     id: 'dep-blue-ridge',
@@ -664,6 +671,7 @@ export const dependencyMap: DependencyNode[] = [
     region: 'Africa',
     riskScore: 62,
     dependencyLabels: [],
+    supplierId: 'blue-ridge-minerals',
   },
 ];
 

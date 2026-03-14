@@ -36,6 +36,8 @@
 - [x] 2026-03-14 16:25 — Fix post-create redirect loop by resolving Supabase embedded `organizations` relation as object-or-array in auth context
 - [x] 2026-03-14 16:35 — Fix cross-tab auth sync so open public tabs (`/`, `/login`, `/signup`) auto-redirect to `/dashboard` after sign-in in another tab
 - [x] 2026-03-14 16:38 — Remove logout status querystring redirects so sign-out always routes to `/login` without `?message=...`
+- [x] 2026-03-14 18:15 — Fix idle-session logout by awaiting Supabase auth refresh in proxy session middleware before returning response cookies
+- [x] 2026-03-14 18:33 — Fix logout navigation: `signOutAction` and new `/logout` route now both sign out and redirect to `/`
 - [x] 2026-03-14 13:15 — Write `seed.sql`: 2 demo orgs, 10 suppliers (tiers 1–3), 5 regions, 3 active risk events, 2 open incidents, multiple alerts, contracts, and inventory records
 - [x] 2026-03-14 15:55 — Verified demo data is visible immediately after deploy with no manual setup
 
@@ -80,8 +82,8 @@
 - [x] 2026-03-14 16:50 — P0: Add org-bound supplier validation + DB-level guardrails for supplier-linked risk rows (`disruptions`, `risk_scores`, `alerts`)
 - [x] 2026-03-14 16:51 — P1: Make risk ingestion writes transactional (event + disruptions + scores + alerts) to avoid partial persistence
 - [x] 2026-03-14 17:05 — Unit tests: risk scoring engine, Zod validation schemas, auth utility functions
-- [ ] E2E tests: login → dashboard → supplier detail → create incident → resolve incident
-- [ ] Verify RLS: user from org A cannot read or write org B data
+- [x] 2026-03-14 18:07 — E2E tests: login → dashboard → supplier detail → create incident → resolve incident
+- [x] 2026-03-14 18:07 — Verify RLS: user from org A cannot read or write org B data
 - [ ] Security checklist: no secrets in client bundle, all mutations require auth, webhooks verify signatures, input validated on every API route
 - [ ] pino structured logging on all API route handlers (request ID, user ID, org ID, status, latency)
 - [ ] `GET /api/health` returns DB + Redis connectivity, app version, uptime
@@ -95,6 +97,24 @@
 - [x] 2026-03-14 14:58 — Add planned settings UI surfaces for `/settings/profile`, `/settings/organization`, `/settings/members`, and stretch pages `/settings/billing`, `/mitigation`
 - [x] 2026-03-14 14:58 — Add judge-facing placeholder UI at `/api/docs` until the real Swagger/OpenAPI surface is wired
 - [x] 2026-03-14 17:01 — Add login password visibility toggle with eye icon to show/hide password input text
+- [x] 2026-03-14 18:27 — Redesign `/settings/members` into a production-ready member management experience (metrics, invite panel, searchable member directory, clear role/status/action affordances)
+- [x] 2026-03-14 18:29 — Add production footer section on landing page with brand context, product navigation, and access links
+- [x] 2026-03-14 18:00 — Bind `/settings/billing` to live Supabase pricing/subscription/payment data and render RBAC-aware active/inactive status from real records
+- [x] 2026-03-14 18:08 — Wire `/settings/billing` actions to real Stripe handlers (`POST /api/stripe/checkout`, `POST /api/stripe/portal`) and connect plan/portal buttons to server-side session redirects
+- [x] 2026-03-14 18:16 — Implement Stripe invoice download action and webhook sync route (`/api/stripe/webhook`) to persist subscription/payment lifecycle events into Supabase billing tables
+- [x] 2026-03-14 18:27 — Generate a dummy Stripe payment flow with local demo routes (`/api/stripe/dummy/*`) and automatic billing-action fallback when Stripe keys are not configured
+- [x] 2026-03-14 18:17 — Update header logo navigation so brand clicks route to `/dashboard`
+- [x] 2026-03-14 18:19 — Add a global footer to the authenticated dashboard layout shell
+- [x] 2026-03-14 18:28 — Fix incident “Mark as resolved” reliability by scoping incidents board/workspace queries to the active organization
+- [x] 2026-03-14 18:45 — Upgrade dashboard KPI cards with real-world operational metrics (risk exposure, disruption cost, alert pressure, and response-performance trend context)
+- [x] 2026-03-14 18:37 — Harden `/dashboard` supplier watchlist rendering (nullable slug/tier/risk) to stabilize `/map` → `/dashboard` navigation behavior
+- [x] 2026-03-14 18:39 — Expand authenticated header with primary app links, settings shortcuts, and a logged-in user profile menu/actions
+- [x] 2026-03-14 18:44 — Redesign `/reports` with a realistic dummy preview panel and improved generation/queue visual hierarchy
+- [x] 2026-03-14 18:47 — Replace header user menu dropdown with popup overlay behavior to prevent dashboard scroll shift when opening profile actions
+- [x] 2026-03-14 18:47 — Fix `/reports` preview CTAs by wiring query-driven preview selection and anchor navigation to the preview panel
+- [x] 2026-03-14 18:50 — Implement dummy `/reports` CSV download flow and wire `Export CSV` CTAs to authenticated export endpoint
+- [x] 2026-03-14 18:51 — Redesign `/risk-events` route with an operations-focused layout, richer event cards, and practical triage filtering/search experience
+- [x] 2026-03-14 18:54 — Redesign `/settings/billing` for clearer hierarchy (control center, plan catalog, KPI strip, and governance checkpoints) while preserving live billing actions
 
 ## Phase 7 — Launch
 

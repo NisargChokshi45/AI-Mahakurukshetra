@@ -714,7 +714,9 @@ insert into public.incidents (
 )
 values
   ('83000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', '81000000-0000-0000-0000-000000000001', '80000000-0000-0000-0000-000000000001', 'Stabilize Edge Sensor Hub board supply', 'Coordinate alternate routing and inventory buffers for Pacific Circuits output drop.', 'investigating', 'critical', '10000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001'),
-  ('83000000-0000-0000-0000-000000000002', '30000000-0000-0000-0000-000000000002', '81000000-0000-0000-0000-000000000002', '80000000-0000-0000-0000-000000000003', 'Recover battery metals release schedule', 'Track compliance remediation and alternate sourcing for Danube Battery Metals.', 'mitigating', 'high', '10000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002')
+  ('83000000-0000-0000-0000-000000000002', '30000000-0000-0000-0000-000000000002', '81000000-0000-0000-0000-000000000002', '80000000-0000-0000-0000-000000000003', 'Recover battery metals release schedule', 'Track compliance remediation and alternate sourcing for Danube Battery Metals.', 'mitigating', 'high', '10000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002'),
+  ('83000000-0000-0000-0000-000000000003', '30000000-0000-0000-0000-000000000001', null, null, 'Qualify backup supplier for Meridian power modules', 'Procurement and risk teams are validating a second source after repeated delivery slips.', 'new', 'high', '10000000-0000-0000-0000-000000000004', '10000000-0000-0000-0000-000000000004'),
+  ('83000000-0000-0000-0000-000000000004', '30000000-0000-0000-0000-000000000001', null, '80000000-0000-0000-0000-000000000002', 'South China port lane reallocation completed', 'Carrier mix and lane controls restored expected lead-time variance.', 'resolved', 'medium', '10000000-0000-0000-0000-000000000003', '10000000-0000-0000-0000-000000000003')
 on conflict do nothing;
 
 insert into public.incident_actions (
@@ -728,7 +730,9 @@ insert into public.incident_actions (
 values
   ('30000000-0000-0000-0000-000000000001', '83000000-0000-0000-0000-000000000001', 'Confirm 7-day finished goods buffer at east coast warehouse', '10000000-0000-0000-0000-000000000001', current_date + 1, 'in_progress'),
   ('30000000-0000-0000-0000-000000000001', '83000000-0000-0000-0000-000000000001', 'Evaluate alternate carrier allocation from Kaohsiung', '10000000-0000-0000-0000-000000000001', current_date + 2, 'todo'),
-  ('30000000-0000-0000-0000-000000000002', '83000000-0000-0000-0000-000000000002', 'Escalate audit documentation with regional compliance counsel', '10000000-0000-0000-0000-000000000002', current_date + 1, 'in_progress')
+  ('30000000-0000-0000-0000-000000000002', '83000000-0000-0000-0000-000000000002', 'Escalate audit documentation with regional compliance counsel', '10000000-0000-0000-0000-000000000002', current_date + 1, 'in_progress'),
+  ('30000000-0000-0000-0000-000000000001', '83000000-0000-0000-0000-000000000003', 'Validate backup supplier quality checklist', '10000000-0000-0000-0000-000000000005', current_date + 3, 'todo'),
+  ('30000000-0000-0000-0000-000000000001', '83000000-0000-0000-0000-000000000004', 'Publish post-incident lane playbook', '10000000-0000-0000-0000-000000000003', current_date - 1, 'done')
 on conflict do nothing;
 
 insert into public.mitigation_plans (
@@ -826,7 +830,9 @@ insert into public.metrics (
 )
 values
   ('30000000-0000-0000-0000-000000000001', timezone('utc', now()) - interval '1 day', 5, 3, 1, 19.5, 4.2),
-  ('30000000-0000-0000-0000-000000000002', timezone('utc', now()) - interval '1 day', 5, 2, 1, 15.0, 3.1)
+  ('30000000-0000-0000-0000-000000000001', timezone('utc', now()) - interval '4 hours', 5, 2, 2, 16.8, 3.8),
+  ('30000000-0000-0000-0000-000000000002', timezone('utc', now()) - interval '1 day', 5, 2, 1, 15.0, 3.1),
+  ('30000000-0000-0000-0000-000000000002', timezone('utc', now()) - interval '4 hours', 5, 1, 1, 13.4, 2.9)
 on conflict do nothing;
 
 insert into public.notifications (

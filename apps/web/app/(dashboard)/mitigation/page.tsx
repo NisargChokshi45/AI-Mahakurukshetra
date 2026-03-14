@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import {
   PageHeader,
   SectionCard,
@@ -40,6 +41,16 @@ export default function MitigationPage() {
         eyebrow="Mitigation"
         title="Formal response plans for recurring or high-impact supply risk."
         description="This stretch page turns recurring incident actions into reusable mitigation plans with ownership and status tracking."
+        actions={
+          <>
+            <Link href="/incidents" className={buttonStyles('secondary')}>
+              View incidents
+            </Link>
+            <Link href="/risk-events" className={buttonStyles('primary')}>
+              View risk events
+            </Link>
+          </>
+        }
       />
 
       <div className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">

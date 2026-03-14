@@ -6,6 +6,7 @@ import {
   resolveOrganizationSupplierIds,
 } from '@/lib/risk-pipeline';
 import { getServerEnv } from '@/lib/env';
+import { logRequestResponse, startRequestLog } from '@/lib/logger/http';
 import { monitoringWebhookSchema } from '@/lib/validations/risk';
 
 const orgHeaderSchema = z.string().uuid();
@@ -24,13 +25,43 @@ function timingSafeCompare(a: string, b: string): boolean {
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  const requestLog = startRequestLog({
+    method: request.method,
+    pathname: request.nextUrl.pathname,
+    requestId: request.headers.get('x-request-id'),
+  });
+
+  const respond = (
+    status: number,
+    payload: Record<string, string | number>,
+    options?: {
+      level?: 'error' | 'info' | 'warn';
+      message?: string;
+      metadata?: Record<string, unknown>;
+    },
+  ) => {
+    const response = NextResponse.json(payload, { status });
+    response.headers.set('x-request-id', requestLog.requestId);
+    logRequestResponse(requestLog, {
+      status,
+      level: options?.level,
+      message: options?.message ?? 'Monitoring webhook handled.',
+      metadata: options?.metadata,
+    });
+    return response;
+  };
+
   const env = getServerEnv();
   const secret = env.MONITORING_WEBHOOK_SECRET;
 
   if (!secret) {
-    return NextResponse.json(
+    return respond(
+      500,
       { error: 'MONITORING_WEBHOOK_SECRET is not configured' },
-      { status: 500 },
+      {
+        level: 'error',
+        message: 'Monitoring webhook misconfigured.',
+      },
     );
   }
 
@@ -46,14 +77,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     : '';
 
   if (!receivedHex || !timingSafeCompare(expectedHex, receivedHex)) {
-    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    return respond(401, { error: 'Invalid signature' }, { level: 'warn' });
   }
 
   let body: unknown;
   try {
     body = JSON.parse(rawBody);
   } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    return respond(400, { error: 'Invalid JSON body' }, { level: 'warn' });
   }
 
   const parsed = monitoringWebhookSchema
@@ -61,15 +92,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     .safeParse(body);
   if (!parsed.success) {
     const message = parsed.error.issues[0]?.message ?? 'Validation failed.';
-    return NextResponse.json({ error: message }, { status: 400 });
+    return respond(400, { error: message }, { level: 'warn' });
   }
 
   const rawOrgId = request.headers.get('x-org-id') ?? '';
   const orgIdParsed = orgHeaderSchema.safeParse(rawOrgId);
   if (!orgIdParsed.success) {
-    return NextResponse.json(
+    return respond(
+      400,
       { error: 'x-org-id header must be a valid organization UUID' },
-      { status: 400 },
+      { level: 'warn' },
     );
   }
 
@@ -80,12 +112,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   );
 
   if (supplierResolution.invalidSupplierIds.length > 0) {
-    return NextResponse.json(
+    return respond(
+      400,
       {
         error:
           'One or more supplier_ids are invalid for the provided organization.',
       },
-      { status: 400 },
+      {
+        level: 'warn',
+        metadata: {
+          invalid_supplier_ids: supplierResolution.invalidSupplierIds.length,
+          organization_id: organizationId,
+        },
+      },
     );
   }
 
@@ -106,19 +145,37 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       riskEventId: null,
     });
 
-    return NextResponse.json(
+    return respond(
+      201,
       {
         id: result.riskEventId,
         alerts_created: result.alertsCreated,
         scores_inserted: result.scoresInserted,
       },
-      { status: 201 },
+      {
+        message: 'Monitoring webhook ingested successfully.',
+        metadata: {
+          alerts_created: result.alertsCreated,
+          organization_id: organizationId,
+          risk_event_id: result.riskEventId,
+          scores_inserted: result.scoresInserted,
+        },
+      },
     );
   } catch (error) {
     const message =
       error instanceof Error
         ? error.message
         : 'Risk pipeline transaction failed';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return respond(
+      500,
+      { error: message },
+      {
+        level: 'error',
+        metadata: {
+          organization_id: organizationId,
+        },
+      },
+    );
   }
 }

@@ -10,6 +10,7 @@ type AllowedOriginRule =
     };
 
 const WILDCARD_ORIGIN_REGEX = /^(https?):\/\/\*\.(.+)$/i;
+const LOOPBACK_HOSTNAMES = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
 
 function parseCsvEnv(value: string | undefined): string[] {
   if (!value) {
@@ -73,7 +74,31 @@ function matchesAllowedOriginRule(
   rule: AllowedOriginRule,
 ): boolean {
   if (rule.type === 'exact') {
-    return origin.origin.toLowerCase() === rule.origin;
+    const normalizedOrigin = origin.origin.toLowerCase();
+    if (normalizedOrigin === rule.origin) {
+      return true;
+    }
+
+    try {
+      const allowed = new URL(rule.origin);
+      const isLoopbackPair =
+        LOOPBACK_HOSTNAMES.has(origin.hostname.toLowerCase()) &&
+        LOOPBACK_HOSTNAMES.has(allowed.hostname.toLowerCase());
+
+      if (!isLoopbackPair) {
+        return false;
+      }
+
+      const originProtocol = origin.protocol.toLowerCase();
+      const allowedProtocol = allowed.protocol.toLowerCase();
+      if (originProtocol !== allowedProtocol) {
+        return false;
+      }
+
+      return origin.port === allowed.port;
+    } catch {
+      return false;
+    }
   }
 
   if (origin.protocol.replace(':', '').toLowerCase() !== rule.protocol) {

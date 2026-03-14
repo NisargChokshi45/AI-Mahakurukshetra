@@ -48,9 +48,19 @@ function getPublicApiConfig(pathname: string): PublicRateLimitConfig | null {
 }
 
 function isRateLimitConfigured(): boolean {
-  return Boolean(
-    process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN,
-  );
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL?.trim();
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+
+  if (!redisUrl || !redisToken) {
+    return false;
+  }
+
+  try {
+    new URL(redisUrl);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function getLimiter(pathname: string): Ratelimit | null {

@@ -14,6 +14,12 @@ export function getRedisClient() {
     throw new Error('Upstash Redis credentials are not configured.');
   }
 
+  try {
+    new URL(env.UPSTASH_REDIS_REST_URL);
+  } catch {
+    throw new Error('UPSTASH_REDIS_REST_URL must be a valid URL.');
+  }
+
   redisClient = new Redis({
     token: env.UPSTASH_REDIS_REST_TOKEN,
     url: env.UPSTASH_REDIS_REST_URL,

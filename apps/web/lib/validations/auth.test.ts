@@ -1,7 +1,9 @@
 import {
+  deleteMemberSchema,
   inviteMemberSchema,
   signInSchema,
   signUpSchema,
+  updateMemberRoleSchema,
 } from '@/lib/validations/auth';
 
 describe('auth validations', () => {
@@ -37,6 +39,32 @@ describe('auth validations', () => {
     const result = inviteMemberSchema.safeParse({
       email: 'new.user@example.com',
       role: 'owner',
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts role update payload for non-owner roles', () => {
+    const result = updateMemberRoleSchema.safeParse({
+      role: 'admin',
+      userId: 'ef13c65e-c1c2-4fbf-b649-ddc9f28955c7',
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects owner role in member role update payload', () => {
+    const result = updateMemberRoleSchema.safeParse({
+      role: 'owner',
+      userId: 'ef13c65e-c1c2-4fbf-b649-ddc9f28955c7',
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('requires UUID for member deletion payload', () => {
+    const result = deleteMemberSchema.safeParse({
+      userId: 'not-a-uuid',
     });
 
     expect(result.success).toBe(false);

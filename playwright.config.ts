@@ -7,8 +7,14 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? 'github' : 'list',
   use: {
-    baseURL: process.env.NEXT_PUBLIC_APP_URL ?? 'http://127.0.0.1:3000',
+    baseURL: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
     trace: 'on-first-retry',
+  },
+  webServer: {
+    command: 'pnpm --filter @repo/web dev',
+    port: 3000,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
   },
   projects: [
     {

@@ -48,13 +48,13 @@ export async function proxy(request: NextRequest) {
         return blocked;
       }
 
-      const response = updateSession(request);
+      const response = await updateSession(request);
       appendCorsHeaders(response, allowedCorsOrigin);
       appendRateLimitHeaders(response.headers, rateLimit);
       return response;
     }
 
-    const response = updateSession(request);
+    const response = await updateSession(request);
     appendCorsHeaders(response, allowedCorsOrigin);
     return response;
   }
@@ -69,7 +69,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  return updateSession(request);
+  return await updateSession(request);
 }
 
 export const config = {

@@ -194,3 +194,123 @@ Next.js route modules cannot export arbitrary helpers without violating route ty
 
 Reason:
 The login form submits through a server action, but password show/hide requires browser state. A small client `PasswordInput` component provides the eye toggle without converting the full page to client rendering or changing the auth mutation flow.
+
+### Decision: Billing page reads live subscription state from RLS-scoped tables and avoids service-role bypass
+
+Reason:
+`subscriptions` and `payment_history` are intentionally owner-restricted in RLS. The billing UI now queries those tables with the authenticated server client and renders owner-only details; non-owner users get explicit RBAC messaging instead of privileged data leakage.
+
+### Decision: Use server-side Stripe session routes invoked by standard form POST from billing UI
+
+Reason:
+Billing operations require secret-key-backed Stripe SDK calls and should not expose client-side session creation logic. Wiring `/settings/billing` buttons to `POST /api/stripe/checkout` and `POST /api/stripe/portal` keeps key usage server-only, preserves RBAC checks, and supports direct redirect flows without client JS complexity.
+
+### Decision: Persist Stripe subscription and invoice lifecycle via webhook sync into Supabase billing tables
+
+Reason:
+Relying on front-end actions alone leaves billing state stale when renewals, payment failures, or cancellations occur asynchronously. Handling signed Stripe webhooks server-side keeps `subscriptions` and `payment_history` in sync with the source of truth and enables accurate active/inactive billing status in the app.
+
+### Decision: Treat local loopback hosts as equivalent for exact origin-allowlist rules
+
+Reason:
+Local QA tools and browsers frequently alternate between `localhost` and `127.0.0.1`. Requiring both to be listed for identical protocol/port caused server-action request rejections and unstable local auth behavior. Matching loopback aliases as equivalent preserves origin security while removing non-production QA friction.
+
+### Decision: Force incident workspace route dynamic to avoid stale post-mutation renders
+
+Reason:
+Incident resolve mutations persisted correctly, but `/incidents/[id]` could render stale status immediately after redirect. Marking the page `force-dynamic` ensures post-action reads reflect current database state for operational workflows and E2E assertions.
+
+### Decision: Await Supabase user refresh in proxy middleware before returning responses
+
+Reason:
+Access tokens expire periodically, and refresh writes updated auth cookies through the middleware cookie adapter. Returning the response before `supabase.auth.getUser()` resolves can drop refresh-cookie writes and lead to unexpected idle logouts.
+
+### Decision: Standardize header brand clicks to route to `/dashboard`
+
+Reason:
+Users treat the top-left brand/logo as a home action inside the product. Routing brand clicks to `/dashboard` provides a consistent recovery path to the main operational view from both public and authenticated headers.
+
+### Decision: Redirect sign-out actions to `/dashboard` as the post-logout destination
+
+Reason:
+The latest UX request requires logout to land on the dashboard route rather than `/login`. The server action now uses `/dashboard` as the canonical post-sign-out redirect target.
+
+### Decision: Implement dashboard footer at the shared authenticated layout boundary
+
+Reason:
+Adding the footer in `app/(dashboard)/layout.tsx` guarantees consistent visibility across all protected dashboard routes, avoids duplicated per-page UI, and keeps footer placement stable by using a `flex` column shell with `main` set to `flex-1`.
+
+### Decision: Model `/settings/members` as an operations screen (metrics + invite + searchable directory) instead of a plain list
+
+Reason:
+Member management is a high-frequency admin workflow. Presenting quick coverage metrics, explicit role semantics, and searchable member cards with scoped actions reduces access-management errors and makes permissions decisions faster and more intuitive.
+
+### Decision: Provide a built-in dummy Stripe flow for local/demo environments when `STRIPE_SECRET_KEY` is absent
+
+Reason:
+Billing UX and role flows still need validation without live Stripe credentials. Auto-falling back to `/api/stripe/dummy/*` routes keeps end-to-end billing behavior testable (plan switch, portal, invoice actions) while preserving the real Stripe path whenever credentials are configured.
+
+### Decision: Enforce active-organization scoping on incidents board/workspace reads
+
+Reason:
+The resolve action already updates incidents with `organization_id = context.organization.organizationId`; read paths now apply the same org boundary to avoid mismatches where users could open an incident outside the active org and then fail to mark it resolved.
+
+### Decision: Design dashboard cards around operational decisions, not vanity counts
+
+Reason:
+Judges and operators need immediate action signals. The dashboard now emphasizes decision-grade KPIs (risk exposure mix, active disruption cost, alert backlog pressure, and response effectiveness trends) so users can prioritize triage and mitigation from the first screen.
+
+### Decision: Include a persistent footer on the public landing page for navigation completeness
+
+Reason:
+A production marketing page should provide clear secondary navigation and persistent access actions even after long-scroll sections. Adding a footer with product anchors and auth/dashboard entry points improves discoverability and reduces navigation friction.
+
+### Decision: Route users to the public home page after sign-out
+
+Reason:
+Post-logout navigation should land on a non-protected destination. Redirecting to `/` gives a clear signed-out state and prevents accidental loops or protected-route transitions.
+
+### Decision: Support both action-based and URL-based logout with identical redirect behavior
+
+Reason:
+Users may sign out from UI actions or direct `/logout` links. Handling both through explicit sign-out logic and redirecting to `/` keeps logout behavior predictable and avoids dead-end routes.
+
+### Decision: Make dashboard supplier watchlist rendering null-safe
+
+Reason:
+Some organizations can have incomplete supplier records (`slug`, `tier`, or `current_risk_score` unset). Defensive rendering fallbacks prevent route instability when navigating to `/dashboard` from other dashboard pages such as `/map`.
+
+### Decision: Keep authenticated account utilities directly in the shared dashboard header
+
+Reason:
+Logged-in users need fast access to profile and workspace settings across all protected routes. Placing profile/account actions in the global dashboard header reduces navigation friction and avoids repeating account controls in per-page UIs.
+
+### Decision: Render header profile actions as a popup overlay rather than an in-flow dropdown
+
+Reason:
+The single-row header uses horizontal overflow behavior for responsiveness; in-flow dropdown expansion can create unwanted page scroll shifts. A fixed-position popup overlay preserves layout stability while keeping account actions accessible.
+
+### Decision: Include a first-class dummy report preview surface directly on `/reports`
+
+Reason:
+The report flow was hard to evaluate with only form and queue placeholders. Embedding a realistic preview card (summary metrics, top risk drivers, timeline) makes the output tangible for judges and stakeholders before real PDF generation is wired.
+
+### Decision: Keep report preview selection URL-driven (`?preview=<reportId>`) on the server-rendered reports page
+
+Reason:
+This keeps preview CTAs functional without introducing client-side state complexity and allows direct linking to a specific preview card while preserving RSC-first page architecture.
+
+### Decision: Make `/risk-events` a triage-focused operations screen instead of a plain event list
+
+Reason:
+Risk-event handling is an operational workflow, not just a table view. The route now emphasizes immediate triage decisions through top-level signal KPIs, context-rich feed cards, and explicit escalation guidance so teams can move faster from detection to incident action.
+
+### Decision: Implement report CSV export as an authenticated API attachment response
+
+Reason:
+Export CTAs should trigger a real browser download without client-side file-generation complexity. Serving dummy CSV from `/api/reports/export` with `Content-Disposition: attachment` keeps behavior predictable, secure, and easy to replace with live report data later.
+
+### Decision: Reframe `/settings/billing` as a control-center layout with KPI-first hierarchy
+
+Reason:
+The billing page needed clearer scanability and action clarity. Leading with KPI cards, then grouping operational actions in a dedicated control-center panel, and separating plan selection into a catalog view improves decision speed while keeping existing Stripe/dummy flows unchanged.

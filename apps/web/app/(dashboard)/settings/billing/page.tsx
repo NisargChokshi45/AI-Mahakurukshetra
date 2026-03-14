@@ -1,88 +1,749 @@
 import type { Metadata } from 'next';
 import {
+  ArrowUpRight,
+  CalendarClock,
+  CheckCircle2,
+  CircleDashed,
+  CreditCard,
+  ReceiptText,
+  PauseCircle,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react';
+import { requireOrganizationContext } from '@/lib/auth/session';
+import {
   PageHeader,
   SectionCard,
-  StatusBadge,
   buttonStyles,
 } from '@/components/dashboard/ui';
+import { createClient } from '@/lib/supabase/server';
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'Billing Settings | Supply Chain Risk Intelligence Platform',
-  description: 'Billing and subscription UI placeholder for the platform.',
+  description:
+    'Billing workspace with live subscription state and usage visibility.',
 };
 
-const plans = [
-  { name: 'Starter', suppliers: 'Up to 25 suppliers', status: 'inactive' },
-  { name: 'Professional', suppliers: 'Up to 100 suppliers', status: 'active' },
-  {
-    name: 'Enterprise',
-    suppliers: 'Unlimited visibility',
-    status: 'available',
-  },
-];
+type PlanStatus = 'active' | 'inactive' | 'available';
 
-export default function BillingSettingsPage() {
+type BillingPlan = {
+  ctaLabel: string;
+  description: string;
+  isCheckoutEnabled: boolean;
+  id: string;
+  priceLabel: string;
+  priceValueCents: number;
+  supplierLimit: number | null;
+  status: PlanStatus;
+  statusLabel: string;
+  suppliers: string;
+  title: string;
+};
+
+type PriceRow = {
+  currency: string;
+  id: string;
+  interval: 'month' | 'year';
+  is_active: boolean;
+  nickname: string;
+  supplier_limit: number | null;
+  unit_amount: number;
+};
+
+type SubscriptionRow = {
+  current_period_end: string | null;
+  price_id: string | null;
+  status: 'trialing' | 'active' | 'past_due' | 'canceled';
+};
+
+type PaymentHistoryRow = {
+  amount: number;
+  currency: string;
+  paid_at: string;
+  status: 'succeeded' | 'failed';
+};
+
+type BillingSettingsPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function readMessage(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function formatPrice(currency: string, unitAmount: number, interval: string) {
+  const normalizedInterval = interval === 'year' ? 'yr' : 'mo';
+
+  return (
+    new Intl.NumberFormat('en-US', {
+      currency: currency.toUpperCase(),
+      style: 'currency',
+    }).format(unitAmount / 100) + `/${normalizedInterval}`
+  );
+}
+
+function formatCurrency(currency: string, amountCents: number) {
+  return new Intl.NumberFormat('en-US', {
+    currency: currency.toUpperCase(),
+    style: 'currency',
+  }).format(amountCents / 100);
+}
+
+function formatDate(value: string | null) {
+  if (!value) {
+    return 'Not scheduled';
+  }
+
+  return new Intl.DateTimeFormat('en-US', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(value));
+}
+
+function getSupplierLimitLabel(limit: number | null) {
+  if (!limit) {
+    return 'Flexible supplier scope';
+  }
+
+  if (limit >= 1000000) {
+    return 'Unlimited visibility';
+  }
+
+  return `Up to ${limit} suppliers`;
+}
+
+function getPlanDescription(limit: number | null) {
+  if (!limit) {
+    return 'Flexible supplier monitoring with custom capacity controls.';
+  }
+
+  if (limit <= 25) {
+    return 'Best for smaller supplier footprints with stable monthly volumes.';
+  }
+
+  if (limit <= 100) {
+    return 'Designed for teams coordinating incidents across multiple supplier tiers.';
+  }
+
+  return 'Built for complex multi-region programs with broad supplier networks.';
+}
+
+function resolveSubscriptionActivity(status: SubscriptionRow['status'] | null) {
+  if (!status) {
+    return {
+      badgeLabel: 'Inactive',
+      isActive: false,
+      summaryText: 'No active subscription',
+    };
+  }
+
+  if (status === 'canceled') {
+    return {
+      badgeLabel: 'Inactive',
+      isActive: false,
+      summaryText: 'Canceled',
+    };
+  }
+
+  if (status === 'trialing') {
+    return {
+      badgeLabel: 'Active',
+      isActive: true,
+      summaryText: 'Trialing',
+    };
+  }
+
+  if (status === 'past_due') {
+    return {
+      badgeLabel: 'Active',
+      isActive: true,
+      summaryText: 'Past due',
+    };
+  }
+
+  return {
+    badgeLabel: 'Active',
+    isActive: true,
+    summaryText: 'Active',
+  };
+}
+
+function buildBillingPlans(
+  prices: PriceRow[],
+  subscription: SubscriptionRow | null,
+): BillingPlan[] {
+  const subscriptionState = resolveSubscriptionActivity(
+    subscription?.status ?? null,
+  );
+
+  return prices
+    .sort((a, b) => a.unit_amount - b.unit_amount)
+    .map((price) => {
+      const isCurrentPlan = subscription?.price_id === price.id;
+      const status: PlanStatus = isCurrentPlan
+        ? subscriptionState.isActive
+          ? 'active'
+          : 'inactive'
+        : 'available';
+
+      return {
+        ctaLabel: isCurrentPlan ? 'Current plan' : 'Switch plan',
+        description: getPlanDescription(price.supplier_limit),
+        isCheckoutEnabled: !isCurrentPlan,
+        id: price.id,
+        priceLabel: formatPrice(
+          price.currency,
+          price.unit_amount,
+          price.interval,
+        ),
+        priceValueCents: price.unit_amount,
+        supplierLimit: price.supplier_limit,
+        status,
+        statusLabel:
+          status === 'active'
+            ? subscriptionState.badgeLabel
+            : status === 'inactive'
+              ? 'Inactive'
+              : 'Available',
+        suppliers: getSupplierLimitLabel(price.supplier_limit),
+        title: price.nickname,
+      };
+    });
+}
+
+function getPlanHighlights(limit: number | null) {
+  if (!limit) {
+    return [
+      'Custom supplier capacity bands',
+      'Dedicated billing support',
+      'Advanced contract governance',
+    ];
+  }
+
+  if (limit <= 25) {
+    return [
+      'Core risk and incident workflows',
+      'Single-team operating model',
+      'Monthly plan review checkpoints',
+    ];
+  }
+
+  if (limit <= 100) {
+    return [
+      'Cross-team response coordination',
+      'Expanded supplier monitoring',
+      'Priority incident triage support',
+    ];
+  }
+
+  return [
+    'Portfolio-wide monitoring scale',
+    'Multi-region response governance',
+    'Executive-grade reporting workflows',
+  ];
+}
+
+function getUsageLabel(usagePercent: number | null) {
+  if (usagePercent === null) {
+    return 'Capacity open';
+  }
+
+  if (usagePercent >= 90) {
+    return 'Near limit';
+  }
+
+  if (usagePercent >= 70) {
+    return 'Watch usage';
+  }
+
+  return 'Healthy headroom';
+}
+
+function getUsageToneClasses(usagePercent: number | null) {
+  if (usagePercent === null || usagePercent < 70) {
+    return '[&::-moz-progress-bar]:bg-emerald-500 [&::-webkit-progress-value]:bg-emerald-500';
+  }
+
+  if (usagePercent < 90) {
+    return '[&::-moz-progress-bar]:bg-amber-500 [&::-webkit-progress-value]:bg-amber-500';
+  }
+
+  return '[&::-moz-progress-bar]:bg-rose-500 [&::-webkit-progress-value]:bg-rose-500';
+}
+
+export default async function BillingSettingsPage({
+  searchParams,
+}: BillingSettingsPageProps) {
+  const context = await requireOrganizationContext();
+  const params = (await searchParams) ?? {};
+  const error = readMessage(params.error);
+  const message = readMessage(params.message);
+  const supabase = await createClient();
+  const isOwner = context.organization.role === 'owner';
+  const stripeConfigured = Boolean(process.env.STRIPE_SECRET_KEY?.trim());
+  const checkoutAction = stripeConfigured
+    ? '/api/stripe/checkout'
+    : '/api/stripe/dummy/checkout';
+  const portalAction = stripeConfigured
+    ? '/api/stripe/portal'
+    : '/api/stripe/dummy/portal';
+  const invoiceAction = stripeConfigured
+    ? '/api/stripe/invoice/latest'
+    : '/api/stripe/dummy/invoice/latest';
+
+  const { count: supplierCount } = await supabase
+    .from('suppliers')
+    .select('id', { count: 'exact', head: true })
+    .eq('organization_id', context.organization.organizationId);
+
+  const { data: pricesData } = await supabase
+    .from('prices')
+    .select(
+      'id, nickname, currency, unit_amount, interval, supplier_limit, is_active',
+    )
+    .eq('is_active', true);
+
+  let subscription: SubscriptionRow | null = null;
+  let latestPayment: PaymentHistoryRow | null = null;
+
+  if (isOwner) {
+    const [{ data: subscriptionData }, { data: paymentData }] =
+      await Promise.all([
+        supabase
+          .from('subscriptions')
+          .select('status, current_period_end, price_id')
+          .eq('organization_id', context.organization.organizationId)
+          .maybeSingle(),
+        supabase
+          .from('payment_history')
+          .select('status, paid_at, amount, currency')
+          .eq('organization_id', context.organization.organizationId)
+          .order('paid_at', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
+
+    subscription = (subscriptionData as SubscriptionRow | null) ?? null;
+    latestPayment = (paymentData as PaymentHistoryRow | null) ?? null;
+  }
+
+  const billingPlans = buildBillingPlans(
+    ((pricesData ?? []) as PriceRow[]).filter((row) => row.is_active),
+    subscription,
+  );
+
+  const fallbackPlans: BillingPlan[] = [
+    {
+      ctaLabel: 'Unavailable',
+      description: 'Pricing data is not available for this environment yet.',
+      isCheckoutEnabled: false,
+      id: 'fallback-starter',
+      priceLabel: '--',
+      priceValueCents: 0,
+      supplierLimit: 25,
+      status: 'inactive',
+      statusLabel: 'Inactive',
+      suppliers: 'Up to 25 suppliers',
+      title: 'Starter',
+    },
+  ];
+
+  const renderedPlans = billingPlans.length > 0 ? billingPlans : fallbackPlans;
+  const currentPlan =
+    renderedPlans.find((plan) => plan.status === 'active') ??
+    renderedPlans.find((plan) => plan.status === 'inactive') ??
+    renderedPlans[0];
+
+  const supplierLimit = currentPlan?.supplierLimit ?? null;
+  const usedSuppliers = supplierCount ?? 0;
+  const usagePercent =
+    supplierLimit && supplierLimit > 0
+      ? Math.min(100, Math.round((usedSuppliers / supplierLimit) * 100))
+      : null;
+  const renewalDate = formatDate(subscription?.current_period_end ?? null);
+  const invoiceStatusText = latestPayment
+    ? latestPayment.status === 'succeeded'
+      ? `Paid on ${formatDate(latestPayment.paid_at)}`
+      : `Failed on ${formatDate(latestPayment.paid_at)}`
+    : 'No invoice history';
+  const latestPaymentAmount = latestPayment
+    ? formatCurrency(latestPayment.currency, latestPayment.amount)
+    : '--';
+  const subscriptionState = resolveSubscriptionActivity(
+    subscription?.status ?? null,
+  );
+  const usageLabel = getUsageLabel(usagePercent);
+  const usageToneClasses = getUsageToneClasses(usagePercent);
+  const usageMax = supplierLimit ?? 100;
+  const usageValue =
+    usagePercent === null
+      ? 100
+      : Math.min(usedSuppliers, supplierLimit ?? usedSuppliers);
+
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Settings"
-        title="Billing and plan usage"
-        description="Stretch UI for the Stripe-backed subscription model described in the plan."
+        eyebrow="Billing"
+        title="Plan control and workspace spend visibility"
+        description="Manage subscription state, monitor supplier capacity, and execute billing actions from one operational surface."
       />
 
-      <div className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
+      {!isOwner ? (
+        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <p>
+            Billing details are restricted to the workspace owner by RBAC
+            policy.
+          </p>
+        </div>
+      ) : null}
+      {error ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      ) : null}
+      {message ? (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          {message}
+        </div>
+      ) : null}
+      {!stripeConfigured ? (
+        <div className="flex items-start gap-3 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+          <Sparkles className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <p>
+            Stripe secret key is not configured. Billing actions are running in
+            dummy mode for local/demo testing.
+          </p>
+        </div>
+      ) : null}
+
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <BillingMetricCard
+          label="Current plan"
+          value={currentPlan?.title ?? 'Not configured'}
+          detail={subscriptionState.summaryText}
+        />
+        <BillingMetricCard
+          label="Cycle spend"
+          value={currentPlan?.priceLabel ?? '--'}
+          detail="Based on current selected tier"
+        />
+        <BillingMetricCard
+          label="Supplier usage"
+          value={
+            supplierLimit
+              ? `${usedSuppliers}/${supplierLimit}`
+              : `${usedSuppliers}/∞`
+          }
+          detail={usageLabel}
+        />
+        <BillingMetricCard
+          label="Latest invoice"
+          value={latestPaymentAmount}
+          detail={invoiceStatusText}
+        />
+      </section>
+
+      <div className="grid gap-6 xl:grid-cols-[0.82fr_1.18fr]">
         <SectionCard
-          eyebrow="Usage"
-          title="Current plan"
-          description="Supplier-monitored pricing aligns with the MVP monetization strategy."
+          eyebrow="Control Center"
+          title="Subscription health and billing actions"
+          description="Review current subscription posture and launch operational billing actions without leaving settings."
         >
-          <div className="space-y-4">
-            <div className="border-border/70 bg-background/80 rounded-[24px] border p-4">
-              <p className="text-muted-foreground text-sm font-semibold tracking-[0.24em] uppercase">
-                Active plan
-              </p>
-              <p className="mt-3 text-3xl font-semibold">Professional</p>
-              <p className="text-muted-foreground mt-2 text-sm">
-                42 of 100 monitored suppliers in use this cycle.
-              </p>
+          <div className="grid gap-4">
+            <div className="rounded-[24px] border border-emerald-200 bg-[linear-gradient(145deg,rgba(236,253,245,0.85),rgba(240,249,255,0.8))] p-5">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <p className="text-muted-foreground text-sm font-semibold tracking-[0.24em] uppercase">
+                    Active subscription
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold tracking-tight">
+                    {currentPlan?.title ?? 'Not configured'}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    {subscriptionState.summaryText}
+                  </p>
+                </div>
+                <PlanStatusPill
+                  status={subscriptionState.isActive ? 'active' : 'inactive'}
+                />
+              </div>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border border-white/70 bg-white/80 p-3">
+                  <p className="text-xs font-semibold tracking-[0.2em] text-slate-500 uppercase">
+                    Renewal date
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-slate-900">
+                    {renewalDate}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/70 bg-white/80 p-3">
+                  <p className="text-xs font-semibold tracking-[0.2em] text-slate-500 uppercase">
+                    Invoice status
+                  </p>
+                  <p
+                    className={cn(
+                      'mt-1 text-sm font-semibold',
+                      latestPayment?.status === 'failed'
+                        ? 'text-red-700'
+                        : 'text-emerald-700',
+                    )}
+                  >
+                    {invoiceStatusText}
+                  </p>
+                </div>
+              </div>
             </div>
-            <button type="button" className={buttonStyles('primary')}>
-              Open billing portal
-            </button>
+
+            <div className="border-border/70 bg-background/90 space-y-4 rounded-[24px] border p-5">
+              <div className="space-y-2">
+                <div className="text-muted-foreground flex items-center justify-between text-sm">
+                  <span>Supplier capacity utilization</span>
+                  <span className="font-semibold text-slate-800">
+                    {usagePercent !== null ? `${usagePercent}%` : 'Unlimited'}
+                  </span>
+                </div>
+                <progress
+                  className={cn(
+                    'h-2 w-full overflow-hidden rounded-full [&::-webkit-progress-bar]:bg-slate-200',
+                    usageToneClasses,
+                  )}
+                  max={usageMax}
+                  value={usageValue}
+                />
+                <p className="text-muted-foreground text-sm">
+                  {supplierLimit
+                    ? `${usedSuppliers} of ${supplierLimit} monitored suppliers are currently active this cycle.`
+                    : `${usedSuppliers} monitored suppliers are currently active this cycle.`}
+                </p>
+              </div>
+
+              <div className="grid gap-2">
+                <form action={portalAction} method="post">
+                  <button
+                    type="submit"
+                    className={cn(
+                      buttonStyles('primary'),
+                      'w-full justify-start',
+                    )}
+                    disabled={!isOwner}
+                  >
+                    <CreditCard className="mr-2 h-4 w-4" aria-hidden="true" />
+                    {stripeConfigured
+                      ? 'Open billing portal'
+                      : 'Open dummy billing portal'}
+                    <ArrowUpRight
+                      className="ml-auto h-4 w-4"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </form>
+                <form action={invoiceAction} method="post">
+                  <button
+                    type="submit"
+                    className={cn(
+                      buttonStyles('secondary'),
+                      'w-full justify-start',
+                    )}
+                    disabled={!isOwner || !latestPayment}
+                  >
+                    <ReceiptText className="mr-2 h-4 w-4" aria-hidden="true" />
+                    {stripeConfigured
+                      ? 'Download latest invoice'
+                      : 'Open dummy invoice'}
+                  </button>
+                </form>
+              </div>
+            </div>
           </div>
         </SectionCard>
 
         <SectionCard
-          eyebrow="Plans"
-          title="Available tiers"
-          description="Placeholder pricing cards for the future Stripe checkout flow."
+          eyebrow="Plan Catalog"
+          title="Select the right coverage tier"
+          description="Plan cards reflect live subscription state and workspace supplier capacity data."
         >
-          <div className="grid gap-4 md:grid-cols-3">
-            {plans.map((plan) => (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {renderedPlans.map((plan) => (
               <article
-                key={plan.name}
-                className="border-border/70 bg-background/80 rounded-[24px] border p-4"
+                key={plan.id}
+                className={cn(
+                  'rounded-[24px] border p-5 transition',
+                  plan.status === 'active'
+                    ? 'border-emerald-300 bg-emerald-50/70 shadow-[0_22px_45px_-32px_rgba(22,163,74,0.45)]'
+                    : plan.status === 'inactive'
+                      ? 'border-amber-300 bg-amber-50/60'
+                      : 'border-border/70 bg-background/85',
+                )}
               >
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-lg font-semibold tracking-tight">
-                    {plan.name}
-                  </h3>
-                  <StatusBadge status={plan.status} />
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-lg font-semibold tracking-tight text-slate-950">
+                      {plan.title}
+                    </h3>
+                    <p className="text-muted-foreground mt-1 text-sm">
+                      {plan.suppliers}
+                    </p>
+                  </div>
+                  <PlanStatusPill
+                    status={plan.status}
+                    label={plan.statusLabel}
+                  />
                 </div>
-                <p className="text-muted-foreground mt-3 text-sm">
-                  {plan.suppliers}
+
+                <p className="mt-4 text-2xl font-semibold tracking-tight text-slate-900">
+                  {plan.priceLabel}
                 </p>
-                <button
-                  type="button"
-                  className={`${buttonStyles('secondary')} mt-4 w-full`}
-                >
-                  Choose plan
-                </button>
+                <p className="text-muted-foreground mt-2 text-sm leading-6">
+                  {plan.description}
+                </p>
+
+                <div className="mt-4 space-y-2 rounded-2xl border border-slate-200/80 bg-white/70 p-3">
+                  {getPlanHighlights(plan.supplierLimit).map((highlight) => (
+                    <p
+                      key={`${plan.id}-${highlight}`}
+                      className="flex items-start gap-2 text-xs leading-5 text-slate-600"
+                    >
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400" />
+                      {highlight}
+                    </p>
+                  ))}
+                </div>
+
+                <form action={checkoutAction} method="post">
+                  <input type="hidden" name="priceId" value={plan.id} />
+                  <button
+                    type="submit"
+                    disabled={
+                      !isOwner ||
+                      !plan.isCheckoutEnabled ||
+                      plan.priceValueCents <= 0
+                    }
+                    className={cn(
+                      buttonStyles(
+                        plan.status === 'active' ? 'ghost' : 'secondary',
+                      ),
+                      'mt-5 w-full',
+                      (!isOwner ||
+                        !plan.isCheckoutEnabled ||
+                        plan.priceValueCents <= 0) &&
+                        'cursor-default',
+                    )}
+                  >
+                    {isOwner
+                      ? plan.isCheckoutEnabled
+                        ? stripeConfigured
+                          ? plan.ctaLabel
+                          : `Dummy ${plan.ctaLabel.toLowerCase()}`
+                        : 'Current plan'
+                      : 'Owner access required'}
+                  </button>
+                </form>
               </article>
             ))}
           </div>
         </SectionCard>
       </div>
+
+      <SectionCard
+        eyebrow="Compliance"
+        title="Billing governance checkpoints"
+        description="Use these checkpoints to keep plan utilization and payment hygiene aligned with procurement operations."
+      >
+        <div className="grid gap-3 md:grid-cols-3">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <div className="flex items-center gap-2 text-slate-800">
+              <CalendarClock className="h-4 w-4" aria-hidden="true" />
+              <p className="text-sm font-semibold">Renewal readiness</p>
+            </div>
+            <p className="mt-2 text-sm text-slate-600">
+              Confirm ownership and budget approvals before {renewalDate}.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <div className="flex items-center gap-2 text-slate-800">
+              <ReceiptText className="h-4 w-4" aria-hidden="true" />
+              <p className="text-sm font-semibold">Invoice traceability</p>
+            </div>
+            <p className="mt-2 text-sm text-slate-600">
+              Latest payment status: {invoiceStatusText}. Keep records attached
+              to monthly close workflows.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <div className="flex items-center gap-2 text-slate-800">
+              <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+              <p className="text-sm font-semibold">Capacity governance</p>
+            </div>
+            <p className="mt-2 text-sm text-slate-600">
+              Supplier usage is currently {usageLabel.toLowerCase()}. Review
+              limits before adding high-volume supplier cohorts.
+            </p>
+          </div>
+        </div>
+      </SectionCard>
     </div>
+  );
+}
+
+function BillingMetricCard({
+  label,
+  value,
+  detail,
+}: Readonly<{
+  detail: string;
+  label: string;
+  value: string;
+}>) {
+  return (
+    <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p className="text-xs font-semibold tracking-[0.2em] text-slate-500 uppercase">
+        {label}
+      </p>
+      <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
+        {value}
+      </p>
+      <p className="mt-1.5 text-sm text-slate-600">{detail}</p>
+    </article>
+  );
+}
+
+function PlanStatusPill({
+  status,
+  label,
+}: Readonly<{ status: PlanStatus; label?: string }>) {
+  const text =
+    label ??
+    (status === 'active'
+      ? 'Active'
+      : status === 'inactive'
+        ? 'Inactive'
+        : 'Available');
+
+  if (status === 'active') {
+    return (
+      <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-emerald-100 px-3 text-xs font-semibold text-emerald-700">
+        <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+        {text}
+      </span>
+    );
+  }
+
+  if (status === 'inactive') {
+    return (
+      <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-amber-100 px-3 text-xs font-semibold text-amber-700">
+        <PauseCircle className="h-4 w-4" aria-hidden="true" />
+        {text}
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-sky-100 px-3 text-xs font-semibold text-sky-700">
+      <CircleDashed className="h-4 w-4" aria-hidden="true" />
+      {text}
+    </span>
   );
 }
