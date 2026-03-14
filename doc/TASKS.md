@@ -5,11 +5,11 @@
 - [x] 2026-03-14 10:19 — Review repo baseline, extract problem statement, and create phased implementation plan
 - [x] 2026-03-14 11:50 — Configure `.codex` multi-agent roster from `PRD.md` and `plan.md`
 - [x] 2026-03-14 11:57 — Tighten `.codex/agents/*.toml` to minimal, production-ready role profiles
-- [ ] Init Turborepo + PNPM workspace, verify `pnpm dev` starts cleanly
-- [ ] Install and configure: Supabase client + SSR auth helpers, Zod, React Hook Form, TanStack Query, shadcn/ui, pino, Vitest, Playwright, Upstash Redis
-- [ ] Set up `.env.example` with all required vars (Supabase, Stripe, Redis, app URLs, allowed origins)
-- [ ] Configure ESLint, Prettier, Husky pre-commit (lint-staged + type-check)
-- [ ] Align framework versions with project conventions or document divergence
+- [~] 2026-03-14 12:12 — Workspace foundation aligned; `pnpm build` passes, but `pnpm dev` could not be socket-verified inside the sandbox
+- [x] 2026-03-14 12:12 — Install and configure: Supabase client + SSR auth helpers, Zod, React Hook Form, TanStack Query, shadcn/ui, pino, Vitest, Playwright, Upstash Redis
+- [x] 2026-03-14 12:12 — Set up `.env.example` with all required vars (Supabase, Stripe, Redis, app URLs, allowed origins)
+- [x] 2026-03-14 12:12 — Configure ESLint, Prettier, Husky pre-commit (lint-staged + type-check)
+- [x] 2026-03-14 12:12 — Align framework versions with project conventions or document divergence
 
 ## Phase 1 — Product Definition & Architecture
 

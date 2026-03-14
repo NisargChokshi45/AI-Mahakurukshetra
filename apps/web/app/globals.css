@@ -1,26 +1,68 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: oklch(0.9868 0.004 106.42);
+  --foreground: oklch(0.2524 0.0185 248.39);
+  --card: oklch(0.9976 0.0013 106.42);
+  --card-foreground: oklch(0.2524 0.0185 248.39);
+  --popover: oklch(0.9976 0.0013 106.42);
+  --popover-foreground: oklch(0.2524 0.0185 248.39);
+  --primary: oklch(0.6205 0.1423 154.17);
+  --primary-foreground: oklch(0.9854 0.0064 146.27);
+  --secondary: oklch(0.9507 0.0133 174.17);
+  --secondary-foreground: oklch(0.3476 0.0347 192.73);
+  --muted: oklch(0.9551 0.0089 236.45);
+  --muted-foreground: oklch(0.4881 0.0198 248.91);
+  --accent: oklch(0.9366 0.0229 160.23);
+  --accent-foreground: oklch(0.326 0.0384 171.37);
+  --destructive: oklch(0.6322 0.2105 25.94);
+  --destructive-foreground: oklch(0.9797 0.0047 17.17);
+  --border: oklch(0.8865 0.0108 236.79);
+  --input: oklch(0.8865 0.0108 236.79);
+  --ring: oklch(0.6205 0.1423 154.17);
+  --radius: 1rem;
+  --app-font-sans: 'Avenir Next', 'Segoe UI', sans-serif;
+  --app-font-mono: 'SFMono-Regular', 'Consolas', monospace;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: var(--app-font-sans);
+  --font-mono: var(--app-font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--app-font-sans);
+  }
 }

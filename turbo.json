@@ -17,8 +17,17 @@
     "lint:fix": {
       "cache": false
     },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
     "check-types": {
-      "dependsOn": ["^check-types"]
+      "dependsOn": ["typecheck"]
+    },
+    "test": {
+      "dependsOn": ["^test"]
+    },
+    "test:e2e": {
+      "cache": false
     },
     "format": {
       "cache": false
