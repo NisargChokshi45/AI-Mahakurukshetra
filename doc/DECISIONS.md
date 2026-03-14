@@ -34,3 +34,13 @@ The blueprint explicitly lists "Tiered SaaS subscription based on number of supp
 
 Reason:
 The scoring logic and weights are org-specific and commercially sensitive. Running scoring as a server action or API handler prevents weight manipulation and keeps the algorithm logic out of the client bundle.
+
+### Decision: Mirror the product architecture in the `.codex` agent roster
+
+Reason:
+The plan separates concerns across UI, application/backend logic, database/RLS work, testing, and final review. Matching that structure in `.codex` makes agent handoffs map directly to the MVP delivery flow: database -> backend -> frontend -> tester -> reviewer.
+
+### Decision: Keep per-agent TOML profiles minimal and role-focused
+
+Reason:
+Production defaults should minimize unnecessary instruction surface area while preserving correctness. `backend` and `database` use `medium` reasoning for balanced reliability/cost, `tester` uses `low` reasoning for execution-heavy tasks, and `reviewer` stays read-only for safety.

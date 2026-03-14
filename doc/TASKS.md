@@ -3,6 +3,8 @@
 ## Phase 0 — Foundation
 
 - [x] 2026-03-14 10:19 — Review repo baseline, extract problem statement, and create phased implementation plan
+- [x] 2026-03-14 11:50 — Configure `.codex` multi-agent roster from `PRD.md` and `plan.md`
+- [x] 2026-03-14 11:57 — Tighten `.codex/agents/*.toml` to minimal, production-ready role profiles
 - [ ] Init Turborepo + PNPM workspace, verify `pnpm dev` starts cleanly
 - [ ] Install and configure: Supabase client + SSR auth helpers, Zod, React Hook Form, TanStack Query, shadcn/ui, pino, Vitest, Playwright, Upstash Redis
 - [ ] Set up `.env.example` with all required vars (Supabase, Stripe, Redis, app URLs, allowed origins)

@@ -1,0 +1,22 @@
+[experimental]
+multi_agent = true
+
+[agents.frontend]
+description = "Owns Next.js App Router UI for dashboard, suppliers, risks, incidents, reports, and settings flows."
+config_file = "./agents/frontend.toml"
+
+[agents.backend]
+description = "Builds API routes, Server Actions, auth/session logic, and risk/incident workflows."
+config_file = "./agents/backend.toml"
+
+[agents.database]
+description = "Implements Supabase migrations, RLS policies, seed data, and schema-performance safety checks."
+config_file = "./agents/database.toml"
+
+[agents.tester]
+description = "Runs unit + e2e verification for MVP-critical journeys and regression checks."
+config_file = "./agents/tester.toml"
+
+[agents.reviewer]
+description = "Performs final code review for correctness, security, and standards compliance before handoff."
+config_file = "./agents/reviewer.toml"
