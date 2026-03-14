@@ -253,7 +253,7 @@ export default async function DashboardPage() {
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Link
           href="/suppliers"
-          className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md"
+          className="flex flex-col rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md"
         >
           <p className="text-xs font-semibold tracking-[0.24em] text-slate-500 uppercase">
             Supplier Risk Exposure
@@ -278,13 +278,13 @@ export default async function DashboardPage() {
               </p>
             </div>
           </div>
-          <p className="mt-4 text-sm font-medium text-emerald-700">
+          <p className="mt-auto pt-4 text-sm font-medium text-emerald-700">
             Open supplier matrix →
           </p>
         </Link>
         <Link
           href="/risk-events"
-          className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md"
+          className="flex flex-col rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md"
         >
           <p className="text-xs font-semibold tracking-[0.24em] text-slate-500 uppercase">
             Live Disruption Cost
@@ -305,13 +305,13 @@ export default async function DashboardPage() {
               downstream impact.
             </p>
           </div>
-          <p className="mt-4 text-sm font-medium text-emerald-700">
+          <p className="mt-auto pt-4 text-sm font-medium text-emerald-700">
             Review risk events →
           </p>
         </Link>
         <Link
           href="/risk-events"
-          className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md"
+          className="flex flex-col rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md"
         >
           <p className="text-xs font-semibold tracking-[0.24em] text-slate-500 uppercase">
             Alert Pressure
@@ -331,13 +331,13 @@ export default async function DashboardPage() {
               <span className="font-medium">acknowledged</span> states.
             </p>
           </div>
-          <p className="mt-4 text-sm font-medium text-emerald-700">
+          <p className="mt-auto pt-4 text-sm font-medium text-emerald-700">
             Open alert queue →
           </p>
         </Link>
         <Link
           href="/incidents"
-          className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md"
+          className="flex flex-col rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md"
         >
           <p className="text-xs font-semibold tracking-[0.24em] text-slate-500 uppercase">
             Response Performance
@@ -371,7 +371,7 @@ export default async function DashboardPage() {
               )
             </p>
           </div>
-          <p className="mt-4 text-sm font-medium text-emerald-700">
+          <p className="mt-auto pt-4 text-sm font-medium text-emerald-700">
             Open incident board →
           </p>
         </Link>

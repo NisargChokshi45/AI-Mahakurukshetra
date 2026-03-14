@@ -5,6 +5,7 @@ import {
   StatusBadge,
   SelectField,
   buttonStyles,
+  selectStyles,
 } from '@/components/dashboard/ui';
 import { AISettingsForm } from '@/components/settings/ai-settings-form';
 import { createClient } from '@/lib/supabase/server';
