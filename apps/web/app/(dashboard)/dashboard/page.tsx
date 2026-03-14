@@ -1,207 +1,201 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import {
-  alerts,
-  dashboardMetrics,
-  getSupplierName,
-  incidents,
-  riskEvents,
-  topRiskSuppliers,
-  trendSeries,
-} from '@/lib/demo-data';
-import {
-  MetricCard,
-  PageHeader,
-  RiskScoreBadge,
-  SectionCard,
-  SeverityBadge,
-  Sparkline,
-  StatusBadge,
-  buttonStyles,
-} from '@/components/dashboard/ui';
+import { requireOrganizationContext } from '@/lib/auth/session';
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
-  title: 'Dashboard | Supply Chain Risk Intelligence Platform',
-  description:
-    'Operational dashboard with alert severity, top at-risk suppliers, disruption feed, and trend monitoring.',
+  title: 'Dashboard',
+  description: 'Organization overview for supply chain risk operations.',
 };
 
-export default function DashboardPage() {
+export const dynamic = 'force-dynamic';
+
+type AlertRow = {
+  id: string;
+  severity: string;
+  title: string;
+  status: string;
+};
+
+type SupplierRow = {
+  id: string;
+  name: string;
+  tier: string;
+  current_risk_score: number;
+};
+
+type IncidentRow = {
+  id: string;
+  title: string;
+  status: string;
+  priority: string;
+};
+
+type MetricRow = {
+  at_risk_suppliers: number;
+  open_incidents: number;
+  total_suppliers: number;
+};
+
+type DashboardPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function readMessage(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function DashboardPage({
+  searchParams,
+}: DashboardPageProps) {
+  const context = await requireOrganizationContext();
+  const params = (await searchParams) ?? {};
+  const message = readMessage(params.message);
+  const supabase = await createClient();
+
+  const [
+    { data: alerts },
+    { data: suppliers },
+    { data: incidents },
+    { data: metrics },
+  ] = await Promise.all([
+    supabase
+      .from('alerts')
+      .select('id, severity, title, status')
+      .order('created_at', { ascending: false })
+      .limit(5),
+    supabase
+      .from('suppliers')
+      .select('id, name, tier, current_risk_score')
+      .order('current_risk_score', { ascending: false })
+      .limit(5),
+    supabase
+      .from('incidents')
+      .select('id, title, status, priority')
+      .order('created_at', { ascending: false })
+      .limit(5),
+    supabase
+      .from('metrics')
+      .select('total_suppliers, at_risk_suppliers, open_incidents')
+      .order('recorded_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+
+  const latestMetrics = metrics as MetricRow | null;
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow="Command center"
-        title="Real-time visibility into supplier disruption, alerting, and incident readiness."
-        description="The core dashboard prioritizes what judges need to see first: severity counts, top supplier risk, active disruptions, and response momentum across the operating network."
-        actions={
-          <>
-            <Link href="/incidents" className={buttonStyles('secondary')}>
-              Review incidents
-            </Link>
-            <Link href="/risk-events/new" className={buttonStyles('primary')}>
-              Add risk event
-            </Link>
-          </>
-        }
-      />
+      {message ? (
+        <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          {message}
+        </p>
+      ) : null}
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {dashboardMetrics.map((metric) => (
-          <MetricCard
-            key={metric.label}
-            label={metric.label}
-            value={metric.value}
-            detail={metric.detail}
-          />
-        ))}
-      </div>
+      <section className="grid gap-4 md:grid-cols-3">
+        <article className="rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-sm text-slate-500">Total suppliers</p>
+          <p className="mt-3 text-4xl font-semibold text-slate-950">
+            {latestMetrics?.total_suppliers ?? suppliers?.length ?? 0}
+          </p>
+        </article>
+        <article className="rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-sm text-slate-500">At-risk suppliers</p>
+          <p className="mt-3 text-4xl font-semibold text-slate-950">
+            {latestMetrics?.at_risk_suppliers ?? 0}
+          </p>
+        </article>
+        <article className="rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-sm text-slate-500">Open incidents</p>
+          <p className="mt-3 text-4xl font-semibold text-slate-950">
+            {latestMetrics?.open_incidents ?? incidents?.length ?? 0}
+          </p>
+        </article>
+      </section>
 
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <SectionCard
-          eyebrow="Watchlist"
-          title="Top 5 at-risk suppliers"
-          description="Ranked by composite risk score so operations can triage exposure first."
-        >
-          <div className="grid gap-4">
-            {topRiskSuppliers.map((supplier, index) => (
+      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold tracking-[0.28em] text-emerald-700 uppercase">
+                Supplier Watchlist
+              </p>
+              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
+                {context.organization.organizationName}
+              </h1>
+            </div>
+            <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700">
+              {context.organization.role}
+            </span>
+          </div>
+
+          <div className="mt-6 space-y-3">
+            {((suppliers ?? []) as SupplierRow[]).map((supplier) => (
               <article
                 key={supplier.id}
-                className="border-border/70 bg-background/70 grid gap-4 rounded-[24px] border p-4 lg:grid-cols-[auto_minmax(0,1fr)_auto]"
+                className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4"
               >
-                <div className="bg-muted flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-semibold">
-                  {index + 1}
-                </div>
                 <div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Link
-                      href={`/suppliers/${supplier.id}`}
-                      className="hover:text-primary text-lg font-semibold tracking-tight"
-                    >
-                      {supplier.name}
-                    </Link>
-                    <StatusBadge status={supplier.status} />
-                  </div>
-                  <p className="text-muted-foreground mt-2 text-sm leading-6">
-                    {supplier.summary}
-                  </p>
-                  <div className="text-muted-foreground mt-3 flex flex-wrap gap-3 text-sm">
-                    <span>
-                      {supplier.region} • {supplier.country}
+                  <p className="font-medium text-slate-950">{supplier.name}</p>
+                  <p className="text-sm text-slate-500">{supplier.tier}</p>
+                </div>
+                <span className="rounded-full bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-700">
+                  Risk {supplier.current_risk_score}
+                </span>
+              </article>
+            ))}
+
+            {!suppliers?.length ? (
+              <p className="rounded-2xl border border-dashed border-slate-200 px-4 py-8 text-sm text-slate-500">
+                No suppliers yet. Run the seed or onboard data to populate the
+                dashboard.
+              </p>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <section className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <p className="text-sm font-semibold tracking-[0.28em] text-slate-500 uppercase">
+              Active Alerts
+            </p>
+            <div className="mt-4 space-y-3">
+              {((alerts ?? []) as AlertRow[]).map((alert) => (
+                <article
+                  key={alert.id}
+                  className="rounded-2xl border border-slate-200 px-4 py-4"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-medium text-slate-950">{alert.title}</p>
+                    <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold tracking-[0.2em] text-red-700 uppercase">
+                      {alert.severity}
                     </span>
-                    <span>{supplier.activeAlerts} active alerts</span>
-                    <span>{supplier.openIncidents} open incidents</span>
                   </div>
-                </div>
-                <RiskScoreBadge
-                  score={supplier.riskScore}
-                  className="justify-self-start lg:justify-self-end"
-                />
-              </article>
-            ))}
-          </div>
-        </SectionCard>
-
-        <SectionCard
-          eyebrow="Trend"
-          title="Risk trend sparklines"
-          description="A compact, presentation-friendly summary for executive reviews."
-        >
-          <div className="grid gap-4">
-            {trendSeries.map((series) => (
-              <article
-                key={series.label}
-                className="border-border/70 bg-background/75 rounded-[24px] border p-4"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-muted-foreground text-xs font-semibold tracking-[0.24em] uppercase">
-                      {series.label}
-                    </p>
-                    <p className="mt-2 text-lg font-semibold">{series.value}</p>
-                    <p className="text-muted-foreground mt-1 text-sm">
-                      {series.change}
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <Sparkline values={series.values} />
-                </div>
-              </article>
-            ))}
-          </div>
-        </SectionCard>
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
-        <SectionCard
-          eyebrow="Feed"
-          title="Disruption and alert feed"
-          description="Fresh signals affecting lead times, quality, and continuity."
-        >
-          <div className="grid gap-4">
-            {alerts.map((alert) => (
-              <article
-                key={alert.id}
-                className="border-border/70 bg-background/75 rounded-[24px] border p-4"
-              >
-                <div className="flex flex-wrap items-center gap-3">
-                  <SeverityBadge severity={alert.severity} />
-                  <p className="text-muted-foreground text-sm">
-                    {alert.createdAt}
-                  </p>
-                </div>
-                <h3 className="mt-3 text-lg font-semibold tracking-tight">
-                  {alert.title}
-                </h3>
-                <div className="text-muted-foreground mt-2 flex flex-wrap gap-3 text-sm">
-                  <span>{getSupplierName(alert.supplierId)}</span>
-                  <span>{alert.type}</span>
-                  <span>{alert.response}</span>
-                </div>
-              </article>
-            ))}
-          </div>
-        </SectionCard>
-
-        <SectionCard
-          eyebrow="Response"
-          title="Incident snapshot"
-          description="Action ownership and mitigation progress across active incidents."
-        >
-          <div className="grid gap-4">
-            {incidents.slice(0, 3).map((incident) => (
-              <article
-                key={incident.id}
-                className="border-border/70 bg-background/75 rounded-[24px] border p-4"
-              >
-                <div className="flex flex-wrap items-center gap-3">
-                  <SeverityBadge severity={incident.severity} />
-                  <StatusBadge status={incident.status} />
-                </div>
-                <div className="mt-3 flex flex-col gap-2">
-                  <Link
-                    href={`/incidents/${incident.id}`}
-                    className="hover:text-primary text-lg font-semibold tracking-tight"
-                  >
-                    {incident.title}
-                  </Link>
-                  <p className="text-muted-foreground text-sm leading-6">
-                    {incident.summary}
-                  </p>
-                  <div className="text-muted-foreground flex flex-wrap gap-3 text-sm">
-                    <span>Owner: {incident.owner}</span>
-                    <span>{incident.eta}</span>
-                  </div>
-                </div>
-              </article>
-            ))}
-            <div className="border-border/70 bg-background/60 text-muted-foreground rounded-[24px] border border-dashed p-4 text-sm">
-              {riskEvents.length} active or recently resolved risk events are
-              currently feeding the incident workflow.
+                  <p className="mt-2 text-sm text-slate-500">{alert.status}</p>
+                </article>
+              ))}
             </div>
-          </div>
-        </SectionCard>
-      </div>
+          </section>
+
+          <section className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <p className="text-sm font-semibold tracking-[0.28em] text-slate-500 uppercase">
+              Incident Queue
+            </p>
+            <div className="mt-4 space-y-3">
+              {((incidents ?? []) as IncidentRow[]).map((incident) => (
+                <article
+                  key={incident.id}
+                  className="rounded-2xl border border-slate-200 px-4 py-4"
+                >
+                  <p className="font-medium text-slate-950">{incident.title}</p>
+                  <p className="mt-2 text-sm text-slate-500">
+                    {incident.status} · {incident.priority}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </section>
+        </div>
+      </section>
     </div>
   );
 }

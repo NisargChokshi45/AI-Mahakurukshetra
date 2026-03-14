@@ -46,3 +46,6 @@ next-env.d.ts
 # Ignore temporary files
 *.tmp
 *.log
+
+# supabase local temp artifacts
+supabase/.temp/

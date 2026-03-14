@@ -14,7 +14,12 @@
     "test:e2e": "turbo run test:e2e",
     "format": "turbo run format",
     "format:check": "turbo run format:check",
-    "prepare": "husky"
+    "prepare": "husky",
+    "db:push": "./scripts/migrate.sh push",
+    "db:new": "./scripts/migrate.sh new",
+    "db:status": "./scripts/migrate.sh status",
+    "db:test": "./scripts/migrate.sh test",
+    "db:pull": "./scripts/migrate.sh pull"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.1",

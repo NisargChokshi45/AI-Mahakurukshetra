@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build --webpack",
-    "start": "next start",
+    "dev": "sh -ac 'set -a; [ -f ../../.env ] && . ../../.env; set +a; exec next dev'",
+    "build": "sh -ac 'set -a; [ -f ../../.env ] && . ../../.env; set +a; exec next build --webpack'",
+    "start": "sh -ac 'set -a; [ -f ../../.env ] && . ../../.env; set +a; exec next start'",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "typecheck": "tsc --noEmit",
@@ -13,8 +13,8 @@
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest --watch --passWithNoTests",
     "test:e2e": "playwright test --config ../../playwright.config.ts --pass-with-no-tests",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format": "prettier --ignore-path ../../.prettierignore --write .",
+    "format:check": "prettier --ignore-path ../../.prettierignore --check ."
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -41,11 +41,14 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.3.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "eslint-config-prettier": "^10.1.8",
     "pino-pretty": "^13.1.1",
+    "supabase": "^2.78.1",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
 }

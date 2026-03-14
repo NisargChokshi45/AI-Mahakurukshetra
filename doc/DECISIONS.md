@@ -84,3 +84,38 @@ Phase 2 and Phase 3 are not complete yet, but the hackathon demo needs a full pr
 
 Reason:
 The route map in `doc/plan.md` is broader than the original Phase 4 task list. Shipping these surfaces now closes visible gaps in the judge flow and page inventory, while still keeping scope under control by deferring real auth, billing, integration, and OpenAPI behavior to later phases.
+
+### Decision: Accept external dev-session confirmation as the Phase 0 runtime check when sandbox socket binding is restricted
+
+Reason:
+The remaining Phase 0 caveat was caused by sandbox limitations around local socket verification, not by a known application failure. If the Next.js dev workflow is already running in the user session, that is sufficient evidence to close the foundation phase without adding repo churn just to satisfy the sandbox.
+
+### Decision: Use `user_profiles.current_organization_id` plus a custom access-token hook as the source of truth for active org context
+
+Reason:
+Phase 2 needs a stable tenant context for RLS, server actions, and route guards. Persisting the active org on the profile and copying it into the JWT keeps reads cheap while still allowing first-login bootstrap and org switching later.
+
+### Decision: Keep organization bootstrap user-driven and RLS-compatible
+
+Reason:
+The first-login org creation flow can be completed with the authenticated user client by allowing authenticated inserts into `organizations` and self-creation of the initial `owner` membership. This avoids unnecessary service-role use in the normal onboarding path.
+
+### Decision: Force auth-bound routes dynamic and use `proxy.ts` for request-bound session refresh in Next 16
+
+Reason:
+Protected routes depend on cookies, redirects, and per-request Supabase session resolution. Marking those surfaces dynamic prevents static generation failures, and `proxy.ts` matches the current Next 16 runtime convention better than the deprecated middleware file name.
+
+### Decision: Ignore Supabase local `.temp` artifacts in git
+
+Reason:
+`supabase/.temp/` is generated local CLI state and should remain untracked to avoid committing machine-specific noise like `cli-latest`.
+
+### Decision: Source workspace-root `.env` directly from `apps/web` runtime scripts in this monorepo
+
+Reason:
+`pnpm run dev` runs `next dev` from `apps/web`, and Next loads env files from that app boundary. Sourcing `../../.env` in scripts guarantees consistent env resolution from the root command path and prevents runtime Zod failures for required `NEXT_PUBLIC_*` values.
+
+### Decision: Keep `/login` and `/signup` implemented only in the `(auth)` route group, and reserve `/auth/callback` exclusively for the route handler
+
+Reason:
+Next.js resolves route-group pages to the same public pathname as top-level pages. Duplicating both forms causes `pnpm run dev` to fail at compile time with path conflicts, and `/auth/callback` must remain a route handler so Supabase can exchange the auth code server-side.
