@@ -59,3 +59,18 @@ Phase 0 verification must succeed in restricted environments. Google font fetchi
 
 Reason:
 `next build` with Turbopack panicked in the sandbox while processing CSS/PostCSS and attempted operations that were not permitted. `next build --webpack` compiles successfully and gives a reliable verification path for the current environment.
+
+### Decision: Treat `/dashboard` as the authenticated application home and keep all operational workflows under protected routes
+
+Reason:
+The core user loop starts after login. Making `/dashboard` the protected landing page keeps auth, tenancy checks, and navigation framing consistent while leaving `/` free to serve as a public pitch/demo surface.
+
+### Decision: Keep billing, integrations, and mitigation management in the route map but classify them as stretch surfaces for the MVP
+
+Reason:
+These pages are part of the realistic enterprise product shape and help avoid future route churn, but they are not required to prove the main judging flow. Marking them as stretch prevents Phase 2–4 work from being diluted.
+
+### Decision: First-login organization bootstrap must seed demo data automatically and idempotently
+
+Reason:
+The PRD requires a realistic environment immediately after deploy. Automatic idempotent seeding ensures every new demo org lands in a usable state without manual operator steps or duplicated records on retries.

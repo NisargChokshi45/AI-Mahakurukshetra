@@ -13,12 +13,12 @@
 
 ## Phase 1 — Product Definition & Architecture
 
-- [ ] Lock route map and page inventory (see plan.md)
-- [ ] Define and document role matrix: owner, admin, risk_manager, procurement_lead, viewer
-- [ ] Confirm API endpoint groups and document in plan.md
-- [ ] Document cross-domain strategy: app domain, Vercel preview URLs, auth redirect URLs, webhook origins
-- [ ] Define org onboarding flow (org creation → invite members → seed demo data)
-- [ ] Confirm feature flag list and which advanced features are gated for MVP
+- [x] 2026-03-14 12:25 — Lock route map and page inventory (see `doc/plan.md`)
+- [x] 2026-03-14 12:25 — Define and document role matrix: owner, admin, risk_manager, procurement_lead, viewer
+- [x] 2026-03-14 12:25 — Confirm API endpoint groups and document in `doc/plan.md`
+- [x] 2026-03-14 12:25 — Document cross-domain strategy: app domain, Vercel preview URLs, auth redirect URLs, webhook origins
+- [x] 2026-03-14 12:25 — Define org onboarding flow (org creation → invite members → seed demo data)
+- [x] 2026-03-14 12:25 — Confirm feature flag list and which advanced features are gated for MVP
 
 ## Phase 2 — Database & Auth
 
@@ -60,7 +60,7 @@
 - [ ] Implement origin allowlist in middleware using `ALLOWED_ORIGINS` env var (no hardcoded domains)
 - [ ] Configure Supabase Auth redirect URL allowlist for local, preview, and production
 - [ ] Apply CORS headers on all API routes (allowlist-based, never `*`)
-- [ ] Rate limiting via Upstash Redis on all public API routes (see plan.md for limits)
+- [ ] Rate limiting via Upstash Redis on all public API routes (see `doc/plan.md` for limits)
 - [ ] ERP integration placeholder: connector config UI under `/settings/integrations`
 - [ ] Validate Vercel multi-domain deployment with env-based URL config
 
